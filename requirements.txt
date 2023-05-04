@@ -21,4 +21,5 @@ requests==2.29.0
 twilio==8.1.0
 urllib3==1.26.15
 Werkzeug==2.3.3
+wordninja==2.0.0
 yarl==1.9.2
