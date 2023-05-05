@@ -1,5 +1,10 @@
 from flask import Flask, render_template, url_for, request, redirect, jsonify, make_response
 import wordninja
+from spellchecker import SpellChecker
+import nltk
+from nltk.corpus import wordnet as wn
+
+nltk.download("wordnet")
 
 app = Flask(__name__)
 
@@ -22,9 +27,8 @@ def errorPage():
 
 '''
 Checks to do:
-- Spelling check - break up words in subtier
+- Spelling check (grammarly)
 - Check subtier words not using short forms
-- Check initial word in subtier is a verb?
 - Check all required properties are present
 '''
 
@@ -33,7 +37,6 @@ def checkOAS():
     if request.method == 'POST':
         result = request.form
         listErrors = []
-        print(result.get("title"))
 
         # Check for null title
         if result.get("title") == "" or result.get("title") == None:
@@ -75,13 +78,19 @@ def checkOAS():
                     listErrors.append("Only two subtiers are allowed")
                 elif len(subtiers) == 5:
                     pathVersionNumber = subtiers[3]
+                    firstSubtierPos = 4
                 elif len(subtiers) == 6:
                     pathVersionNumber = subtiers[4]
+                    firstSubtierPos = 5
                 
                 flag = 0
-                # Check for camelCasing
-                for subtier in subtiers[1:]:
-                    subtierWords = wordninja.split(subtier)
+                for i in range(1, len(subtiers)):
+                    subtierWords = wordninja.split(subtiers[i])
+                    # Check if first word in subtier is a verb
+                    if i >= firstSubtierPos:
+                        if not checkVerb(subtierWords[0]):
+                            listErrors.append("The first word of the following subtier is not a verb: " + subtiers[i])
+                    # Check for camelCasing
                     if (len(subtierWords) > 1):
                         if subtierWords[0][0] != subtierWords[0][0].lower():
                             flag = 1
@@ -91,7 +100,7 @@ def checkOAS():
                                     flag = 1
                                     break
                     if flag == 1:
-                        listErrors.append("The following subtier is not using camel casing: " + subtier)
+                        listErrors.append("The following subtier is not using camel casing: " + subtiers[i])
                     flag = 0
         
         # Check for null version
@@ -117,6 +126,17 @@ def checkOAS():
 def splitSubtierWords(subtier: str):
     words = wordninja.split(subtier)
     return words
+
+def checkVerb(word: str):
+    if (wn.synsets(word, pos=wn.VERB)):
+        return True
+    return False
+
+# For words in path since Grammarly cannot pick up on joined words
+# WARNING: Not very accurate
+def correctSpelling(word: str):
+    spell = SpellChecker()
+    return spell.correction(word)
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')

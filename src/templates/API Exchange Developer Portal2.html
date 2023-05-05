@@ -281,7 +281,7 @@ paths:
 
   <script src="/static/js/bootstrap.bundle.min.js.download"></script>
   <script src="/static/js/swagger-ui-bundle.js.download"></script>
-  <script src="swagger-ui-standalone-preset.js"></script>
+  <!-- <script src="swagger-ui-standalone-preset.js"></script> -->
   <script src="/static/js/js-yaml-3.13.1.min.js.download"></script>
   <script>
     function previewOas() {
@@ -289,7 +289,7 @@ paths:
       dom_id: '#oasPreviewBody', // Determine what element to load swagger ui
         presets: [
           SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
+          // SwaggerUIStandalonePreset
         ],
         plugins: [
           SwaggerUIBundle.plugins.DownloadUrl

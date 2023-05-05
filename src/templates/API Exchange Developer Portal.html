@@ -5,10 +5,6 @@
     <!--<base href="https://portal.axpuat.cpf.gov.sg/test_workspace_01/">--><base href=".">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
 
-
-
-
-
 <style>
   /* Values */
   :root {
@@ -125,144 +121,15 @@
       <h3>CPF OAS Validator Tool</h3>
       <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below and click the "How is my OAS?" button to check if there are any errors on the OAS format.</p>
       <grammarly-editor-plugin contenteditable="true">
-      <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 10cm;">
-openapi: 3.0.0
-info:
-  title: Agecheckfor55WDL 
-  description: |
-    ### To check age eligibility for 55 WDL.
-    The service shall validate member's CPF account number and Birth date.
-    This service shall retrieve the following information.
-    1. 55 Eligibility Tag
-    2. 55A eligibility Tag
-    3. Return code
-    4. Return message
-    
-    ### Change log
-    | version | Date      | Description                         |
-    | ------- | --------- | ----------------------------------- |
-    | 1.0.0   | 2021-10-09| First version                       |
-    | 1.0.1   | 2021-12-01| change xxxxx for xxxxxxx            |
-    | 1.0.2   | 2022-04-09| change xxxxx for xxxxxxx            |
-    | 1.1.0   | 2022-07-04| change xxxxx for xxxxxxx            |
-    | 1.1.1   | 2022-10-05| change xxxxx for xxxxxxx            |
-  version: 1.1.1
-  x-author: MS1
-  x-date: 2023-03-01
-  x-searchKeywords: 55WDL
-paths:
-  '/discretionaryWithdrawals/55Withdrawals/v2/checkMemberAgeEligibility':
-    post:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                accountNumber:
-                  type: string
-                  description: Member Account Number
-                  example: 'S3120874B'
-                birthdate:
-                  type: string
-                  description: Member Birthdate (CCYY-MM-DD)
-                  example: '1965-03-04'
-                guid:
-                  type: string
-                  description: Globally Unique Identifier for data integrity check
-                  example: 'abcab671-68e8-4096-8bbc-fe3e184ef72b'
-              required:
-                - accountNumber
-                - startMonth
-                - endMonth
-      responses:
-        200:
-          description: Successfully retrieved contribution history
-          content:
-            application/json:
-              examples:
-                Return00:
-                  summary: normal return 
-                  value:
-                    accountNumber: 'S3120874B'
-                    birthdate: '1965-03-04'
-                    55EligibilityTag: 'Y'
-                    55AEligibilityTag: 'N'
-                    returnCode: '00'
-                    returnMessage: 'SUCCESSFUL'
-                    guid: 'abcab671-68e8-4096-8bbc-fe3e184ef72b'
-                Return01:
-                  summary: error return 
-                  value:
-                    accountNumber: ''
-                    birthdate: '1965-03-04'
-                    55EligibilityTag: ''
-                    55AEligibilityTag: ''
-                    returnCode: '01'  
-                    returnMessage: 'ACCOUNT NUMBER NOT PROVIDED'
-                    guid: 'abcab671-68e8-4096-8bbc-fe3e184ef72b'
-              schema:
-                type: object
-                properties:
-                  accountNumber:
-                    type: string
-                    description: Member Account Number
-                  birthdate:
-                    type: string
-                    description: Member Birthdate (CCYY-MM-DD)
-                  55EligibilityTag:
-                    type: string
-                    enum: [Y, N]
-                    description: |
-                        **The below table defines the value of 55EligibilityTag**
-                        | Value   | Description                         |
-                        | ------- | ----------------------------------- |
-                        | Y       | Eligible                            |
-                        | N       | Not Eligible                        |
-                  55AEligibilityTag:
-                    type: string
-                    enum: [N]
-                    description: |
-                        **The below table defines the value of 55AEligibilityTag**
-                        | Value   | Description                         |
-                        | ------- | ----------------------------------- |
-                        | N       | Default value                       |
-                  returnCode:
-                    type: string
-                    description: |
-                        **The below table defines the value of returnCode**
-                        | Value   | Description                         |
-                        | ------- | ----------------------------------- |
-                        | 00      | Successful                          |
-                        | 01      | Account number not provided         |
-                        | 02      | Member's age unknown                |
-                        | 03      | Invalid birthdate - DD              |
-                        | 04      | Invalid birthdate - MM              |
-                        | 05      | Not a cpf member                    |
-                        | 06      | invalid pensionable tag             |
-                        | 07      | medisave table not found            |
-                        | 08      | last withdrawal age is not valid    |
-                        | 12      | Invalid birthdate - CCYY            |
-                  returnMessage:
-                    type: string
-                    description: Return Message
-                  guid:
-                    type: string
-                    description: Globally Unique Identifier for data integrity check
-                required:
-                  - accountNumber
-                  - birthdate
-                  - 55EligibilityTag
-                  - 55AEligibilityTag
-                  - returnCode
-                  - returnMessage
-                  - guid
-      deprecated: false</textarea>
+        <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 10cm;"></textarea>
       </grammarly-editor-plugin>
-      <!-- <form id="checkOASForm" name="checkOASForm" action="http://localhost:5000/checkOAS" method="post" style="margin-bottom: 0.5rem;"> -->
-        <button class="btn noBorder my-0 px-5 align-self-start" id="checkOASButton" style="background-color: rgb(10, 97, 96); color: white; font-size: 1em; text-transform: none; height: auto; padding: 8px 15px; border-radius: 5px; margin-bottom: 5rem;" onclick=extractOAS()>How is my OAS?</button>
-      <!-- </form> -->
+      
+      <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; display: inline-block;"/><button id="fileUploadButton" style="display: inline-block;" onclick=uploadFile()>Upload</button>
+
+      <button class="btn noBorder my-0 px-5 align-self-start" id="checkOASButton" style="background-color: rgb(10, 97, 96); color: white; font-size: 1em; text-transform: none; height: auto; padding: 8px 15px; border-radius: 5px; margin-bottom: 5rem;" onclick=extractOAS()>How is my OAS?</button>
+
       <p wrap="on" style="margin-bottom: 3rem !important; margin-top: 1rem !important;">Paste dictionary word here (from least important to most important order):</p>
+      <!-- may be able to cover abbreviations -->
       <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 50%; height: 50%;">test</textarea>
       
     </div>
@@ -272,44 +139,37 @@ paths:
     documentation/untitled
   </div>
 
-  <!-- Modal -->
-  <!-- <link href="static/css/swagger-ui.css" rel="stylesheet" type="text/css">
-  <div class="modal" id="oasPreview" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <!-- Modals -->
+  <link href="static/css/swagger-ui.css" rel="stylesheet" type="text/css">
+  <div class="modal fade" id="oasSuccess" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content" style="min-height:100%;">
         <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">Preview</h5>
-          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title" id="staticSuccessBackdropLabel">OAS Checker</h5>
+          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal" onclick="document.getElementById('oasSuccess').style.display='none'"></button>
         </div>
-        <div class="modal-body" id="oasPreviewBody">
+        <div class="modal-body" id="oasSuccessBody">
         </div>
       </div>
     </div>
-  </div> -->
+  </div>
 
-  {% if show_errors %}
-  <div class="modal" id="oasDebug" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="display: block;">
+  <div class="modal fade" id="oasErrors" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content" style="min-height:100%;">
         <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">OAS Checker</h5>
-          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal" onclick="document.getElementById('oasDebug').style.display='none'"></button>
+          <h5 class="modal-title" id="staticErrorsBackdropLabel">OAS Checker</h5>
+          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal" onclick="document.getElementById('oasErrors').style.display='none'"></button>
         </div>
-        <div class="modal-body" id="oasDebugBody">
+        <div class="modal-body" id="oasErrorsBody"> 
             <table style="width:100%">
-                <tbody class="modal-table" id="oasTableBody">
+                <tbody class="modal-table" id="oasErrorsTable">
                 </tbody>
             </table>
         </div>
       </div>
     </div>
   </div>
-  {% endif %}
-
-  <div>
-    <input type="text">
-  </div>
-
 
   <script src="/static/js/bootstrap.bundle.min.js.download"></script>
   <script src="/static/js/swagger-ui-bundle.js.download"></script>
@@ -318,37 +178,37 @@ paths:
   <script src="https://cdn.jsdelivr.net/npm/@grammarly/editor-sdk?clientId=client_G9BZTBHKX7chBEXcHdt3ND"></script>
 
   <script>
-    //clears the error array before starting.
-    // function clearArray(array) {
-    //   while (array.length > 0) {
-    //       array.pop();
-    //   }
-    // }
-    
-    var show_errors = true;
-    function extractOAS() {
-      var swaggerUIOptions = {
-      dom_id: '#oasPreviewBody', // Determine what element to load swagger ui
-        presets: [
-          SwaggerUIBundle.presets.apis,
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl
-        ],
-        layout: 'BaseLayout',
+    function uploadFile() {
+        var file = document.getElementById("fileUpload").files[0];
+        if (file != undefined) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+          var textArea = document.getElementById("oasTextarea");
+          textArea.value = e.target.result;
+          }
+          reader.readAsText(file);
+        };
       }
-      var data = $('#oasTextarea').val();
-      var checkdata = $('#oasDictionaryArea').val(); // checks if dictionary is empty or not
-      const doc = jsyaml.safeLoad(data, {schema: jsyaml.JSON_SCHEMA});
-      // SwaggerUIBundle(swaggerUIOptions);
-      console.log(doc.info.title);
 
+    function extractOAS() {
       $(document).ready(function() {
         $('#checkOASButton').one('click', function(e) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+
+          var data = $('#oasTextarea').val();
+          if (data == "") {
+            alert("Please input an OAS!");
+            return;
+          }
+          var checkdata = $('#oasDictionaryArea').val(); // checks if dictionary is empty or not
+          const doc = jsyaml.safeLoad(data, {schema: jsyaml.JSON_SCHEMA});
+
           var jsonPaths = JSON.stringify(doc.paths);
           var path = jsonPaths.split('"')[1];
           
           $.ajax({
+            async: false,
             data: {
               openapi: doc["openapi"],
               title: doc["info"]["title"],
@@ -361,36 +221,35 @@ paths:
             type: 'POST',
             url: '/checkOAS',
             success: function(response) {
-              console.log("good");
+              oasSuccessModal = $('#oasSuccess');
+              oasSuccessModal.find('.modal-body').html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>`);
+              oasSuccessModal.find('.modal-body').append("There are no additional errors found");
+              oasSuccessModal.modal("show");
             },
             error: function(response) {
-              listErrors = response["responseJSON"]["errors"]
-              for (let i = 0; i < listErrors.length; i++) {
-                console.log(listErrors[i])
+              listErrors = response["responseJSON"]["errors"];
+
+              oasErrorModal = $('#oasErrors');
+              oasErrorModal.find('.modal-table').html(`<tr>
+                                                          <td>#</td>
+                                                          <td>Errors</td>
+                                                      </tr>
+                                                      `);
+              for (let i = 0; i < listErrors.length; i++){
+                oasErrorModal.find('.modal-table').append(`<tr>
+                                                              <td>`+(i+1)+`</td>
+                                                              <td>`+(listErrors[i])+`</td>
+                                                           </tr>
+                                                          `);
               }
-              console.log("bad");
+              oasErrorModal.modal("show");
             }
           });
-          e.preventDefault();
         });
       })
     }
 
     
-
-    function previewOas() {
-
-
-
-//         //Check for camelCasing improper use of caps.
-//         //BUG: table formating messes up with this.
-//         var patt = new RegExp('^[a-z]([a-z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*$');
-//         var res = patt.test(s[1]);
-//         if (res != true && s[0] == ''){
-//             listErrors.push(`API Product doesn\'t meet camelCasing standards due to improper use of capitalization. Note this is limited to only case checking.`);
-//         }
-
-
 //         //there shouldn't be any repeats of words used.
 //         //break up the words based on starting caps.
 //         const dictionaryWordsArray = dictionaryWords.split(/\r?\n/);
@@ -416,65 +275,9 @@ paths:
 //             }
 //         }
 
-//         //check dictionary words for mis-spelling.
 //         //check to make sure that subtiers are not using short form. ie. dictionary words
 
-
-//         //check to make sure the verb is included in the list.
-//         //check to make sure the tailing words after the verb are using camel casing.
         
-
-
-
-      
-//       //stopped here 13/1/2023
-
-
-
-// //console.log(listErrors);
-
-//       if(checkdata != ""){
-//             // put action here.
-//             // this will check if the keywords are found, against the dictionary keywords.
-//             // the dictionary keywords can be provided by the excel or dgo office.
-//             var oasPreview = new bootstrap.Modal(document.getElementById("oasDebug"), {});
-//             var oasCheckerModal = $('#oasDebug');
-
-
-//             //Check list of dictionary words on the list of keywords used.
-//             //Flag any keywords that aren't used.
- 
-
-//             //oasCheckerModal.find('.modal-body').html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>`);
-
-//             let arraylength = listErrors.length + 1;
-//             if (listErrors.length == 0){
-//                 oasCheckerModal.find('.modal-table').empty();
-//                 oasCheckerModal.find('.modal-table').modal('hide');
-//                 oasCheckerModal.find('.modal-body').append(`There are no additional errors found.`);
-//             } else {
-
-//                 oasCheckerModal.find('.modal-table').html(`
-//                         <tr>
-//                             <td>#</td> 
-//                             <td>Items</td>
-//                         </tr>
-//                         `);
-
-//                 for (let i = 1; i < arraylength; i++){
-//                     oasCheckerModal.find('.modal-table').append(`
-//                         <tr>
-//                             <td>`+i+`</td>
-//                             <td>`+listErrors[i-1]+`</td>
-//                         </tr>
-//                         `);
-//                 }
-//             }
-//       } else {
-//             var oasPreview = new bootstrap.Modal(document.getElementById("oasPreview"), {});
-//       }
-//       oasPreview.show();
-    }
   </script>
     
 <script src="/static/js/kong.utils.js.download"></script>
