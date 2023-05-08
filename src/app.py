@@ -1,4 +1,5 @@
 from flask import Flask, render_template, url_for, request, redirect, jsonify, make_response
+import json
 import wordninja
 from spellchecker import SpellChecker
 import nltk
@@ -27,7 +28,6 @@ def errorPage():
 
 '''
 Checks to do:
-- Spelling check (grammarly)
 - Check subtier words not using short forms
 - Check all required properties are present
 '''
@@ -82,10 +82,32 @@ def checkOAS():
                 elif len(subtiers) == 6:
                     pathVersionNumber = subtiers[4]
                     firstSubtierPos = 5
-                
+
+
+                dictionaryWordsArray = json.loads(result.get("dictionary"))["dictionary"]
+                dictionaryWordsArray = [word.lower() for word in dictionaryWordsArray]
+                # Check duplicate words in dictionary
+                seen = set()
+                duplicates = set()
+                for word in dictionaryWordsArray:
+                    if word not in seen:
+                        seen.add(word)
+                    else:
+                        duplicates.add(word)
+                        dictionaryWordsArray.remove(word)
+                if duplicates:
+                    listErrors.append("The following words are repeated in the dictionary text box: " + ", ".join(duplicates))         
+
                 flag = 0
+                wordsNotInDictionary = set()
                 for i in range(1, len(subtiers)):
                     subtierWords = wordninja.split(subtiers[i])
+                    # Check for words in subtier not in dictionary
+                    for word in subtierWords:
+                        if ord(word[0]) < 65 or ord(word[0]) > 122 or len(word) == 1:
+                            continue
+                        if word.lower() not in dictionaryWordsArray:
+                            wordsNotInDictionary.add(word)
                     # Check if first word in subtier is a verb
                     if i >= firstSubtierPos:
                         if not checkVerb(subtierWords[0]):
@@ -102,6 +124,8 @@ def checkOAS():
                     if flag == 1:
                         listErrors.append("The following subtier is not using camel casing: " + subtiers[i])
                     flag = 0
+        if wordsNotInDictionary:
+            listErrors.append("The following words in subtiers are not in the dictionary: " + ", ".join(wordsNotInDictionary))
         
         # Check for null version
         if result.get("version") == "" or result.get("version") == None:
@@ -128,6 +152,7 @@ def splitSubtierWords(subtier: str):
     return words
 
 def checkVerb(word: str):
+    wn.ensure_loaded()
     if (wn.synsets(word, pos=wn.VERB)):
         return True
     return False
