@@ -122,7 +122,7 @@
       <!-- OAS Text Box -->
       <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below or upload your OAS file, and click the "How is my OAS?" button to check if there are any errors on the OAS format.</p>
       <grammarly-editor-plugin contenteditable="true">
-        <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 10cm;"></textarea>
+        <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 8cm;"></textarea>
       </grammarly-editor-plugin>
       <!-- Upload Feature -->
       <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; display: inline-block;"/>
@@ -208,25 +208,20 @@ now</textarea>
       if (textArea == "") {
         alert("Please input an OAS before saving to file!");
         return;
-      } else {
+      } else if (fileName = prompt("Save file as", "")) {
         var textBlob = new Blob([textArea], {type:"text/plain"});
-        let fileName = prompt("Please enter file name", "OAS.txt")
-        if (fileName == null) {
-            fileName = "OAS.txt"
-        }
         var downloadLink = document.createElement("a");
         downloadLink.download = fileName;
         downloadLink.innerHTML = textBlob;
-        if (window.webkitURL != null) {
+        if (window.webkitURL != null) { // Chrome
           downloadLink.href = window.webkitURL.createObjectURL(textBlob);
-        } else {
+        } else { // Firefox
           downloadLink.href = window.URL.createObjectURL(textBlob);
           downloadLink.onclick = destroyClickedElement;
           downloadLink.style.display = "none";
           document.body.appendChild(downloadLink);
         }
         downloadLink.click();
-
       }
     }
 
@@ -245,19 +240,12 @@ now</textarea>
           var dictionaryWordsDictionary = {dictionary: dictionaryWords}
           dictionary = JSON.stringify(dictionaryWordsDictionary);
           const doc = jsyaml.safeLoad(data, {schema: jsyaml.JSON_SCHEMA});
+          var doc_json = JSON.stringify(doc)
 
-          var jsonPaths = JSON.stringify(doc.paths);
-          var path = jsonPaths.split('"')[1];
           
           $.ajax({
             data: {
-              openapi: doc["openapi"],
-              title: doc["info"]["title"],
-              description: doc["info"]["description"],
-              version: doc["info"]["version"],
-              x_author: doc["info"]["x-author"],
-              x_date: doc["info"]["x-date"],
-              path: path,
+              doc: doc_json,
               dictionary: dictionary,
             },
             type: 'POST',
@@ -291,18 +279,8 @@ now</textarea>
       })
     }
 
-    
-
-//         //check to make sure that subtiers are not using short form. ie. dictionary words
-
-        
   </script>
     
 <script src="/static/js/kong.utils.js.download"></script>
-
-
-    
-  
-
 
 </body></html>
