@@ -23,7 +23,7 @@ stages:
     - task: Docker@2
       inputs:
         containerRegistry: 'Daniel-DockerHub'
-        repository: 'test'
+        repository: 'danielxdante/test'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
       
