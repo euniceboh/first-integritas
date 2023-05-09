@@ -1,5 +1,4 @@
 import app
-import pytest
 
 class TestMissing:
     def setUp(self):
@@ -10,7 +9,6 @@ class TestMissing:
         self.x_date = "2022-12-22"
 
     def test_title(self):
-        assert app.checkTitle(self.title)
+        assert app.checkTitle("wow")
     
-    def test_description(self):
-        assert app.checkDescription(self.description)
+

@@ -95,12 +95,23 @@
   h1, h2, h2, h3, h4, h5, h6 {
     font-family: "", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   }
+
+  #editor { 
+        position: relative;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 30cm;
+        margin-bottom: 3rem;
+    }
 </style>
 
     <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="static/css/highlight.min.css" rel="stylesheet" type="text/css">
     <link href="static/css/framework.min.css" rel="stylesheet" type="text/css">
     <link href="static/css/site.css" rel="stylesheet" type="text/css">
+
 
   </head>
 
@@ -121,9 +132,11 @@
       <h3>CPF OAS Validator Tool</h3>
       <!-- OAS Text Box -->
       <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below or upload your OAS file, and click the "How is my OAS?" button to check if there are any errors on the OAS format.</p>
-      <grammarly-editor-plugin contenteditable="true">
-        <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 8cm;"></textarea>
-      </grammarly-editor-plugin>
+      <div id="editor">
+        <grammarly-editor-plugin contenteditable="true">
+          <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 8cm;"></textarea>
+        </grammarly-editor-plugin>
+      </div>
       <!-- Upload Feature -->
       <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; display: inline-block;"/>
       <button id="fileUploadButton" style="display: inline-block;" onclick=uploadFile()>Upload</button>
@@ -142,7 +155,10 @@ credit
 status
 for
 pay
-now</textarea>
+now
+eligibility
+check
+age</textarea>
     </div>
   </div>
 
@@ -187,15 +203,23 @@ now</textarea>
   <script src="/static/js/js-yaml-3.13.1.min.js.download"></script>
   <script src="/static/js/jquery.min.js.download"></script>
   <script src="https://cdn.jsdelivr.net/npm/@grammarly/editor-sdk?clientId=client_G9BZTBHKX7chBEXcHdt3ND"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/src-min-noconflict/ace.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/css/ace.min.css" rel="stylesheet">
 
   <script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/kuroir");
+    editor.getSession().setMode("ace/mode/yaml");
+    document.getElementById('editor').style.fontSize='15px';
+
     function uploadFile() {
         var file = document.getElementById("fileUpload").files[0];
         if (file != undefined) {
           var reader = new FileReader();
           reader.onload = function(e) {
-          var textArea = document.getElementById("oasTextarea");
-          textArea.value = e.target.result;
+          // var textArea = document.getElementById("oasTextarea");
+          // textArea.value = e.target.result;
+          editor.setValue(e.target.result);
           }
           reader.readAsText(file);
         } else {
@@ -204,7 +228,8 @@ now</textarea>
       }
 
     function saveFile() {
-      var textArea = document.getElementById("oasTextarea").value;
+      // var textArea = document.getElementById("oasTextarea").value;
+      var textArea = editor.getValue();
       if (textArea == "") {
         alert("Please input an OAS before saving to file!");
         return;
@@ -228,10 +253,12 @@ now</textarea>
     function extractOAS() {
       $(document).ready(function() {
         $('#checkOASButton').on('click', function(e) {
+          
           e.preventDefault();
           e.stopImmediatePropagation();
 
-          var data = $('#oasTextarea').val();
+          // var data = $('#oasTextarea').val();
+          var data = editor.getValue();
           if (data == "") {
             alert("Please input an OAS!");
             return;

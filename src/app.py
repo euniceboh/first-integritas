@@ -29,9 +29,6 @@ def errorPage():
 '''
 Checks to do:
 - Check subtier words not using short forms
-- Check all required properties are present
-- Check spelling of subtier words
-- More checks to do since we have access to the JSON version of the file now
 '''
 def checkOpenapi(openapi):
     if openapi == "" or openapi == None:
@@ -67,6 +64,32 @@ def checkPath(path):
     if path == "" or path == None:
         return False
     return True
+
+def checkResponse(doc, flag):
+    if flag == 1:
+        return True
+    try:
+        for key, value in doc.items():
+            if key == "responses":
+                flag = 1
+            checkResponse(value, flag)
+    except (AttributeError):
+        pass
+    if flag == 0:
+        return False
+
+def checkResponse(doc, flag):
+    try:
+        for key, value in doc.items():
+            if key == "responses":
+                return 1
+            flag = checkResponse(value, flag)
+    except (AttributeError):
+        pass
+    if flag == 1:
+        return 1
+    return 0
+    
 
 def checkPathCharacters(path):
     # Check for whitespaces, underscores, or hyphens in path
@@ -167,6 +190,35 @@ def checkCamelCasing(path):
         flag = 0
     return notCamelCasing
 
+# This function is included as the grammarly plugin cannot detect words that are joined together
+def checkPathSpelling(path):
+    wrongSubtiers = []
+    subtiers = path.split("/")
+    for subtier in subtiers[1:]:
+        subtierWords = splitSubtierWords(subtier)
+        for word in subtierWords:
+            if len(word) == 1:
+                continue
+            if correctSpelling(word) != word:
+                wrongSubtiers.append(subtier)
+                break
+    return wrongSubtiers
+
+def checkProperties(k, v, missingProperties):
+    # Checks if required properties are not in "properties" list
+    try:
+        for key, value in v.items():
+            checkProperties(key, value, missingProperties)
+        if "required" in value.keys():
+            requiredProperties = value["required"]
+            for requiredProperty in requiredProperties:
+                if requiredProperty not in value["properties"].keys():
+                    missingProperties.append((key, requiredProperty))
+    except (AttributeError):
+        pass
+    return missingProperties
+
+
 @app.route('/checkOAS', methods=['GET', 'POST'])
 def checkOAS():
     if request.method == 'POST':
@@ -211,6 +263,10 @@ def checkOAS():
         if not checkPath(path):
             listErrors.append("Missing path")
 
+        # Check for missing responses
+        if not checkResponse(doc, 0):
+            listErrors.append("Missing response in API request")
+
         # Check for illegal characters in path
         if not checkPathCharacters(path):
             listErrors.append("Illegal characters in path")
@@ -251,6 +307,18 @@ def checkOAS():
         notCamelCasing = checkCamelCasing(path)
         if len(notCamelCasing) > 0:
             listErrors.append("The following subtier(s) is not using camel casing: " + ", ".join(notCamelCasing))
+
+        # Check spelling of subtier words
+        wrongSubtiers = checkPathSpelling(path)
+        if len(wrongSubtiers) > 0:
+            listErrors.append("The following subtier(s) has spelling errors: " + ", ".join(wrongSubtiers))
+
+        # Check all required properties are present
+        missingProperties = []
+        for key, value in doc.items():
+            missingProperties = checkProperties(key, value, missingProperties)
+        if len(missingProperties) > 0:
+            listErrors.append("The following properties are missing from your OAS: " + ", ".join([(missingProperty[1] + " in " + missingProperty[0] + " ==> properties") for missingProperty in missingProperties]))
 
         if len(listErrors) == 0:
             payload = {"message": "Done"}
