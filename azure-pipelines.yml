@@ -38,21 +38,6 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-  
-# - stage: Deploy
-#   displayName: Azure App Service Deploy
-#   jobs:
-#     - job: Deploy
-#       displayName: Deploy
-#       steps:
-#       - task: AzureRmWebAppDeployment@4
-#         inputs:
-#           ConnectionType: 'AzureRM'
-#           azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-#           appType: 'webAppContainer'
-#           WebAppName: 'cpfdevportal'
-#           DockerNamespace: 'cpfdevportal'
-#           DockerRepository: 'danielxdantecpfdevportal'
     - task: AzureWebAppContainer@1
       displayName: 'Azure Web App on Container Deploy'
       inputs:
