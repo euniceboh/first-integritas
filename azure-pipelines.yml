@@ -57,5 +57,5 @@ stages:
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: 'cpfdevportal'
-        imageName: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal:13'
+        containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal:13'
     
