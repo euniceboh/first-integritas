@@ -251,11 +251,11 @@ age</textarea>
     }
 
     function extractOAS() {
-      $(document).ready(function() {
-        $('#checkOASButton').on('click', function(e) {
+      // $(document).ready(function() {
+      //   $('#checkOASButton').unbind('click').on('click', function(e) {
           
-          e.preventDefault();
-          e.stopImmediatePropagation();
+      //     e.preventDefault();
+      //     e.stopImmediatePropagation();
 
           // var data = $('#oasTextarea').val();
           var data = editor.getValue();
@@ -302,8 +302,8 @@ age</textarea>
               oasErrorModal.modal("show");
             }
           });
-        });
-      })
+      //   });
+      // })
     }
 
   </script>
