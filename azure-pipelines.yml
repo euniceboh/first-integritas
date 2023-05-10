@@ -10,7 +10,7 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  applicationName: 'oastest'
+  applicationName: 'cpfdevportal'
   dockerRegistryServiceConnection: 'a3b968c1-9a21-4d22-b80e-d4b6241e3bb4'
   imageRepository: 'danielxdantecpfdevportal'
   containerRegistry: 'cpfdevportal.azurecr.io'
@@ -37,7 +37,7 @@ stages:
         dockerfile: $(dockerfilePath)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
-          $(tag)
+          latest
   - job: Deploy
     steps:
     - task: AzureWebAppContainer@1
@@ -45,5 +45,5 @@ stages:
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: $(applicationName)
-        imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal:$(tag)
+        imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal:latest
     
