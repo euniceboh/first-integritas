@@ -57,4 +57,5 @@ stages:
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: 'cpfdevportal'
-        imageName: 'cpfdevportal/danielxdantecpfdevportal:$(tag)'
+        imageName: 'danielxdantecpfdevportal:$(tag)'
+    
