@@ -10,6 +10,7 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
+  applicationName: 'cpfdevportal'
   dockerRegistryServiceConnection: 'a3b968c1-9a21-4d22-b80e-d4b6241e3bb4'
   imageRepository: 'danielxdantecpfdevportal'
   containerRegistry: 'cpfdevportal.azurecr.io'
@@ -56,6 +57,6 @@ stages:
       displayName: 'Azure Web App on Container Deploy'
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        appName: 'cpfdevportal'
-        containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal:13'
+        appName: $(applicationName)
+        containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal:$(tag)'
     
