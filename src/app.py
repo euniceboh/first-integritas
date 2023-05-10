@@ -9,22 +9,18 @@ nltk.download("wordnet")
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return '<h1>Hello, World!</h1>'
-
-@app.route('/portal1') 
-def portal1():
+@app.route('/') 
+def oasChecker():
     return render_template('API Exchange Developer Portal.html')
 
-@app.route('/portal2')
-def portal2():
+@app.route('/swaggeruipreview')
+def swaggerUIPreview():
     return render_template('API Exchange Developer Portal2.html')
 
-@app.route('/404')
-def errorPage():
+@app.route('/', defaults={'my_path': ''})
+@app.route('/<path:my_path>')
+def errorPage(my_path):
     return render_template('404.html')
-
 
 '''
 Checks to do:
