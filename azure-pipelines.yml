@@ -21,11 +21,11 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: Test
-  displayName: Test Web App
+- stage: Unit Test
+  displayName: Unit Test Backend
   jobs:
   - job: Test
-    displayName: Test
+    displayName: Unit Test
     steps:
     - script: |
         python -m pip install --upgrade pip
@@ -64,4 +64,5 @@ stages:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: $(applicationName)
         imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal:latest
-    
+
+# Integration Test
