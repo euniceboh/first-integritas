@@ -133,9 +133,7 @@
       <!-- OAS Text Box -->
       <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below or upload your OAS file, and click the "How is my OAS?" button to check if there are any errors on the OAS format.</p>
       <div id="editor">
-        <grammarly-editor-plugin contenteditable="true">
-          <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 8cm;"></textarea>
-        </grammarly-editor-plugin>
+        <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 8cm;"></textarea>
       </div>
       <!-- Upload Feature -->
       <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; display: inline-block;"/>
@@ -146,7 +144,8 @@
       <button class="btn noBorder my-0 px-5 align-self-start" id="checkOASButton" style="background-color: rgb(10, 97, 96); color: white; font-size: 1em; text-transform: none; height: auto; padding: 8px 15px; border-radius: 5px; margin-bottom: 5rem;" onclick=extractOAS()>How is my OAS?</button>
       <!-- Dictionary Text Box -->
       <p wrap="on" style="margin-bottom: 2rem !important; margin-top: 1rem !important;">Paste dictionary word here (from least important to most important order):</p>
-      <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 50%; height: 50%;">
+      <grammarly-editor-plugin contenteditable="true">
+        <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 50%; height: 5cm;">
 discretionary
 withdrawals
 update
@@ -158,7 +157,7 @@ pay
 now
 eligibility
 check
-age</textarea>
+age</textarea></grammarly-editor-plugin>
     </div>
   </div>
 

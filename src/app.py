@@ -56,35 +56,23 @@ def checkXDate(x_date):
         return False
     return True
 
-def checkPath(path):
-    if path == "" or path == None:
+def checkPath(paths):
+    if paths == None or len(paths) == 0:
         return False
+    for path in paths:
+        if path == "" or path == None:
+            return False
     return True
 
 def checkResponse(doc, flag):
-    if flag == 1:
-        return True
     try:
         for key, value in doc.items():
-            if key == "responses":
-                flag = 1
-            checkResponse(value, flag)
-    except (AttributeError):
-        pass
-    if flag == 0:
-        return False
-
-def checkResponse(doc, flag):
-    try:
-        for key, value in doc.items():
-            if key == "responses":
+            if key == "responses" or flag == 1:
                 return 1
             flag = checkResponse(value, flag)
     except (AttributeError):
         pass
-    if flag == 1:
-        return 1
-    return 0
+    return flag
     
 
 def checkPathCharacters(path):
@@ -188,7 +176,7 @@ def checkCamelCasing(path):
 
 # This function is included as the grammarly plugin cannot detect words that are joined together
 def checkPathSpelling(path):
-    wrongSubtiers = []
+    wrongSubtierSpelling = []
     subtiers = path.split("/")
     for subtier in subtiers[1:]:
         subtierWords = splitSubtierWords(subtier)
@@ -196,10 +184,11 @@ def checkPathSpelling(path):
             if len(word) == 1:
                 continue
             if correctSpelling(word) != word:
-                wrongSubtiers.append(subtier)
+                wrongSubtierSpelling.append(subtier)
                 break
-    return wrongSubtiers
+    return wrongSubtierSpelling
 
+# Needs more tests
 def checkProperties(k, v, missingProperties):
     # Checks if required properties are not in "properties" list
     try:
@@ -222,18 +211,22 @@ def checkOAS():
         listErrors = []
         doc = json.loads(result.get("doc"))
         dictionary = json.loads(result.get("dictionary"))["dictionary"]
+        openapi = title = description = infoVersion = x_author = x_date = paths = None
 
-        openapi = doc["openapi"]
-        title = doc["info"]["title"]
-        description = doc["info"]["description"]
-        infoVersion = doc["info"]["version"]
-        x_author = doc["info"]["x-author"]
-        x_date = doc["info"]["x-date"]
-        path = list(doc["paths"])[0] # need to take into account multiple paths if present
+        try:
+            openapi = doc["openapi"]
+            title = doc["info"]["title"]
+            description = doc["info"]["description"]
+            infoVersion = doc["info"]["version"]
+            x_author = doc["info"]["x-author"]
+            x_date = doc["info"]["x-date"]
+            paths = list(doc["paths"])
+        except (TypeError):
+            pass
         
         # Check for missing OpenAPI version
         if not checkOpenapi(openapi):
-            listErrors.append("Missing OpenAPI version")
+            listErrors.append("Missing openAPI version")
 
         # Check for null title
         if not checkTitle(title):
@@ -255,78 +248,87 @@ def checkOAS():
         if not checkXDate(x_date):
             listErrors.append("Missing x_date")
 
-        # Check for null path
-        if not checkPath(path):
-            listErrors.append("Missing path")
-
         # Check for missing responses
         if not checkResponse(doc, 0):
             listErrors.append("Missing response in API request")
 
-        # Check for illegal characters in path
-        if not checkPathCharacters(path):
-            listErrors.append("Illegal characters in path")
-        if not checkPathLeadingSlash(path):
-            listErrors.append("Path missing leading /")
-        
-        # Check for path length
-        pathLengthFlag = checkPathLength(path)
-        if pathLengthFlag == 1:
-            listErrors.append("There needs to be at least one subtier")
-        elif pathLengthFlag == 2:
-            listErrors.append("Only two subtiers are allowed")
-        
-        # Check for null path version
-        if not checkPathVersion(path):
-            listErrors.append("Missing path version")
+        # Check for null path
+        if not checkPath(paths):
+            listErrors.append("Missing path(s)")
         else:
-            # Check for matching info version and path version
-            if not checkMatchingVersion(infoVersion, path):
-                listErrors.append("Version numbers do not match")
+            for path in paths:
+                # Check for illegal characters in path
+                if not checkPathCharacters(path):
+                    listErrors.append("Illegal characters in path")
+            
+                # Check for leading slash in path
+                if not checkPathLeadingSlash(path):
+                    listErrors.append("Path missing leading /")
+                
+                # Check for words in path that are not in dictionary
+                wordsNotInDictionary = checkPathWordsDict(path, dictionary)
+                if len(wordsNotInDictionary) > 0:
+                    listErrors.append("The following word(s) in subtiers are not in the dictionary: " + ", ".join(wordsNotInDictionary))
+
+                # Check for camelCasing
+                notCamelCasing = checkCamelCasing(path)
+                if len(notCamelCasing) > 0:
+                    listErrors.append("The following subtier(s) is not using camel casing: " + ", ".join(notCamelCasing))
+
+                # Check spelling of subtier words
+                wrongSubtierSpelling = checkPathSpelling(path)
+                if len(wrongSubtierSpelling) > 0:
+                    listErrors.append("The following subtier(s) has spelling errors: " + ", ".join(wrongSubtierSpelling))
+
+                # Check for path length
+                pathLengthFlag = checkPathLength(path)
+                if pathLengthFlag == 1:
+                    listErrors.append("There needs to be at least one subtier in path")
+                elif pathLengthFlag == 2:
+                    listErrors.append("Only two subtiers are allowed in path")
+                else:
+                    # Check for null path version
+                    if not checkPathVersion(path):
+                        listErrors.append("Missing path version")
+                    else:
+                        # Check for matching info version and path version
+                        if checkInfoVersion(infoVersion) and not checkMatchingVersion(infoVersion, path):
+                            listErrors.append("Version numbers do not match")
+
+                    # Check if first word in subtier is a verb
+                    notVerbSubtiers = checkSubtierVerb(path)
+                    if len(notVerbSubtiers) > 0:
+                        listErrors.append("The first word of the following subtier(s) is not a verb: " + ", ".join(notVerbSubtiers))
+
 
         # Check for duplicate dictionary words
         duplicateDictWords = checkDuplicateDict(dictionary)
         if len(duplicateDictWords) > 0:
             listErrors.append("The following word(s) are repeated in the dictionary text box: " + ", ".join(duplicateDictWords)) 
 
-        # Check for words in path that are not in dictionary
-        wordsNotInDictionary = checkPathWordsDict(path, dictionary)
-        if len(wordsNotInDictionary) > 0:
-            listErrors.append("The following word(s) in subtiers are not in the dictionary: " + ", ".join(wordsNotInDictionary))
-        
-        # Check if first word in subtier is a verb
-        notVerbSubtiers = checkSubtierVerb(path)
-        if len(notVerbSubtiers) > 0:
-            listErrors.append("The first word of the following subtier(s) is not a verb: " + ", ".join(notVerbSubtiers))
-
-        # Check for camelCasing
-        notCamelCasing = checkCamelCasing(path)
-        if len(notCamelCasing) > 0:
-            listErrors.append("The following subtier(s) is not using camel casing: " + ", ".join(notCamelCasing))
-
-        # Check spelling of subtier words
-        wrongSubtiers = checkPathSpelling(path)
-        if len(wrongSubtiers) > 0:
-            listErrors.append("The following subtier(s) has spelling errors: " + ", ".join(wrongSubtiers))
-
         # Check all required properties are present
         missingProperties = []
-        for key, value in doc.items():
-            missingProperties = checkProperties(key, value, missingProperties)
+        try:
+            for key, value in doc.items():
+                missingProperties = checkProperties(key, value, missingProperties)
+        except (AttributeError):
+            pass
         if len(missingProperties) > 0:
             listErrors.append("The following properties are missing from your OAS: " + ", ".join([(missingProperty[1] + " in " + missingProperty[0] + " ==> properties") for missingProperty in missingProperties]))
 
+
         if len(listErrors) == 0:
-            payload = {"message": "Done"}
+            payload = {"message": "No errors"}
             return make_response(jsonify(payload), 201)
         else:
-            payload = {"message": "Not done", "errors": listErrors}
+            payload = {"message": "Has errors", "errors": listErrors}
             return make_response(jsonify(payload), 400)
         return render_template('API Exchange Developer Portal.html', result=result, show_errors=True)
     
     else:
         render_template('404.html')
 
+# Utils
 def splitSubtierWords(subtier: str):
     words = wordninja.split(subtier)
     return words
