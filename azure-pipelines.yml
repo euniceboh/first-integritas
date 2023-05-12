@@ -34,7 +34,7 @@ stages:
       displayName: 'Install Dependencies'
     
     - script: |
-        python -m pytest tests/
+        pytest
       # workingDirectory: '$(System.DefaultWorkingDirectory)'
       displayName: 'pytest'
 
