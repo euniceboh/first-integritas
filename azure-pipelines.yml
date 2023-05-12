@@ -33,7 +33,7 @@ stages:
         pip install pytest pytest-azurepipelines
       displayName: 'Install Dependencies'
     
-    - script: |
+    - bash: |
         pytest test_unit.py
       # workingDirectory: '$(System.DefaultWorkingDirectory)'
       displayName: 'pytest'
