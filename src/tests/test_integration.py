@@ -8,62 +8,62 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# class TestRoute:
-#     def setup_method(self):
-#         self.driver = webdriver.Chrome()
+class TestRoute:
+    def setup_method(self):
+        self.driver = webdriver.Chrome()
         
-#     def test_oasChecker_route(self):
-#         self.driver.get("http://127.0.0.1:80/")
-#         try:
-#             route_identifier = WebDriverWait(self.driver, 5).until(
-#                 EC.presence_of_element_located((By.CLASS_NAME, "route-identifier"))
-#             )
-#         finally:
-#             route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
-#             assert route_identifier == "CPF OAS Validator Tool"
+    def test_oasChecker_route(self):
+        self.driver.get("http://127.0.0.1:80/")
+        try:
+            route_identifier = WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "route-identifier"))
+            )
+        finally:
+            route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
+            assert route_identifier == "CPF OAS Validator Tool"
     
-#     def test_swaggeruipreview_route(self):
-#         self.driver.get("http://127.0.0.1:80/swaggeruipreview")
-#         try:
-#             route_identifier = WebDriverWait(self.driver, 5).until(
-#                 EC.presence_of_element_located((By.CLASS_NAME, "route-identifier"))
-#             )
-#         finally:
-#             route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
-#             assert route_identifier == "OAS Preview Tool"
+    def test_swaggeruipreview_route(self):
+        self.driver.get("http://127.0.0.1:80/swaggeruipreview")
+        try:
+            route_identifier = WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "route-identifier"))
+            )
+        finally:
+            route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
+            assert route_identifier == "OAS Preview Tool"
     
-#     def test_catchall_route(self):
-#         self.driver.get("http://127.0.0.1:80/404")
-#         try:
-#             route_identifier = WebDriverWait(self.driver, 5).until(
-#                     EC.presence_of_element_located((By.CLASS_NAME, "route-identifier"))
-#                 )
-#         finally:
-#             route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
-#             assert route_identifier == "Not Found"
+    def test_catchall_route(self):
+        self.driver.get("http://127.0.0.1:80/404")
+        try:
+            route_identifier = WebDriverWait(self.driver, 5).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "route-identifier"))
+                )
+        finally:
+            route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
+            assert route_identifier == "Not Found"
 
-#     def teardown_method(self):
-#         self.driver.close()
+    def teardown_method(self):
+        self.driver.close()
 
-# class TestRedirect:
-#     def setup_method(self):
-#         self.driver = webdriver.Chrome()
-#         self.driver.get("http://127.0.0.1:80/404")
+class TestRedirect:
+    def setup_method(self):
+        self.driver = webdriver.Chrome()
+        self.driver.get("http://127.0.0.1:80/404")
     
-#     def test_catchall_redirect_button(self):
-#         try:
-#             button = WebDriverWait(self.driver, 5).until(
-#                 EC.visibility_of_element_located((By.CLASS_NAME, "block"))
-#             )
-#         finally:
-#             button = self.driver.find_element(By.CLASS_NAME, "block").click()
-#         try:
-#             route_identifier = WebDriverWait(self.driver, 5).until(
-#                 EC.presence_of_element_located((By.CLASS_NAME, "route-identifier"))
-#             )
-#         finally:
-#             route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
-#             assert route_identifier == "CPF OAS Validator Tool"
+    def test_catchall_redirect_button(self):
+        try:
+            button = WebDriverWait(self.driver, 5).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "block"))
+            )
+        finally:
+            button = self.driver.find_element(By.CLASS_NAME, "block").click()
+        try:
+            route_identifier = WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "route-identifier"))
+            )
+        finally:
+            route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
+            assert route_identifier == "CPF OAS Validator Tool"
 
 class TestOASValidator:
     def setup_method(self):
