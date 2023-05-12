@@ -17,6 +17,7 @@ def oasChecker():
 def swaggerUIPreview():
     return render_template('API Exchange Developer Portal2.html')
 
+# @app.errorhandler(404)
 @app.route('/', defaults={'my_path': ''})
 @app.route('/<path:my_path>')
 def errorPage(my_path):

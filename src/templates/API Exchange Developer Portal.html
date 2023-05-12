@@ -106,6 +106,64 @@
           height: 30cm;
           margin-bottom: 3rem;
       }
+    
+    .styled-table {
+      border-collapse: collapse;
+      margin: 25px 0;
+      font-size: 0.9em;
+      font-family: sans-serif;
+      min-width: 400px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .styled-table thead th {
+      background-color: #0A6160;
+      color: #ffffff;
+      text-align: left;
+    }
+
+    .styled-table .secondary-col {
+      width: 100%;
+    }
+
+    .styled-table th,
+    .styled-table td {
+      padding: 15px !important;
+    }
+
+    .styled-table tbody tr {
+      border-bottom: 1px solid #dddddd;
+    }
+
+    .styled-table tbody tr:nth-of-type(even) {
+      background-color: #f3f3f3;
+    }
+
+    .styled-table tbody tr:last-of-type {
+      border-bottom: 2px solid #0A6160;
+    }
+
+    .styled-table tbody tr.active-row {
+      font-weight: bold;
+      color: #009879;
+    }
+
+    th:first-of-type {
+      border-top-left-radius: 10px;
+    }
+
+    th:last-of-type {
+      border-top-right-radius: 10px;
+    }
+
+    tr:last-of-type td:first-of-type {
+      border-bottom-left-radius: 10px;
+    }
+
+    tr:last-of-type td:last-of-type {
+      border-bottom-right-radius: 10px;
+    }
+
   </style>
 
   <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
@@ -129,7 +187,7 @@
 
   <div class="page vh-100">
     <div class="container h-100 py-5 d-flex flex-column">
-      <h3>CPF OAS Validator Tool</h3>
+      <h3 class="route-identifier">CPF OAS Validator Tool</h3>
       <!-- OAS Text Box -->
       <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below or upload your OAS file, and click the "How is my OAS?" button to check if there are any errors on the OAS format.</p>
       <div id="editor">
@@ -172,7 +230,7 @@ age</textarea></grammarly-editor-plugin>
       <div class="modal-content" style="min-height:100%;">
         <div class="modal-header">
           <h5 class="modal-title" id="staticSuccessBackdropLabel">OAS Checker</h5>
-          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal" onclick="document.getElementById('oasSuccess').style.display='none'"></button>
+          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body" id="oasSuccessBody">
         </div>
@@ -185,13 +243,23 @@ age</textarea></grammarly-editor-plugin>
       <div class="modal-content" style="min-height:100%;">
         <div class="modal-header">
           <h5 class="modal-title" id="staticErrorsBackdropLabel">OAS Checker</h5>
-          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal" onclick="document.getElementById('oasErrors').style.display='none'"></button>
+          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body" id="oasErrorsBody"> 
-            <table style="width:100%">
-                <tbody class="modal-table" id="oasErrorsTable">
+        <div class="modal-body"> 
+            <table class = "styled-table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col" class="secondary-col">Errors</th>
+                  </tr>
+                </thead>
+                <tbody id="oasErrorsBody">
                 </tbody>
             </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="">Save Changes</button>
         </div>
       </div>
     </div>
@@ -283,19 +351,15 @@ age</textarea></grammarly-editor-plugin>
             },
             error: function(response) {
               listErrors = response["responseJSON"]["errors"];
-
+              
               oasErrorModal = $('#oasErrors');
-              oasErrorModal.find('.modal-table').html(`<tr>
-                                                          <td>#</td>
-                                                          <td>Errors</td>
-                                                      </tr>
-                                                      `);
+              oasErrorModal.find('.styled-table tbody').empty();
               for (let i = 0; i < listErrors.length; i++){
-                oasErrorModal.find('.modal-table').append(`<tr>
-                                                              <td>`+(i+1)+`</td>
-                                                              <td>`+(listErrors[i])+`</td>
-                                                           </tr>
-                                                          `);
+                oasErrorModal.find('.styled-table tbody').append(`<tr>
+                                                            <td scope="row">`+(i+1)+`</th>
+                                                            <td>`+(listErrors[i])+`</td>
+                                                          </tr>
+                                                        `);
               }
               oasErrorModal.modal("show");
             }
