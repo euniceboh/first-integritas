@@ -31,7 +31,11 @@ stages:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-azurepipelines
-        python -m pytest
+      displayName: 'Install Dependencies'
+    
+    - script: |
+        python -m pytest tests/
+      # workingDirectory: '$(System.DefaultWorkingDirectory)'
       displayName: 'pytest'
 
 - stage: Build
