@@ -21,7 +21,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: Unit Test
+- stage: Test
   displayName: Unit Test Backend
   jobs:
   - job: Test
