@@ -93,6 +93,7 @@ stages:
           echo "Build.SourcesDirectory:"
 
           echo "$(Build.SourcesDirectory)"
+          echo "$(System.DefaultWorkingDirectory"
     - script: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
