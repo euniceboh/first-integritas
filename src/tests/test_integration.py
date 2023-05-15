@@ -1,16 +1,19 @@
 # Integration Testing on Deployed App
 
+import time
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 class TestRoute:
     def setup_method(self):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         
     def test_oasChecker_route(self):
         self.driver.get("http://127.0.0.1:80/")
@@ -47,7 +50,7 @@ class TestRoute:
 
 class TestRedirect:
     def setup_method(self):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         self.driver.get("http://127.0.0.1:80/404")
     
     def test_catchall_redirect_button(self):
@@ -64,12 +67,15 @@ class TestRedirect:
         finally:
             route_identifier = self.driver.find_element(By.CLASS_NAME, "route-identifier").text
             assert route_identifier == "CPF OAS Validator Tool"
+    
+    def teardown_method(self):
+        self.driver.close()
 
 class TestOASValidator:
     def setup_method(self):
-        with open("../template1.yaml", "r") as f:
+        with open("src/template1.yaml", "r") as f:
             self.template1 = f.read()
-        with open("../template2.yaml", "r") as f:
+        with open("src/template2.yaml", "r") as f:
             self.template2 = f.read()
         self.driver = webdriver.Chrome()
         self.driver.get("http://127.0.0.1:80/")
@@ -114,13 +120,40 @@ class TestOASValidator:
             )
         finally:
             assert True
-    
-    def test_uploadFile(self):
-        pass
 
-    def test_saveFile(self):
-        pass
+    def teardown_method(self):
+            self.driver.close()
+
+class TestFileUploadSave:
+    def setup_method(self):
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        self.driver.get("http://127.0.0.1:80/")
+
+    def test_uploadFile(self):
+        try:
+            buttonChooseFile = WebDriverWait(self.driver, 5).until(
+                EC.visibility_of_element_located((By.ID, "fileUpload"))
+            )
+            buttonChooseFile.send_keys("C:/Users/danie/Documents/CPF Validator Tool/CPF-Dev-Portal/src/template1.yaml")
+        finally:
+            self.driver.find_element(By.ID, "fileUploadButton").click()
+            textareaContent = self.driver.execute_script("editor.getValue()")
+            assert (textareaContent != "" or textareaContent != None) == True
+            
+    # def test_saveFile(self):
+    #     try:
+    #         buttonChooseFile = WebDriverWait(self.driver, 5).until(
+    #             EC.visibility_of_element_located((By.ID, "fileUpload"))
+    #         )
+    #         buttonChooseFile.send_keys("C:/Users/danie/Documents/CPF Validator Tool/CPF-Dev-Portal/src/template1.yaml")
+    #     finally:
+    #         self.driver.find_element(By.ID, "fileUploadButton").click()
+    #         buttonSaveFile = self.driver.find_element(By.ID, "savefile").click()
+    #         textareaContent = self.driver.execute_script("editor.getValue()")
+    #         assert (textareaContent != "" or textareaContent != None) == True
 
     def teardown_method(self):
         self.driver.close()
+
+# Dictionary Input
 

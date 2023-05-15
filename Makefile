@@ -14,11 +14,20 @@ venv/Scripts/activate: requirements.txt
 venv: venv/Scripts/activate
 	. ./venv/Scripts/activate
 
-run: venv test
+run: venv
 	$(PYTHON) src/app.py
 
-test:
-	. ./venv/Scripts/activate; pytest
+unit_test:
+	. ./venv/Scripts/activate; \
+	cd src; \
+	cd tests; \
+	pytest test_unit.py
+
+integration_test:
+	. ./venv/Scripts/activate; \
+	cd src; \
+	cd tests; \
+	pytest test_integration.py
 
 clean:
 	cd src; rm -rf __pycache__
