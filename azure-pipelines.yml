@@ -84,6 +84,6 @@ stages:
       displayName: 'Install Dependencies'
      
     - script: |
-        pytest test_integration.py
-      workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
+        pytest src/tests/test_integration.py
+      workingDirectory: '$(System.DefaultWorkingDirectory)/'
       displayName: 'pytest'
