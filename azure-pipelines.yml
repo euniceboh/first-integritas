@@ -76,6 +76,7 @@ stages:
   - job: Test
     displayName: Integration Test
     steps:
+    - script: SET | more
     - script: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
