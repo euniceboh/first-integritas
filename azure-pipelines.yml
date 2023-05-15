@@ -76,7 +76,21 @@ stages:
   - job: Test
     displayName: Integration Test
     steps:
-    - script: SET | more
+    - script: 
+      echo "Structure of work folder of this pipeline:"
+      tree $(Agent.WorkFolder)\1 /f
+
+      echo "Build.ArtifactStagingDirectory:" 
+
+      echo "$(Build.ArtifactStagingDirectory)"
+
+      echo "Build.BinariesDirectory:" 
+
+      echo "$(Build.BinariesDirectory)"
+
+      echo "Build.SourcesDirectory:"
+
+      echo "$(Build.SourcesDirectory)"
     - script: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
