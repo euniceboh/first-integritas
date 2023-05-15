@@ -114,7 +114,7 @@ class TestOASValidator:
     
     def test_checkOAS_error(self):
         try:
-            # WARNING: If screen minimized or screen too small, ace editor might not appear and thus this test will fail
+            # WARNING: If screen minimized or screen too small, ace editor might not appear and thus this test will fail; fixed with maximised screen and headless
             textarea = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )

@@ -26,6 +26,7 @@ def errorPage(my_path):
 '''
 Checks to do:
 - Check subtier words not using short forms
+    E.g., /api/IND/FRM_IND_GetMbrDPSInfo --> /api/IND/FRM_IND_GetMemberPolicyInformation
 '''
 def checkOpenapi(openapi):
     if openapi == "" or openapi == None:
