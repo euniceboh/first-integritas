@@ -21,7 +21,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: Test
+- stage: Unit Test
   displayName: Unit Test Backend
   jobs:
   - job: Test
@@ -70,3 +70,19 @@ stages:
         imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal:latest
 
 # Integration Test
+- stage: Integration Test
+  displayName: Integration Test Backend
+  jobs:
+  - job: Test
+    displayName: Integration Test
+    steps:
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-azurepipelines
+      displayName: 'Install Dependencies'
+     
+    - script: |
+        pytest test_integration.py
+      workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
+      displayName: 'pytest'
