@@ -1,5 +1,6 @@
 # Integration Testing on Deployed App
 
+import os
 import time
 import pytest
 from selenium import webdriver
@@ -132,22 +133,23 @@ class TestOASValidator:
     def teardown_method(self):
             self.driver.close()
 
-class TestFileUploadSave:
-    def setup_method(self):
-        # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-        self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
-        self.driver.get("https://cpfdevportal.azurewebsites.net/")
+# Manual Testing or external libraries can support
+# class TestFileUploadSave:
+#     def setup_method(self):
+#         # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+#         self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
+#         self.driver.get("https://cpfdevportal.azurewebsites.net/")
 
-    def test_uploadFile(self):
-        try:
-            buttonChooseFile = WebDriverWait(self.driver, 5).until(
-                EC.visibility_of_element_located((By.ID, "fileUpload"))
-            )
-            buttonChooseFile.send_keys("C:/Users/danie/Documents/CPF Validator Tool/CPF-Dev-Portal/src/template1.yaml")
-        finally:
-            self.driver.find_element(By.ID, "fileUploadButton").click()
-            textareaContent = self.driver.execute_script("editor.getValue()")
-            assert (textareaContent != "" or textareaContent != None) == True
+#     def test_uploadFile(self):
+#         try:
+#             buttonChooseFile = WebDriverWait(self.driver, 5).until(
+#                 EC.visibility_of_element_located((By.ID, "fileUpload"))
+#             )
+#             buttonChooseFile.send_keys(os.getcwd()+"../template1.yaml")
+#         finally:
+#             self.driver.find_element(By.ID, "fileUploadButton").click()
+#             textareaContent = self.driver.execute_script("editor.getValue()")
+#             assert (textareaContent != "" or textareaContent != None) == True
             
     # def test_saveFile(self):
     #     try:
@@ -161,8 +163,8 @@ class TestFileUploadSave:
     #         textareaContent = self.driver.execute_script("editor.getValue()")
     #         assert (textareaContent != "" or textareaContent != None) == True
 
-    def teardown_method(self):
-        self.driver.close()
+    # def teardown_method(self):
+    #     self.driver.close()
 
 # Dictionary Input
 
