@@ -6,14 +6,20 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+options = Options()
+options.add_argument("--start-maximized")
+options.add_argument("--headless")
+
 class TestRoute:
     def setup_method(self):
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
         
     def test_oasChecker_route(self):
         self.driver.get("https://cpfdevportal.azurewebsites.net")
@@ -50,7 +56,8 @@ class TestRoute:
 
 class TestRedirect:
     def setup_method(self):
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
         self.driver.get("https://cpfdevportal.azurewebsites.net/404")
     
     def test_catchall_redirect_button(self):
@@ -77,8 +84,9 @@ class TestOASValidator:
             self.template1 = f.read()
         with open("src/template2.yaml", "r") as f:
             self.template2 = f.read()
-        self.driver = webdriver.Chrome()
-        self.driver.get("https://cpfdevportal.azurewebsites.net")
+        # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
+        self.driver.get("https://cpfdevportal.azurewebsites.net/")
     
     def test_checkOAS_noerror(self):
         try:
@@ -126,8 +134,9 @@ class TestOASValidator:
 
 class TestFileUploadSave:
     def setup_method(self):
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-        self.driver.get("https://cpfdevportal.azurewebsites.net")
+        # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
+        self.driver.get("https://cpfdevportal.azurewebsites.net/")
 
     def test_uploadFile(self):
         try:
