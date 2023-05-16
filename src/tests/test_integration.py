@@ -1,7 +1,5 @@
 # Integration Testing on Deployed App
 
-import os
-import time
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -15,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 options = Options()
 options.add_argument("--start-maximized")
+options.add_argument("--window-size=2560,1440")
 options.add_argument("--headless")
 
 class TestRoute:
@@ -81,10 +80,16 @@ class TestRedirect:
 
 class TestOASValidator:
     def setup_method(self):
-        with open("src/template1.yaml", "r") as f:
-            self.template1 = f.read()
-        with open("src/template2.yaml", "r") as f:
-            self.template2 = f.read()
+        try:
+            with open("src/template1.yaml", "r") as f:
+                self.template1 = f.read()
+            with open("src/template2.yaml", "r") as f:
+                self.template2 = f.read()
+        except (FileNotFoundError):
+            with open("../template1.yaml", "r") as f:
+                self.template1 = f.read()
+            with open("../template2.yaml", "r") as f:
+                self.template2 = f.read()
         # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
         self.driver.get("https://cpfdevportal.azurewebsites.net/")
@@ -92,16 +97,18 @@ class TestOASValidator:
     def test_checkOAS_noerror(self):
         try:
             # WARNING: If screen minimized or screen too small, ace editor might not appear and thus this test will fail
-            textarea = WebDriverWait(self.driver, 5).until(
+            textarea = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )
         finally:
             self.driver.execute_script(f"editor.setValue(`{self.template1}`)")
             textareaContent = self.driver.execute_script("editor.getValue()")
             assert (textareaContent != "" or textareaContent != None) == True
-        button = self.driver.find_element(By.ID, "checkOASButton").click()
+        button = self.driver.find_element(By.ID, "checkOASButton")
+        self.driver.execute_script("arguments[0].scrollIntoView(false);", button)
+        button.click()
         try:
-            modal = WebDriverWait(self.driver, 20).until(
+            modal = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_element_located((By.ID, "oasSuccessBody"))
             )
         finally:
@@ -114,7 +121,7 @@ class TestOASValidator:
     
     def test_checkOAS_error(self):
         try:
-            # WARNING: If screen minimized or screen too small, ace editor might not appear and thus this test will fail; fixed with maximised screen and headless
+            # WARNING: If screen minimized or screen too small, ace editor might not appear and thus this test will fail; fixed with fixed window size
             textarea = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )
