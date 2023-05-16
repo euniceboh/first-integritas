@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,9 +18,11 @@ options.add_argument("--headless")
 
 class TestRoute:
     def setup_method(self):
-        # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-        self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
-        
+        try: # in pipeline
+            self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
+        except: # local
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+
     def test_oasChecker_route(self):
         self.driver.get("https://cpfdevportal.azurewebsites.net")
         try:

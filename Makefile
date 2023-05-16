@@ -23,6 +23,7 @@ unit_test:
 	cd tests; \
 	pytest test_unit.py
 
+# need to fix webdriverexception bug here
 integration_test:
 	. ./venv/Scripts/activate; \
 	cd src; \
