@@ -164,37 +164,6 @@
       border-bottom-right-radius: 10px;
     }
 
-    #loading {
-      position: fixed;
-      display: block;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      text-align: center;
-      opacity: 0.7;
-      background-color: #fff;
-      z-index: 99;
-    }
-
-    #loading-image {
-      position: absolute;
-      top: 100px;
-      left: 240px;
-      z-index: 100;
-    }
-
-    /* invisible scrollbar */
-    #errorTextArea::-webkit-scrollbar {
-      display: none;
-    }
-
-    #errorTextArea {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-
   </style>
 
   <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
@@ -207,7 +176,7 @@
 <body>
     
   <header class="site-header">
-    <div class="container"  style="float: left; margin-left: 1cm">
+    <div class="container">
       <div class="row">
         <div class="four columns">
           <h1 class="brand"><a href="https://portal.axpuat.cpf.gov.sg/test_workspace_01"><img class="logo" src="/static/images/Logo.png" alt="API Exchange Developer Portal"></a></h1>
@@ -216,14 +185,14 @@
     </div>
   </header>
 
-  <div style="padding-top: 3cm; padding-left: 1cm">
-    <h3 class="route-identifier">CPF OAS Validator Tool</h3>
-    <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below, and click the "How is my OAS?" button to check if there are any errors on the OAS format.</p>
-  </div>
-    
-
-  <div class="page vh-100" style="display:flex; flex-direction: row; padding-top: 0">
-    <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 70%; flex: 1; padding: 1cm">
+  <div class="page vh-100">
+    <div class="container h-100 py-5 d-flex flex-column">
+      <div>
+        <h3 class="route-identifier">CPF OAS Validator Tool</h3>
+      </div>
+      <div>
+        <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below, and click the "How is my OAS?" button to check if there are any errors on the OAS format.</p>
+      </div>
       <!-- OAS Text Box -->
       <div style="position: relative">
         <div id="editor" style="height: 10cm">
@@ -254,14 +223,6 @@ now
 eligibility
 check
 age</textarea></grammarly-editor-plugin>
-    </div>
-  </div>
-  <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 35%; padding-right: 1cm; ">
-    <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 1.2;" readonly>Error List WIP</textarea>
-    <div class="card text-white bg-success mb-3" style="max-width: 15rem; margin-left: 4cm; margin-top: 0.5cm">
-      <div class="card-body">
-        <p class="card-text" id="errorCount" style="text-align: center;">Valid</p>
-      </div>
     </div>
   </div>
 </div>
@@ -321,9 +282,7 @@ age</textarea></grammarly-editor-plugin>
   <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/css/ace.min.css" rel="stylesheet">
 
   <script>
-    console.log(typeof "3.0.0")
     var editor = ace.edit("editor");
-    var Range = ace.require("ace/range").Range;
     editor.setTheme("ace/theme/kuroir");
     editor.getSession().setMode("ace/mode/yaml");
     document.getElementById('editor').style.fontSize='15px';
@@ -333,23 +292,11 @@ age</textarea></grammarly-editor-plugin>
       enableSnippets: true,
       enableLiveAutocompletion: true});
 
-    // Sync Scrolling
-    $('.ace_scrollbar-v').scroll(function () {
-      $("#errorTextArea").scrollTop($('.ace_scrollbar-v').scrollTop());
-      $("#errorTextArea").scrollLeft($('.ace_scrollbar-v').scrollLeft());
-    });
-    $("#errorTextArea").scroll(function () {
-      $(".ace_scrollbar-v").scrollTop($("#errorTextArea").scrollTop());
-      $(".ace_scrollbar-v").scrollLeft($("#errorTextArea").scrollLeft());
-    })
-
     function uploadFile() {
         var file = document.getElementById("fileUpload").files[0];
         if (file != undefined) {
           var reader = new FileReader();
           reader.onload = function(e) {
-          // var textArea = document.getElementById("oasTextarea");
-          // textArea.value = e.target.result;
           editor.setValue(e.target.result);
           }
           reader.readAsText(file);
@@ -359,7 +306,6 @@ age</textarea></grammarly-editor-plugin>
       }
 
     function saveFile() {
-      // var textArea = document.getElementById("oasTextarea").value;
       var textArea = editor.getValue();
       if (textArea == "") {
         alert("Please input an OAS before saving to file!");
@@ -381,170 +327,37 @@ age</textarea></grammarly-editor-plugin>
       }
     }
 
-    // Invoked when the checkOASButton is pressed
-    function resetErrorPanel() {
-      var errorTextArea = document.getElementById("errorTextArea");
-      var emptyLines = "";
-      var numLines = editor.session.getLength();
-      for (let i = 0; i < numLines-1; i++) {
-        emptyLines += i+1;
-        emptyLines += "\n";
-      }
-      errorTextArea.value = emptyLines;
+    function addMarker(start = 0,end = 0,classes ='default',line="fullLine",override = false){
+        let editor = this.$children[0].editor;
+        editor.getSession().addMarker(new range.Range(start, 0, (end === 0 ? start : end), 10000), classes, line, override)
     }
 
-    // Update side panel with number of lines in editor
-    // If additional lines are added, the errors will disappear
-    // Also update error count
-    editor.getSession().on("change", function() {
-      var errorTextArea = document.getElementById("errorTextArea");
-      errorTextArea_array = errorTextArea.value.split("\n");
-      // console.log(errorTextArea_array);
-
-      // editor.getSession().setAnnotations(syntaxErrors.concat(customAnnotations))
-      var emptyLines = "";
-      var numLines = editor.session.getLength();
-      for (let i = 0; i < numLines-1; i++) {
-        emptyLines += i+1;
-        emptyLines += "\n";
-      }
-      errorTextArea.innerHTML = emptyLines;
-
-      var errorCount = 0;
-      var errorTextArea = document.getElementById("errorTextArea");
-      errorTextArea_array = errorTextArea.value.split("\n");
-      for (let i = 0; i < errorTextArea_array.length; i++) {
-        console.log(errorTextArea_array[i]);
-        if (errorTextArea_array[i] != "" || errorTextArea_array[i] != undefined) {
-          errorCount += 1;
-        }
-      }
-      if (errorCount == 0) {
-        document.getElementById('errorCount').innerHTML = "Valid";
-      }
-      document.getElementById('errorCount').innerHTML = "No. of Errors: " + (errorCount);
-    })
-
-    // Update error count
-    // $('#errorTextArea').on("change", function() {
-    //   var errorCount = 0;
-    //   var errorTextArea = document.getElementById("errorTextArea");
-    //   errorTextArea_array = errorTextArea.value.split("\n");
-    //   console.log(errorTextArea_array);
-    //   for (let i = 0; i < errorTextArea_array.length; i++) {
-    //     console.log(errorTextArea_array[i]);
-    //     if (errorTextArea_array[i] != "" || errorTextArea_array[i] != undefined) {
-    //       errorCount += 1;
-    //     }
-    //   }
-    //   document.getElementById('errorCount').innerHTML = "Errors: " + str(errorCount);
-    // })
-
     function extractOAS() {
-      // $(document).ready(function() {
-      //   $('#checkOASButton').unbind('click').on('click', function(e) {
-          
-      //     e.preventDefault();
-      //     e.stopImmediatePropagation();
-
-          // var data = $('#oasTextarea').val();
           var data = editor.getValue();
-          if (data == "" || data == undefined) {
+          if (data == "") {
             alert("Please input an OAS!");
             return;
           }
-
-          resetErrorPanel();
-
-
           var dictionaryWords = $('#oasDictionaryArea').val().split(/\r?\n/);
-          var dictionaryWordsDictionary = {dictionary: dictionaryWords};
+          var dictionaryWordsDictionary = {dictionary: dictionaryWords}
           dictionary = JSON.stringify(dictionaryWordsDictionary);
-
-          // Catches one indentation error at a time
-          // Make sure user handles all indentation errors before checking OAS
-          // Shows and highlights rows with indentation errors in editor and side panel
-          var syntaxErrors = editor.getSession().getAnnotations();
-          if (syntaxErrors.length != 0) {
-            alert("YAML Syntax Error! Please check for indentation before checking OAS.");
-            line = syntaxErrors[0]["row"];
-            errorText = syntaxErrors[0]["text"];
-            errorType = syntaxErrors[0]["type"];
-            editor.gotoLine(line);
-            var highlightRange = new Range(line, 0, line, 300);
-            editor.selection.setRange(highlightRange);
-            editor.session.addMarker(highlightRange, "error", "text");
-            // var customAnnotations = [
-            // {
-            //   row: line + 5,
-            //   column: 0,
-            //   text: "test", // or the json reply from the parser
-            //   type: "error" // also "warning" and "information"
-            // },
-            // {
-            //   row: line + 10,
-            //   column: 0,
-            //   text: "test", // or the json reply from the parser
-            //   type: "error" // also "warning" and "information"
-            // }]
-            // editor.getSession().setAnnotations(syntaxErrors.concat(customAnnotations))
-            return;
-          }
-
-          // console.log(editor.getSession().getAnnotations())
-          // editor.session.setOption("useWorker", false) # use when the annotations disappear
-          // editor.getSession().setAnnotations([{
-          //   row: 1,
-          //   column: 0,
-          //   text: "test", // or the json reply from the parser
-          //   type: "error" // also "warning" and "information"
-          // }])
-
-          // editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), className, type: ["text", "fullLine", "screenLine"], inFront (opt))
-
-          // var highlightRange = new Range(10, 0, 10, 300);
-          // editor.selection.setRange(highlightRange);
-          // editor.session.addMarker(highlightRange, "error", "text");
-
-          // editor.getSession().setAnnotations([{
-          //     row: 3,
-          //     column: 0,
-          //     text: "test",
-          //     type: "error"
-          // }, {
-          //     row: 5,
-          //     column: 5,
-          //     text: "test2",
-          //     type: "error"
-          // }])
-
-          // console.log(editor.getSession().getAnnotations())
-
-
-          // console.log(editor.getSession().getValue());
-          // session.getLength() --> Gets total number of lines of the yaml file
-          // session.getLine(line) --> Gets the string value of the line at line <line>
-          // session.getLines(line1, line2) --> Gets the string values of line 1 and line 2 
-          // gotoLine(line) --> Scrolls the screen down to line <line>
-          
-          $('#loading').show();
+          const doc = jsyaml.safeLoad(data, {schema: jsyaml.JSON_SCHEMA});
+          var doc_json = JSON.stringify(doc)
           
           $.ajax({
             data: {
-              doc: data,
+              doc: doc_json,
               dictionary: dictionary,
             },
             type: 'POST',
             url: '/checkOAS',
             success: function(response) {
-              $('#loading').hide();
               oasSuccessModal = $('#oasSuccess');
               oasSuccessModal.find('.modal-body').html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>`);
               oasSuccessModal.find('.modal-body').append("There are no additional errors found");
               oasSuccessModal.modal("show");
             },
             error: function(response) {
-              $('#loading').hide();
               listErrors = response["responseJSON"]["errors"];
               
               oasErrorModal = $('#oasErrors');
@@ -559,26 +372,12 @@ age</textarea></grammarly-editor-plugin>
               oasErrorModal.modal("show");
             }
           });
-          
-          
-
-      //   });
-      // })
     }
-
-    $(window).on('load', function() {
-      $('#loading').hide();
-    });
-
 
   </script>
     
 <script src="/static/js/kong.utils.js.download"></script>
 
 </body>
-
-<div id="loading">
-  <img id="loading-image" src="/static/images/ajax-loader.gif" alt="Loading..." />
-</div>
 
 </html>

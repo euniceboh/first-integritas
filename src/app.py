@@ -1,4 +1,5 @@
 from flask import Flask, render_template, url_for, request, redirect, jsonify, make_response
+import yaml
 import json
 import wordninja
 from spellchecker import SpellChecker
@@ -211,19 +212,35 @@ def checkOAS():
     if request.method == 'POST':
         result = request.form
         listErrors = []
-        doc = json.loads(result.get("doc"))
-        dictionary = json.loads(result.get("dictionary"))["dictionary"]
-        openapi = title = description = infoVersion = x_author = x_date = paths = None
 
+        doc = result.get("doc")
+        dictionary = json.loads(result.get("dictionary"))["dictionary"]
         try:
-            openapi = doc["openapi"]
-            title = doc["info"]["title"]
-            description = doc["info"]["description"]
-            infoVersion = doc["info"]["version"]
-            x_author = doc["info"]["x-author"]
-            x_date = doc["info"]["x-date"]
-            paths = list(doc["paths"])
-        except (TypeError):
+            doc_json = yaml.safe_load(doc)
+        except yaml.YAMLError as e: # Catches indentation errors that are not caught by ace editor
+
+            if hasattr(e, 'problem_mark'):
+                line = e.problem_mark.line + 1
+                column = e.problem_mark.column + 1
+                listErrors.append(f'YAML parsing error at line {line}, column {column}: {e}')
+            else: # Catches any other errors that potentially breaks YAML
+                listErrors.append(f'YAML parsing error: {e}')
+            payload = {"message": "Has errors", "errors": listErrors}
+            return make_response(jsonify(payload), 400)
+
+        # Components of the YAML file that are checked; possibly to add more according to OAS 3.0
+        # Possible to use Schemas to check with PYYAML, but then it will be one error caught at a time
+        # Thus, we manually check each component
+        openapi = title = description = infoVersion = x_author = x_date = paths = None
+        try:
+            openapi = doc_json["openapi"]
+            title = doc_json["info"]["title"]
+            description = doc_json["info"]["description"]
+            infoVersion = doc_json["info"]["version"]
+            x_author = doc_json["info"]["x-author"]
+            x_date = doc_json["info"]["x-date"]
+            paths = list(doc_json["paths"])
+        except (TypeError): # If the component is not found, it will be handled by the checkFunctions
             pass
         
         # Check for missing OpenAPI version
@@ -251,7 +268,7 @@ def checkOAS():
             listErrors.append("Missing x_date")
 
         # Check for missing responses
-        if not checkResponse(doc, 0):
+        if not checkResponse(doc_json, 0):
             listErrors.append("Missing response in API request")
 
         # Check for null path
@@ -311,7 +328,7 @@ def checkOAS():
         # Check all required properties are present
         missingProperties = []
         try:
-            for key, value in doc.items():
+            for key, value in doc_json.items():
                 missingProperties = checkProperties(key, value, missingProperties)
         except (AttributeError):
             pass
