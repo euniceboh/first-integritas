@@ -257,7 +257,7 @@ age</textarea></grammarly-editor-plugin>
     </div>
   </div>
   <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 35%; padding-right: 1cm; ">
-    <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 1.2;" readonly>Error List WIP</textarea>
+    <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 1.14;" readonly>Error List WIP</textarea>
     <div class="card text-white bg-success mb-3" style="max-width: 15rem; margin-left: 4cm; margin-top: 0.5cm">
       <div class="card-body">
         <p class="card-text" id="errorCount" style="text-align: center;">Valid</p>
@@ -316,12 +316,12 @@ age</textarea></grammarly-editor-plugin>
   <script src="/static/js/swagger-ui-bundle.js.download"></script>
   <script src="/static/js/js-yaml-3.13.1.min.js.download"></script>
   <script src="/static/js/jquery.min.js.download"></script>
+  <!-- need to find a way to phase grammarly out or hide the api key -->
   <script src="https://cdn.jsdelivr.net/npm/@grammarly/editor-sdk?clientId=client_G9BZTBHKX7chBEXcHdt3ND"></script>
   <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/src-min-noconflict/ace.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/css/ace.min.css" rel="stylesheet">
 
   <script>
-    console.log(typeof "3.0.0")
     var editor = ace.edit("editor");
     var Range = ace.require("ace/range").Range;
     editor.setTheme("ace/theme/kuroir");
@@ -331,7 +331,8 @@ age</textarea></grammarly-editor-plugin>
       enableBasicAutocompletion: true,
       fontFamily: "tahoma",
       enableSnippets: true,
-      enableLiveAutocompletion: true});
+      enableLiveAutocompletion: true
+    });
 
     // Sync Scrolling
     $('.ace_scrollbar-v').scroll(function () {
@@ -381,49 +382,57 @@ age</textarea></grammarly-editor-plugin>
       }
     }
 
+    // =========================================================================================================================
+
     // Invoked when the checkOASButton is pressed
-    function resetErrorPanel() {
-      var errorTextArea = document.getElementById("errorTextArea");
-      var emptyLines = "";
-      var numLines = editor.session.getLength();
-      for (let i = 0; i < numLines-1; i++) {
-        emptyLines += i+1;
-        emptyLines += "\n";
-      }
-      errorTextArea.value = emptyLines;
-    }
+    // function resetErrorPanel() {
+    //   var errorTextArea = document.getElementById("errorTextArea");
+    //   var emptyLines = "";
+    //   var numLines = editor.session.getLength();
+    //   for (let i = 0; i < numLines-1; i++) {
+    //     emptyLines += i+1;
+    //     emptyLines += "\n";
+    //   }
+    //   errorTextArea.value = emptyLines;
+    // }
 
-    // Update side panel with number of lines in editor
-    // If additional lines are added, the errors will disappear
-    // Also update error count
-    editor.getSession().on("change", function() {
-      var errorTextArea = document.getElementById("errorTextArea");
-      errorTextArea_array = errorTextArea.value.split("\n");
-      // console.log(errorTextArea_array);
+    // Real-time side panel refresh by posting to backend
+    // Using debounce concept to buffer each post request
+    var debounce = null;
+    editor.getSession().on("change", function (e) {
+      clearTimeout(debounce);
+      debounce = setTimeout(function () {
+        alert("test");
+      }, 1000);
+    });
+    // editor.getSession().on("change", function() {
+    //   var errorTextArea = document.getElementById("errorTextArea");
+    //   errorTextArea_array = errorTextArea.value.split("\n");
+    //   // console.log(errorTextArea_array);
 
-      // editor.getSession().setAnnotations(syntaxErrors.concat(customAnnotations))
-      var emptyLines = "";
-      var numLines = editor.session.getLength();
-      for (let i = 0; i < numLines-1; i++) {
-        emptyLines += i+1;
-        emptyLines += "\n";
-      }
-      errorTextArea.innerHTML = emptyLines;
+    //   // editor.getSession().setAnnotations(syntaxErrors.concat(customAnnotations))
+    //   var emptyLines = "";
+    //   var numLines = editor.session.getLength();
+    //   for (let i = 0; i < numLines-1; i++) {
+    //     emptyLines += i+1;
+    //     emptyLines += "\n";
+    //   }
+    //   errorTextArea.innerHTML = emptyLines;
 
-      var errorCount = 0;
-      var errorTextArea = document.getElementById("errorTextArea");
-      errorTextArea_array = errorTextArea.value.split("\n");
-      for (let i = 0; i < errorTextArea_array.length; i++) {
-        console.log(errorTextArea_array[i]);
-        if (errorTextArea_array[i] != "" || errorTextArea_array[i] != undefined) {
-          errorCount += 1;
-        }
-      }
-      if (errorCount == 0) {
-        document.getElementById('errorCount').innerHTML = "Valid";
-      }
-      document.getElementById('errorCount').innerHTML = "No. of Errors: " + (errorCount);
-    })
+    //   var errorCount = 0;
+    //   var errorTextArea = document.getElementById("errorTextArea");
+    //   errorTextArea_array = errorTextArea.value.split("\n");
+    //   for (let i = 0; i < errorTextArea_array.length; i++) {
+    //     console.log(errorTextArea_array[i]);
+    //     if (errorTextArea_array[i] != "" || errorTextArea_array[i] != undefined) {
+    //       errorCount += 1;
+    //     }
+    //   }
+    //   if (errorCount == 0) {
+    //     document.getElementById('errorCount').innerHTML = "Valid";
+    //   }
+    //   document.getElementById('errorCount').innerHTML = "No. of Errors: " + (errorCount);
+    // })
 
     // Update error count
     // $('#errorTextArea').on("change", function() {
@@ -582,3 +591,4 @@ age</textarea></grammarly-editor-plugin>
 </div>
 
 </html>
+

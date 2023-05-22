@@ -5,6 +5,7 @@ import wordninja
 from spellchecker import SpellChecker
 import nltk
 from nltk.corpus import wordnet as wn
+from collections import defaultdict
 
 nltk.download("wordnet")
 
@@ -217,8 +218,8 @@ def checkOAS():
         dictionary = json.loads(result.get("dictionary"))["dictionary"]
         try:
             doc_json = yaml.safe_load(doc)
+        # going to remove the syntax error checks as it is not consistent with ace editor
         except yaml.YAMLError as e: # Catches indentation errors that are not caught by ace editor
-
             if hasattr(e, 'problem_mark'):
                 line = e.problem_mark.line + 1
                 column = e.problem_mark.column + 1

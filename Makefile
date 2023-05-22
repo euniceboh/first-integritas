@@ -34,8 +34,6 @@ clean:
 	rm -rf venv
 	cd src; rm -rf __pycache__
 	cd tests; rm -rf __pycache__
-	
-	
 
 .PHONY: run clean
 
