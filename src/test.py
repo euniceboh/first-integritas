@@ -202,7 +202,6 @@ paths:
 
 
 
-import sys
 import ruamel.yaml
 
 yaml_str = """
@@ -262,17 +261,19 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
         ret_val.lc.col = node.start_mark.column
         return ret_val
 
+def keysInNestedDictionary_recursive(d):
+    keyList = []
+    for key, value in d.items():
+        keyList.append(key)
+        if isinstance(value, dict):
+            keyList.extend(keysInNestedDictionary_recursive(value))
+    return keyList
+
 def main():
   yaml = ruamel.yaml.YAML()
   yaml.Constructor = MyConstructor
 
   doc_json = yaml.load(doc)
-
-  # def get_line_number(key):
-  #   if key in doc_json:
-  #       if doc_json[key] is not None and hasattr(doc_json[key], 'lc'):
-  #           return doc_json[key].lc.line
-  #   return None
 
   openapi = title = description = infoVersion = x_author = x_date = paths = None
   try:
@@ -286,12 +287,17 @@ def main():
   except (TypeError): # If the component is not found, it will be handled by the checkFunctions
       pass
   
+  # keyList = keysInNestedDictionary_recursive(doc_json)
+  # for key in keyList:
+  #     if key == "post":
+  #       print(doc_json[key])
+  print(openapi)
+
   # if openapi == "" or openapi == None:
   #     for key, value in doc_json.items():
   #       print(key.lc.line)
   # else:
   #     print("missing openapi at line" + str(doc_json["openapi"].lc.line))
-
 
   # print(doc_json["openapi"].lc.line)
   # print(doc_json["openapi"].lc.col) # no col for omap keys

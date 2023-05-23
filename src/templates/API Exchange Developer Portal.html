@@ -166,7 +166,7 @@
 
     #loading {
       position: fixed;
-      display: block;
+      display: none;
       width: 100%;
       height: 100%;
       top: 0;
@@ -192,6 +192,10 @@
     #errorTextArea {
       -ms-overflow-style: none;
       scrollbar-width: none;
+    }
+
+    button:active {
+      border: none;
     }
 
 
@@ -230,18 +234,20 @@
           <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 100%;"></textarea>
         </div>
       </div>
-      <div style="margin-top: 10.5cm">
+      <div style="margin-top: 10.5cm; text-align: right;">
         <!-- Upload Feature -->
-        <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; display: inline-block;"/>
-        <button id="fileUploadButton" style="display: inline-block;" onclick=uploadFile()>Upload</button>
+        <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; float: left;"/>
+        <button class = "my-0 px-5 align-self-start" id="fileUploadButton" style="display: inline-block;" onclick=uploadFile()>Upload</button>
         <!-- Save Text to File Feature -->
-        <button id="savefile" onclick="saveFile()">Save to File</button>
+        <button class = "my-0 px-5 align-self-start" id="savefile" style="display: inline-block" onclick="saveFile()">Save to File</button>
         <!-- Check OAS -->
-        <button class="btn noBorder my-0 px-5 align-self-start" id="checkOASButton" style="background-color: rgb(10, 97, 96); color: white; font-size: 1em; text-transform: none; height: auto; padding: 8px 15px; border-radius: 5px; margin-bottom: 5rem;" onclick=extractOAS()>How is my OAS?</button>
-        <!-- Dictionary Text Box -->
-        <p wrap="on" style="margin-bottom: 2rem !important; margin-top: 1rem !important;">Paste dictionary word here (from least important to most important order):</p>
-        <grammarly-editor-plugin contenteditable="true">
-          <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 50%; height: 3cm;">
+        <!-- <button class="btn noBorder my-0 px-5 align-self-start" id="checkOASButton" style="background-color: rgb(10, 97, 96); color: white; font-size: 1em; text-transform: none; height: auto; padding: 8px 15px; border-radius: 5px; margin-bottom: 5rem;" onclick=extractOAS()>How is my OAS?</button> -->
+    </div>
+    <div>
+      <!-- Dictionary Text Box -->
+      <p wrap="on" style="margin-bottom: 2rem !important; margin-top: 1rem !important;">Paste dictionary word here (from least important to most important order):</p>
+      <grammarly-editor-plugin contenteditable="true">
+        <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 50%; height: 3cm;">
 discretionary
 withdrawals
 update
@@ -257,12 +263,19 @@ age</textarea></grammarly-editor-plugin>
     </div>
   </div>
   <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 35%; padding-right: 1cm; ">
-    <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 1.14;" readonly>Error List WIP</textarea>
-    <div class="card text-white bg-success mb-3" style="max-width: 15rem; margin-left: 4cm; margin-top: 0.5cm">
-      <div class="card-body">
-        <p class="card-text" id="errorCount" style="text-align: center;">Valid</p>
+
+    <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 1.14;" readonly></textarea>
+    <div>
+      <div class="card text-white bg-success mb-3" style="width: 100%; max-width: 15rem; margin-left: 1cm; margin-top: 0.5cm; display:inline-block">
+        <div class="card-body">
+          <p class="card-text" id="errorCount" style="text-align: center;">Valid</p>
+        </div>
+      </div>
+      <div style="display: inline-block">
+        <button class="">Next Error</button>
       </div>
     </div>
+    
   </div>
 </div>
 
@@ -333,6 +346,7 @@ age</textarea></grammarly-editor-plugin>
       enableSnippets: true,
       enableLiveAutocompletion: true
     });
+    // editor.session.setOption("useWorker", false); // disables syntax checking
 
     // Sync Scrolling
     $('.ace_scrollbar-v').scroll(function () {
@@ -349,8 +363,6 @@ age</textarea></grammarly-editor-plugin>
         if (file != undefined) {
           var reader = new FileReader();
           reader.onload = function(e) {
-          // var textArea = document.getElementById("oasTextarea");
-          // textArea.value = e.target.result;
           editor.setValue(e.target.result);
           }
           reader.readAsText(file);
@@ -360,7 +372,6 @@ age</textarea></grammarly-editor-plugin>
       }
 
     function saveFile() {
-      // var textArea = document.getElementById("oasTextarea").value;
       var textArea = editor.getValue();
       if (textArea == "") {
         alert("Please input an OAS before saving to file!");
@@ -384,102 +395,51 @@ age</textarea></grammarly-editor-plugin>
 
     // =========================================================================================================================
 
-    // Invoked when the checkOASButton is pressed
-    // function resetErrorPanel() {
-    //   var errorTextArea = document.getElementById("errorTextArea");
-    //   var emptyLines = "";
-    //   var numLines = editor.session.getLength();
-    //   for (let i = 0; i < numLines-1; i++) {
-    //     emptyLines += i+1;
-    //     emptyLines += "\n";
-    //   }
-    //   errorTextArea.value = emptyLines;
-    // }
+    // Updates error counter
+    function updateErrorCounter() {
+      var errorCount = 0;
+      var errorPanel = document.getElementById("errorTextArea").innerHTML;
+      
+      errorTextArea_array = errorPanel.split("\n");
+      for (let i = 0; i < errorTextArea_array.length; i++) {
+        if (errorTextArea_array[i] != "") {
+          errorCount += 1;
+        }
+      }
+
+      if (errorCount == 0) {
+        document.getElementById('errorCount').innerHTML = "Valid";
+      } else {
+        document.getElementById('errorCount').innerHTML = "No. of Errors: " + (errorCount);
+      }
+    }
 
     // Real-time side panel refresh by posting to backend
     // Using debounce concept to buffer each post request
     var debounce = null;
     editor.getSession().on("change", function (e) {
       clearTimeout(debounce);
-      debounce = setTimeout(function () {
-        alert("test");
-      }, 1000);
-    });
-    // editor.getSession().on("change", function() {
-    //   var errorTextArea = document.getElementById("errorTextArea");
-    //   errorTextArea_array = errorTextArea.value.split("\n");
-    //   // console.log(errorTextArea_array);
-
-    //   // editor.getSession().setAnnotations(syntaxErrors.concat(customAnnotations))
-    //   var emptyLines = "";
-    //   var numLines = editor.session.getLength();
-    //   for (let i = 0; i < numLines-1; i++) {
-    //     emptyLines += i+1;
-    //     emptyLines += "\n";
-    //   }
-    //   errorTextArea.innerHTML = emptyLines;
-
-    //   var errorCount = 0;
-    //   var errorTextArea = document.getElementById("errorTextArea");
-    //   errorTextArea_array = errorTextArea.value.split("\n");
-    //   for (let i = 0; i < errorTextArea_array.length; i++) {
-    //     console.log(errorTextArea_array[i]);
-    //     if (errorTextArea_array[i] != "" || errorTextArea_array[i] != undefined) {
-    //       errorCount += 1;
-    //     }
-    //   }
-    //   if (errorCount == 0) {
-    //     document.getElementById('errorCount').innerHTML = "Valid";
-    //   }
-    //   document.getElementById('errorCount').innerHTML = "No. of Errors: " + (errorCount);
-    // })
-
-    // Update error count
-    // $('#errorTextArea').on("change", function() {
-    //   var errorCount = 0;
-    //   var errorTextArea = document.getElementById("errorTextArea");
-    //   errorTextArea_array = errorTextArea.value.split("\n");
-    //   console.log(errorTextArea_array);
-    //   for (let i = 0; i < errorTextArea_array.length; i++) {
-    //     console.log(errorTextArea_array[i]);
-    //     if (errorTextArea_array[i] != "" || errorTextArea_array[i] != undefined) {
-    //       errorCount += 1;
-    //     }
-    //   }
-    //   document.getElementById('errorCount').innerHTML = "Errors: " + str(errorCount);
-    // })
-
-    function extractOAS() {
-      // $(document).ready(function() {
-      //   $('#checkOASButton').unbind('click').on('click', function(e) {
+      debounce = setTimeout(function extractOAS () {
+          // $(document).ready(function() {
+          // $('#checkOASButton').unbind('click').on('click', function(e) {
           
-      //     e.preventDefault();
-      //     e.stopImmediatePropagation();
+          // e.preventDefault();
+          // e.stopImmediatePropagation();
 
-          // var data = $('#oasTextarea').val();
           var data = editor.getValue();
-          if (data == "" || data == undefined) {
-            alert("Please input an OAS!");
+          if (data.trim() == "" || data == undefined) {
             return;
           }
-
-          resetErrorPanel();
-
-
-          var dictionaryWords = $('#oasDictionaryArea').val().split(/\r?\n/);
-          var dictionaryWordsDictionary = {dictionary: dictionaryWords};
-          dictionary = JSON.stringify(dictionaryWordsDictionary);
 
           // Catches one indentation error at a time
           // Make sure user handles all indentation errors before checking OAS
           // Shows and highlights rows with indentation errors in editor and side panel
           var syntaxErrors = editor.getSession().getAnnotations();
           if (syntaxErrors.length != 0) {
-            alert("YAML Syntax Error! Please check for indentation before checking OAS.");
             line = syntaxErrors[0]["row"];
             errorText = syntaxErrors[0]["text"];
             errorType = syntaxErrors[0]["type"];
-            editor.gotoLine(line);
+            editor.gotoLine(line); // thinking about how to improve this
             var highlightRange = new Range(line, 0, line, 300);
             editor.selection.setRange(highlightRange);
             editor.session.addMarker(highlightRange, "error", "text");
@@ -535,6 +495,11 @@ age</textarea></grammarly-editor-plugin>
           // session.getLine(line) --> Gets the string value of the line at line <line>
           // session.getLines(line1, line2) --> Gets the string values of line 1 and line 2 
           // gotoLine(line) --> Scrolls the screen down to line <line>
+
+          
+          var dictionaryWords = $('#oasDictionaryArea').val().split(/\r?\n/);
+          var dictionaryWordsDictionary = {dictionary: dictionaryWords};
+          dictionary = JSON.stringify(dictionaryWordsDictionary);
           
           $('#loading').show();
           
@@ -547,39 +512,59 @@ age</textarea></grammarly-editor-plugin>
             url: '/checkOAS',
             success: function(response) {
               $('#loading').hide();
-              oasSuccessModal = $('#oasSuccess');
-              oasSuccessModal.find('.modal-body').html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>`);
-              oasSuccessModal.find('.modal-body').append("There are no additional errors found");
-              oasSuccessModal.modal("show");
+              // oasSuccessModal = $('#oasSuccess');
+              // oasSuccessModal.find('.modal-body').html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>`);
+              // oasSuccessModal.find('.modal-body').append("There are no additional errors found");
+              // oasSuccessModal.modal("show");
+
+              // fill with empty lines in error side panel
+              var errorTextArea = document.getElementById("errorTextArea");
+              var numLines = editor.session.getLength();
+              var emptyLines = "\n".repeat(numLines - 1);
+              errorTextArea.innerHTML = emptyLines;
             },
             error: function(response) {
               $('#loading').hide();
-              listErrors = response["responseJSON"]["errors"];
+              var listErrors = response["responseJSON"]["errors"];
+              var dictErrors = {};
               
-              oasErrorModal = $('#oasErrors');
-              oasErrorModal.find('.styled-table tbody').empty();
+              // oasErrorModal = $('#oasErrors');
+              // oasErrorModal.find('.styled-table tbody').empty();
               for (let i = 0; i < listErrors.length; i++){
-                oasErrorModal.find('.styled-table tbody').append(`<tr>
-                                                            <td scope="row">`+(i+1)+`</th>
-                                                            <td>`+(listErrors[i])+`</td>
-                                                          </tr>
-                                                        `);
+                var errorText = listErrors[i][0];
+                var errorLine = listErrors[i][1];
+                var errorColumn = listErrors[i][2];
+                // oasErrorModal.find('.styled-table tbody').append(`<tr>
+                //                                             <td scope="row">`+(errorLine)+`</th>
+                //                                             <td>`+(errorText)+`</td>
+                //                                           </tr>
+                //                                         `);
+                dictErrors[errorLine] = [errorText, errorColumn];
               }
-              oasErrorModal.modal("show");
+              // oasErrorModal.modal("show");
+
+              // fill lines without errors with empty lines while those with with error description
+              var errorTextArea = document.getElementById("errorTextArea");
+              var emptyLines = "";
+              var numLines = editor.session.getLength();
+              for (let i = 0; i < numLines; i++) {
+                if (dictErrors[i] != undefined) {
+                  emptyLines += `${dictErrors[i][0]} @ line number ${i + 1}`;
+
+                } 
+                if (i == numLines - 1) {
+                  break;
+                }
+                emptyLines += "\n";
+              }
+              errorTextArea.innerHTML = emptyLines;
+            },
+            complete: function() {
+              updateErrorCounter();
             }
           });
-          
-          
-
-      //   });
-      // })
-    }
-
-    $(window).on('load', function() {
-      $('#loading').hide();
+      }, 1500);
     });
-
-
   </script>
     
 <script src="/static/js/kong.utils.js.download"></script>
