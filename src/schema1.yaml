@@ -1,0 +1,210 @@
+type: map
+mapping:
+  openapi:
+    type: str
+    enum: ['2.0', '3.0.0', '3.0.3', '3.1.0']
+    required: true
+  info:
+    type: map
+    required: true
+    mapping:
+      title:
+        type: str
+        required: true
+      description:
+        type: str
+        required: true
+      version:
+        type: str
+        required: true
+      x-author:
+        type: str
+        required: true
+      x-date:
+        type: date
+        required: true
+  paths:
+    type: map
+    required: true
+    mapping:
+      regex;():
+        type: map
+        mapping:
+          # get:
+          #  type: map
+          #   mapping:
+          #     requestBody:
+          #       type: map
+          #       mapping:
+          #         content:
+          #           type: map
+          #           mapping:
+          #             application/json:
+          #               type: map
+          #               mapping:
+          #                 schema:
+          #                   type: map
+          #                   mapping:
+          #                     type:
+          #                       type: str
+          #                     properties:
+          #                       type: map
+          #                       mapping:
+          #                         Section:
+          #                           type: map
+          #                           mapping:
+          #                             type:
+          #                               type: str
+          #                             description:
+          #                               type: str
+          #                             properties:
+          #                               type: map
+          #                               mapping:
+          #                                 regex;():
+          #                                   type: map
+          #                                   mapping:
+          #                                     type: 
+          #                                       type: str
+          #                                       enum: ['any', 'string', 'boolean', 'date', 'float', 'int']
+          #                                     description:
+          #                                       type: str
+          #                                     example:
+          #                                       type: str
+          #                                     minLength:
+          #                                       type: int
+          #                                     maxLength:
+          #                                       type: int
+          #                             required:
+          #                               type: seq
+          #                               sequence:
+          #                                 - type: str
+          #                     required:
+          #                       type: seq
+          #                       sequence:
+          #                         - type: str
+          post: 
+            type: map
+            mapping:
+              requestBody:
+                type: map
+                required: true
+                mapping:
+                  content:
+                    type: map
+                    required: true
+                    mapping:
+                      application/json:
+                        type: map
+                        required: true
+                        mapping:
+                          schema:
+                            type: map
+                            required: true
+                            mapping:
+                              type:
+                                type: str
+                                required: true
+                              properties:
+                                type: map
+                                mapping:
+                                  Section:
+                                    type: map
+                                    mapping:
+                                      type:
+                                        type: str
+                                        required: true
+                                      description:
+                                        type: str
+                                      properties:
+                                        type: map
+                                        mapping:
+                                          regex;():
+                                            type: map
+                                            mapping:
+                                              type: 
+                                                type: str
+                                                enum: ['any', 'string', 'boolean', 'date', 'float', 'int']
+                                                required: true
+                                              description:
+                                                type: str
+                                                required: true
+                                              example:
+                                                type: str
+                                                required: true
+                                              minLength:
+                                                type: int
+                                              maxLength:
+                                                type: int
+                                      required:
+                                        type: seq
+                                        sequence:
+                                          - type: str
+                              required:
+                                type: seq
+                                sequence:
+                                  - type: str
+              responses:
+                type: map
+                required: true
+                mapping:
+                  '200':
+                    type: map
+                    mapping:
+                      description:
+                        type: str
+                        required: true
+                      content:
+                        type: map
+                        mapping:
+                          application/json:
+                            type: map
+                            mapping:
+                              schema:
+                                type: map
+                                mapping:
+                                  type:
+                                    type: str
+                                    required: true
+                                  properties:
+                                    type: map
+                                    mapping:
+                                      Section:
+                                        type: map
+                                        mapping:
+                                          type:
+                                            type: str
+                                            required: true
+                                          description:
+                                            type: str
+                                          properties:
+                                            type: map
+                                            mapping:
+                                              programId:
+                                                type: str
+                                                required: true
+                                              userId:
+                                                type: str
+                                              accountNumber:
+                                                type: str
+                                                required: true
+                                              electronicFormTransactionNumber:
+                                                type: str
+                                                required: true
+                                              creditStatusTag:
+                                                type: str
+                                                required: true
+                                              ocbcTransactionNumber:
+                                                type: str
+                                                required: true
+                                              ocbcReturnCode:
+                                                type: str
+                                                required: true
+                                              returnCode:
+                                                type: str
+                                                required: true
+                                              returnMessage:
+                                                type: str
+                                                required: true
+                                              guid:
+                                                type: str
+                                                required: true

@@ -29,6 +29,7 @@ def errorPage(my_path):
 Checks to do:
 - Check subtier words not using short forms
     E.g., /api/IND/FRM_IND_GetMbrDPSInfo --> /api/IND/FRM_IND_GetMemberPolicyInformation
+- Auto spelling check and correction for all words in the yaml?
 '''
 def checkOpenapi(openapi):
     if openapi == "" or openapi == None:
@@ -257,7 +258,7 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
 def checkOAS():
     if request.method == 'POST':
         result = request.form
-        listErrors = [] # storing tuple of (error_message, line number, column number (for non missing fields))
+        listErrors = [] # storing tuple of (error_message, line number, column number)
         yaml = ruamel.yaml.YAML()
         yaml.Constructor = MyConstructor
 
@@ -265,7 +266,6 @@ def checkOAS():
         dictionary = json.loads(result.get("dictionary"))["dictionary"]
         try:
             doc_json = yaml.load(doc)
-        # going to remove the syntax error checks as it is not consistent with ace editor
         except (ruamel.yaml.parser.ParserError) as e: # Catches syntax errors that are not caught by ace editor
             # if hasattr(e, 'problem_mark'):
             #     line = e.problem_mark.line + 1
@@ -275,23 +275,31 @@ def checkOAS():
             #     listErrors.append(f'YAML parsing error: {e}')
             payload = {"message": "Has errors", "errors": [("Syntax error!", 0, 0)]}
             return make_response(jsonify(payload), 400)
+        
+        # Check for any missing value
+        keyValueList = flattenDict(doc_json)
+        for node in keyValueList:
+            if node[1] == None:
+                listErrors.append(("Missing value", node[0].lc.line, -1))
 
         # Components of the YAML file that are checked; possibly to add more according to OAS 3.0
         # Possible to use Schemas to check with PYYAML, but then it will be one error caught at a time
-        # Thus, we manually check each component
-        openapi = title = description = infoVersion = x_author = x_date = paths = None
+        # Thus, we manually check each field
+        openapi = info = title = description = infoVersion = x_author = x_date = paths = None
         try:
             openapi = doc_json["openapi"]
+            info = doc_json["info"]
+            paths = list(doc_json["paths"])
+
             title = doc_json["info"]["title"]
             description = doc_json["info"]["description"]
             infoVersion = doc_json["info"]["version"]
             x_author = doc_json["info"]["x-author"]
             x_date = doc_json["info"]["x-date"]
-            paths = list(doc_json["paths"])
-        except (TypeError): # If the component is not found, it will be handled by the checkFunctions
+        except (TypeError): # If the component is not found, it will be handled by the check functions
             pass
         
-        # Check for missing OpenAPI version
+        # Check for missing OpenAPI version field
         if not checkOpenapi(openapi):
             flag = 0
             for key in doc_json.keys():
@@ -454,13 +462,29 @@ def checkOAS():
         render_template('404.html')
 
 # Utils
-def keysInNestedDictionary_recursive(d):
-    keyList = []
+def flattenDict(d):
+    keyValueList = []
     for key, value in d.items():
-        keyList.append(key)
+        if value == None:
+            keyValueList.append((key, None))
+        else:
+            keyValueList.append((key, value))
         if isinstance(value, dict):
-            keyList.extend(keysInNestedDictionary_recursive(value))
-    return keyList
+            keyValueList.extend(flattenDict(value))
+    return keyValueList
+
+def is_key_nested(dictionary, parent_key, nested_key):
+    if parent_key in dictionary and nested_key in dictionary[parent_key]:
+        return True
+    
+    for value in dictionary.values():
+        if isinstance(value, dict):
+            if is_key_nested(value, parent_key, nested_key):
+                return True
+            elif nested_key in value:
+                return True
+    
+    return False
 
 def splitSubtierWords(subtier: str):
     words = wordninja.split(subtier)

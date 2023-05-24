@@ -272,7 +272,7 @@ age</textarea></grammarly-editor-plugin>
         </div>
       </div>
       <div style="display: inline-block">
-        <button class="">Next Error</button>
+        <button id="errorScroller">Next Error</button>
       </div>
     </div>
     
@@ -547,6 +547,7 @@ age</textarea></grammarly-editor-plugin>
               var errorTextArea = document.getElementById("errorTextArea");
               var emptyLines = "";
               var numLines = editor.session.getLength();
+              // TODO: Check for errors on the same line and combine the error description
               for (let i = 0; i < numLines; i++) {
                 if (dictErrors[i] != undefined) {
                   emptyLines += `${dictErrors[i][0]} @ line number ${i + 1}`;
@@ -565,6 +566,10 @@ age</textarea></grammarly-editor-plugin>
           });
       }, 1500);
     });
+
+    $('#errorScroller').on('click', function () {
+      return;
+    })
   </script>
     
 <script src="/static/js/kong.utils.js.download"></script>

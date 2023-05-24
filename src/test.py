@@ -1,8 +1,9 @@
 import yaml
 from collections import defaultdict
+from pykwalify.core import Core
 
 doc = '''
-openapi:
+openapi: 3.0.0
 info:
   title: Update Crediting Status of 55 WDL Application PayNow
   description: This API is to update the crediting status of the member's 55 WDL Application for PayNow
@@ -46,7 +47,7 @@ paths:
                       maxLength: 16
                     creditStatusTag:
                       type: string
-                      description: Credit Status Tag
+                      description: 
                       example: 'Y'
                       maxLength: 1
                     ocbcTransactionNumber:
@@ -150,6 +151,63 @@ paths:
                 required:
                   - Section'''
 
+schema = '''
+type: map
+mapping:
+  openapi:
+    type: str
+    required: true
+  info:
+    type: map
+    mapping:
+      title:
+        type: str
+        required: true
+      description:
+        type: str
+        required: true
+      version:
+        type: str
+        required: true
+      x-author:
+        type: str
+      x-date:
+        type: str
+    required: true
+  paths:
+    type: map
+    mapping:
+      .*:
+        type: map
+        mapping:
+          .*:
+            type: map
+            mapping:
+              .*:
+                type: map
+                mapping:
+                  .*:
+                    type: map
+                    mapping:
+                      .*:
+                        type: map
+                        mapping:
+                          .*:
+                            type: map
+                            mapping:
+                              type:
+                                type: str
+                                required: true
+                              description:
+                                type: str
+                              properties:
+                                type: map
+                                mapping:
+                                  .*:
+                                    type: any
+    required: true
+'''
+
 # def process_yaml_string(yaml_string):
 #     lines = yaml_string.split("\n")
 #     line_mapping = defaultdict(list)
@@ -197,9 +255,29 @@ paths:
 
 # process_yaml_string(doc)
 
+def flattenDict(d):
+    keyValueList = []
+    for key, value in d.items():
+        if value == None:
+            keyValueList.append((key, None))
+        else:
+            keyValueList.append((key, value))
+        if isinstance(value, dict):
+            keyValueList.extend(flattenDict(value))
+    return keyValueList
 
-
-
+def is_key_nested(dictionary, parent_key, nested_key):
+    if parent_key in dictionary and nested_key in dictionary[parent_key]:
+        return True
+    
+    for value in dictionary.values():
+        if isinstance(value, dict):
+            if is_key_nested(value, parent_key, nested_key):
+                return True
+            elif nested_key in value:
+                return True
+    
+    return False
 
 
 import ruamel.yaml
@@ -261,37 +339,29 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
         ret_val.lc.col = node.start_mark.column
         return ret_val
 
-def keysInNestedDictionary_recursive(d):
-    keyList = []
-    for key, value in d.items():
-        keyList.append(key)
-        if isinstance(value, dict):
-            keyList.extend(keysInNestedDictionary_recursive(value))
-    return keyList
-
 def main():
   yaml = ruamel.yaml.YAML()
   yaml.Constructor = MyConstructor
 
   doc_json = yaml.load(doc)
 
-  openapi = title = description = infoVersion = x_author = x_date = paths = None
-  try:
-      openapi = doc_json["openapi"]
-      title = doc_json["info"]["title"]
-      description = doc_json["info"]["description"]
-      infoVersion = doc_json["info"]["version"]
-      x_author = doc_json["info"]["x-author"]
-      x_date = doc_json["info"]["x-date"]
-      paths = list(doc_json["paths"])
-  except (TypeError): # If the component is not found, it will be handled by the checkFunctions
-      pass
+  # openapi = title = description = infoVersion = x_author = x_date = paths = None
+  # try:
+  #     openapi = doc_json["openapi"]
+  #     title = doc_json["info"]["title"]
+  #     description = doc_json["info"]["description"]
+  #     infoVersion = doc_json["info"]["version"]
+  #     x_author = doc_json["info"]["x-author"]
+  #     x_date = doc_json["info"]["x-date"]
+  #     paths = list(doc_json["paths"])
+  # except (TypeError): # If the component is not found, it will be handled by the checkFunctions
+  #     pass
   
   # keyList = keysInNestedDictionary_recursive(doc_json)
   # for key in keyList:
   #     if key == "post":
   #       print(doc_json[key])
-  print(openapi)
+  # print(flattenDict(doc_json))
 
   # if openapi == "" or openapi == None:
   #     for key, value in doc_json.items():
@@ -301,6 +371,13 @@ def main():
 
   # print(doc_json["openapi"].lc.line)
   # print(doc_json["openapi"].lc.col) # no col for omap keys
+
+  c = Core(source_file="template1.yaml", schema_files=["schema1.yaml"])
+  c.validate()
+  errors = c.errors
+  if errors:
+      for error in errors:
+          print(error)
 
 if __name__ == "__main__":
     main()
