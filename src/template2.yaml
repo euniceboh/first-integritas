@@ -1,6 +1,7 @@
 openapi: 3.0.0
 info:
   title: Agecheckfor55WDL 
+  version: 1.1.1
   description: |
     ### To check age eligibility for 55 WDL.
     The service shall validate member's CPF account number and Birth date.
@@ -18,7 +19,6 @@ info:
     | 1.0.2   | 2022-04-09| change xxxxx for xxxxxxx            |
     | 1.1.0   | 2022-07-04| change xxxxx for xxxxxxx            |
     | 1.1.1   | 2022-10-05| change xxxxx for xxxxxxx            |
-  version: 1.1.1
   x-author: MS1
   x-date: 2023-03-01
   x-searchKeywords: 55WDL

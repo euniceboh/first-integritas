@@ -13,78 +13,28 @@ mapping:
         required: true
       description:
         type: str
-        required: true
       version:
         type: str
         required: true
       x-author:
         type: str
-        required: true
       x-date:
         type: date
-        required: true
+      regex;():
+        type: str
   paths:
     type: map
     required: true
     mapping:
-      regex;():
+      regex;(/): # check path
         type: map
+        required: true
         mapping:
-          # get:
-          #  type: map
-          #   mapping:
-          #     requestBody:
-          #       type: map
-          #       mapping:
-          #         content:
-          #           type: map
-          #           mapping:
-          #             application/json:
-          #               type: map
-          #               mapping:
-          #                 schema:
-          #                   type: map
-          #                   mapping:
-          #                     type:
-          #                       type: str
-          #                     properties:
-          #                       type: map
-          #                       mapping:
-          #                         Section:
-          #                           type: map
-          #                           mapping:
-          #                             type:
-          #                               type: str
-          #                             description:
-          #                               type: str
-          #                             properties:
-          #                               type: map
-          #                               mapping:
-          #                                 regex;():
-          #                                   type: map
-          #                                   mapping:
-          #                                     type: 
-          #                                       type: str
-          #                                       enum: ['any', 'string', 'boolean', 'date', 'float', 'int']
-          #                                     description:
-          #                                       type: str
-          #                                     example:
-          #                                       type: str
-          #                                     minLength:
-          #                                       type: int
-          #                                     maxLength:
-          #                                       type: int
-          #                             required:
-          #                               type: seq
-          #                               sequence:
-          #                                 - type: str
-          #                     required:
-          #                       type: seq
-          #                       sequence:
-          #                         - type: str
-          post: 
+          regex;(): # check operation object
             type: map
             mapping:
+              deprecated: 
+                type: bool
               requestBody:
                 type: map
                 required: true
@@ -106,9 +56,29 @@ mapping:
                                 required: true
                               properties:
                                 type: map
+                                required: false
                                 mapping:
+                                  regex;():
+                                    type: map
+                                    mapping:
+                                      type: 
+                                        type: str
+                                        enum: ['any', 'string', 'boolean', 'date', 'float', 'int']
+                                        required: true
+                                      enum:
+                                        type: any
+                                      description:
+                                        type: str
+                                        required: true
+                                      example:
+                                        type: str
+                                      minLength:
+                                        type: int
+                                      maxLength:
+                                        type: int
                                   Section:
                                     type: map
+                                    required: false
                                     mapping:
                                       type:
                                         type: str
@@ -125,12 +95,13 @@ mapping:
                                                 type: str
                                                 enum: ['any', 'string', 'boolean', 'date', 'float', 'int']
                                                 required: true
+                                              enum:
+                                                type: any
                                               description:
                                                 type: str
                                                 required: true
                                               example:
                                                 type: str
-                                                required: true
                                               minLength:
                                                 type: int
                                               maxLength:
@@ -147,7 +118,7 @@ mapping:
                 type: map
                 required: true
                 mapping:
-                  '200':
+                  regex;(^[1-5]\d{2}$):
                     type: map
                     mapping:
                       description:
@@ -159,6 +130,20 @@ mapping:
                           application/json:
                             type: map
                             mapping:
+                              examples:
+                                type: map
+                                mapping:
+                                  regex;():
+                                    type: map
+                                    mapping:
+                                      summary:
+                                        type: str
+                                      description:
+                                        type: str
+                                      value:
+                                        type: any
+                                      externalValue:
+                                        type: str
                               schema:
                                 type: map
                                 mapping:
@@ -168,8 +153,27 @@ mapping:
                                   properties:
                                     type: map
                                     mapping:
+                                      regex;():
+                                        type: map
+                                        mapping:
+                                          type: 
+                                            type: str
+                                            enum: ['any', 'string', 'boolean', 'date', 'float', 'int']
+                                            required: true
+                                          enum:
+                                            type: any
+                                          description:
+                                            type: str
+                                            required: true
+                                          example:
+                                            type: str
+                                          minLength:
+                                            type: int
+                                          maxLength:
+                                            type: int
                                       Section:
                                         type: map
+                                        required: false
                                         mapping:
                                           type:
                                             type: str
@@ -179,32 +183,29 @@ mapping:
                                           properties:
                                             type: map
                                             mapping:
-                                              programId:
-                                                type: str
-                                                required: true
-                                              userId:
-                                                type: str
-                                              accountNumber:
-                                                type: str
-                                                required: true
-                                              electronicFormTransactionNumber:
-                                                type: str
-                                                required: true
-                                              creditStatusTag:
-                                                type: str
-                                                required: true
-                                              ocbcTransactionNumber:
-                                                type: str
-                                                required: true
-                                              ocbcReturnCode:
-                                                type: str
-                                                required: true
-                                              returnCode:
-                                                type: str
-                                                required: true
-                                              returnMessage:
-                                                type: str
-                                                required: true
-                                              guid:
-                                                type: str
-                                                required: true
+                                              regex;():
+                                                type: map
+                                                mapping:
+                                                  type: 
+                                                    type: str
+                                                    enum: ['any', 'string', 'boolean', 'date', 'float', 'int']
+                                                    required: true
+                                                  enum:
+                                                    type: any
+                                                  description:
+                                                    type: str
+                                                    required: true
+                                                  example:
+                                                    type: str
+                                                  minLength:
+                                                    type: int
+                                                  maxLength:
+                                                    type: int
+                                          required:
+                                            type: seq
+                                            sequence:
+                                              - type: str
+                                  required:
+                                    type: seq
+                                    sequence:
+                                      - type: str

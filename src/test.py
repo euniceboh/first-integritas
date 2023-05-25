@@ -1,14 +1,16 @@
+import re
 import yaml
 from collections import defaultdict
 from pykwalify.core import Core
+from pykwalify.errors import SchemaError
 
 doc = '''
-openapi: 3.0.0
+openapi: 
 info:
-  title: Update Crediting Status of 55 WDL Application PayNow
+  title: 
   description: This API is to update the crediting status of the member's 55 WDL Application for PayNow
   version: 1.0.0
-  x-author: Jennylyn Sze
+  x-author: 
   x-date: '2022-12-22'
 
 paths:
@@ -25,7 +27,7 @@ paths:
                   description: The main request body
                   properties:
                     programId:
-                      type: string
+                      type: double
                       description: Program ID of the consumer
                       example: 'ESERVICE'
                       minLength: 1
@@ -47,7 +49,7 @@ paths:
                       maxLength: 16
                     creditStatusTag:
                       type: string
-                      description: 
+                      description: Credit Status Tag
                       example: 'Y'
                       maxLength: 1
                     ocbcTransactionNumber:
@@ -76,7 +78,7 @@ paths:
               required:
                 - Section
       responses:
-        '200':
+        '600':
           description: Successfully called the API to update credit status of Member's 55 WDL Application for PayNow. This can include application and data error.
           content:
             application/json:
@@ -150,110 +152,6 @@ paths:
                         - guid
                 required:
                   - Section'''
-
-schema = '''
-type: map
-mapping:
-  openapi:
-    type: str
-    required: true
-  info:
-    type: map
-    mapping:
-      title:
-        type: str
-        required: true
-      description:
-        type: str
-        required: true
-      version:
-        type: str
-        required: true
-      x-author:
-        type: str
-      x-date:
-        type: str
-    required: true
-  paths:
-    type: map
-    mapping:
-      .*:
-        type: map
-        mapping:
-          .*:
-            type: map
-            mapping:
-              .*:
-                type: map
-                mapping:
-                  .*:
-                    type: map
-                    mapping:
-                      .*:
-                        type: map
-                        mapping:
-                          .*:
-                            type: map
-                            mapping:
-                              type:
-                                type: str
-                                required: true
-                              description:
-                                type: str
-                              properties:
-                                type: map
-                                mapping:
-                                  .*:
-                                    type: any
-    required: true
-'''
-
-# def process_yaml_string(yaml_string):
-#     lines = yaml_string.split("\n")
-#     line_mapping = defaultdict(list)
-
-#     # Track positions of each line occurrence within the YAML string
-#     position_mapping = {}
-#     current_position = 0
-#     for line_number, line in enumerate(lines, start=1):
-#         line_mapping[line].append(line_number)
-#         position_mapping[line_number] = current_position
-#         current_position += len(line) + 1
-
-#     print(line_mapping)
-#     print(position_mapping)
-
-#     try:
-#         parsed_yaml = yaml.safe_load(yaml_string)
-#     except yaml.YAMLError as e: # Syntax errors
-#         if hasattr(e, 'problem_mark'):
-#             mark = e.problem_mark
-#             error_position = position_mapping[mark.line + 1] + mark.column
-#             line_number = next( # keeps track of the next item to return in an iteratable without the use of index
-#                 line_number for line_number, position in position_mapping.items() if position >= error_position
-#             )
-#             error_lines = line_mapping[lines[line_number - 1]]
-#             print(f"YAML parsing error on line(s) {', '.join(map(str, error_lines))}: {lines[line_number - 1]}")
-#         else: # uncaught errors by pyyaml
-#             print("YAML parsing error:", e)
-    
-#     # Other checks
-#     openapi = title = description = infoVersion = x_author = x_date = paths = None
-#     try:
-#         openapi = parsed_yaml["openapi"]
-#         title = parsed_yaml["info"]["title"]
-#         description = parsed_yaml["info"]["description"]
-#         infoVersion = parsed_yaml["info"]["version"]
-#         x_author = parsed_yaml["info"]["x-author"]
-#         x_date = parsed_yaml["info"]["x-date"]
-#         paths = list(parsed_yaml["paths"])
-#     except (TypeError): # If the component is not found, it will be handled by the checkFunctions
-#         pass
-    
-#     if openapi == "" or openapi == None:
-        
-
-# process_yaml_string(doc)
 
 def flattenDict(d):
     keyValueList = []
@@ -338,6 +236,63 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
         ret_val.lc.line = node.start_mark.line
         ret_val.lc.col = node.start_mark.column
         return ret_val
+    
+def getLineNumberFromPath(doc, path):
+    if path == "":
+        return True
+    keysArray = path.split("/")
+
+    for i in range(len(keysArray)):
+        for j in range(i, len(keysArray)):
+            key = "/".join([keysArray[x] for x in range(i, j + 1)])
+            try:
+                new_doc = doc[key]
+            except:
+                continue
+            new_keysArray = keysArray.copy()
+            new_keysArray = new_keysArray[:i] + new_keysArray[(j + 1):]
+            new_path = "/".join(new_keysArray)
+            res = getLineNumberFromPath(new_doc, new_path)
+            if res == True:
+                try:
+                    return doc[key].lc.line
+                except:
+                    return doc.lc.line
+            elif res != False:
+                return res
+    return False
+
+def parse_error(error):
+    # Extract the error path using regular expression
+    path_regex = r": '([^']*)'"
+    path_match = re.search(path_regex, error)
+    if path_match:
+        error_path = path_match.group(1)
+    else:
+        error_path = ""
+
+    # Extract the error message by removing the path from the error
+    error_message = re.sub(path_regex, "", error).strip()
+
+    # Check if the error message contains enum information
+    enum_regex = r"Enum: \[(.+)\]"
+    enum_match = re.search(enum_regex, error_message)
+    if enum_match:
+        enum_values = enum_match.group(1)
+        error_message = re.sub(enum_regex, "", error_message).strip()
+        return error_path, error_message, enum_values
+
+    # Check if the error message contains regex validation error
+    regex_error_regex = r"Key '(.+)' does not match any regex '(.+)'\."
+    regex_error_match = re.search(regex_error_regex, error_message)
+    if regex_error_match:
+        key = regex_error_match.group(1)
+        regex = regex_error_match.group(2)
+        error_message = f"Key '{key}' does not match regex '{regex}'."
+        return error_path, error_message, None
+
+    return error_path, error_message, None
+
 
 def main():
   yaml = ruamel.yaml.YAML()
@@ -372,12 +327,37 @@ def main():
   # print(doc_json["openapi"].lc.line)
   # print(doc_json["openapi"].lc.col) # no col for omap keys
 
-  c = Core(source_file="template1.yaml", schema_files=["schema1.yaml"])
-  c.validate()
-  errors = c.errors
-  if errors:
-      for error in errors:
-          print(error)
+
+  try:
+    c = Core(source_data=doc_json, schema_files=["schema1.yaml"])
+    c.validate()
+  except SchemaError as e:
+      errors = e.msg
+      for error in errors.split("\n")[1:]:
+          error_path, error_message, enum_values = parse_error(error)
+          print("Error Path:", error_path)
+          print("Error line", getLineNumberFromPath(doc_json, error_path))
+          print("Error Message:", error_message)
+          print()
+      # for entry in e.args:
+      #   if isinstance(entry, SchemaError.SchemaErrorEntry):
+      #       # Access properties of the SchemaErrorEntry
+      #       msg = entry.msg
+      #       path = entry.path
+      #       value = entry.value
+      #       # Do something with the properties
+      #       print(f"Message: {msg}")
+      #       print(f"Path: {path}")
+      #       print(f"Value: {value}")
+          
+          
+          
+
+  
+  # path = "/paths//discretionaryWithdrawals/55Withdrawals/v1/updateMemberCreditStatusForPayNow/post/responses/200/content/application/json/schema/properties/Section/properties/programId/type"
+  
+  # print(getLineNumberFromPath(doc_json, path[1:]))
+
 
 if __name__ == "__main__":
     main()
