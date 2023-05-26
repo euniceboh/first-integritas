@@ -283,8 +283,21 @@ def checkOAS():
                 error_line = getLineNumberFromPath(doc_json, error_path)
                 if error_path == "":
                     error_line = 0
-                print(error_line)
                 listErrors.append((error_message, error_line, -1))
+        
+        # Path checks
+        # try:
+            
+        # except:
+        #     pass
+
+
+        # Check for duplicate dictionary words
+        duplicateDictWords = checkDuplicateDict(dictionary)
+        if len(duplicateDictWords) > 0:
+            listErrors.append("The following word(s) are repeated in the dictionary text box: " + ", ".join(duplicateDictWords)) 
+
+
         
         
         if len(listErrors) == 0:
@@ -572,27 +585,43 @@ def parse_error(error):
     else:
         error_path = ""
 
-    # Extract the error message by removing the path from the error
+    # Extract the error message by removing the path from the error and some additional processing
     error_message = re.sub(path_regex, "", error).strip()
 
     # Check if the error message contains enum information
+    enum_values = None
     enum_regex = r"Enum: \[(.+)\]"
     enum_match = re.search(enum_regex, error_message)
     if enum_match:
         enum_values = enum_match.group(1)
         error_message = re.sub(enum_regex, "", error_message).strip()
-        return error_path, error_message, enum_values
 
     # Check if the error message contains regex validation error
     regex_error_regex = r"Key '(.+)' does not match any regex '(.+)'\."
     regex_error_match = re.search(regex_error_regex, error_message)
     if regex_error_match:
         key = regex_error_match.group(1)
-        regex = regex_error_match.group(2)
-        error_message = f"Key '{key}' does not match regex '{regex}'."
-        return error_path, error_message, None
+        regex = regex_error_match.group(2) # can do some specification based on regex
+        error_message = f"Key '{key}' invalid value."
+    
+    # Additional processing
+    if "Path ." in error_message:
+      error_message = error_message.replace("Path .", "")
+    if "Path." in error_message:
+      error_message = error_message.replace("Path.", "")
+    if "required.novalue" in error_message:
+      property = error_path.split("/")[-1]
+      error_message = f"Should have required value '{property}'"
+    
+    # Additional properties that should not be in the doc
+    property_match = re.findall(r"Key '([^']*)' was not defined", error_message)
+    if property_match:
+        additional_property = property_match[0]
+        error_message = f"Should not have additional key '{additional_property}'"
 
-    return error_path, error_message, None
+
+
+    return error_path, error_message, enum_values
 
 
 def splitSubtierWords(subtier: str):

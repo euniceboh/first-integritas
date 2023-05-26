@@ -26,11 +26,11 @@ mapping:
     type: map
     required: true
     mapping:
-      regex;(/): # check path
+      regex;(^/): # check path
         type: map
         required: true
         mapping:
-          regex;(): # check operation object
+          regex;(^(get|put|post|delete|options|head|patch|trace)$):
             type: map
             mapping:
               deprecated: 

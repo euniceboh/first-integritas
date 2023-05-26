@@ -4,17 +4,16 @@ from collections import defaultdict
 from pykwalify.core import Core
 from pykwalify.errors import SchemaError
 
-doc = '''
-openapi: 
+doc = '''openapi: 3.0.0
 info:
-  title: 
+  title: grvrws
   description: This API is to update the crediting status of the member's 55 WDL Application for PayNow
   version: 1.0.0
   x-author: 
   x-date: '2022-12-22'
 
 paths:
-  /discretionaryWithdrawals/55Withdrawals/v1/updateMemberCreditStatusForPayNow:
+  dummy:
     post:
       requestBody:
         content:
@@ -27,7 +26,7 @@ paths:
                   description: The main request body
                   properties:
                     programId:
-                      type: double
+                      type: string
                       description: Program ID of the consumer
                       example: 'ESERVICE'
                       minLength: 1
@@ -78,7 +77,7 @@ paths:
               required:
                 - Section
       responses:
-        '600':
+        '200':
           description: Successfully called the API to update credit status of Member's 55 WDL Application for PayNow. This can include application and data error.
           content:
             application/json:
@@ -271,27 +270,45 @@ def parse_error(error):
     else:
         error_path = ""
 
-    # Extract the error message by removing the path from the error
+    # Extract the error message by removing the path from the error and some additional processing
     error_message = re.sub(path_regex, "", error).strip()
 
     # Check if the error message contains enum information
+    enum_values = None
     enum_regex = r"Enum: \[(.+)\]"
     enum_match = re.search(enum_regex, error_message)
     if enum_match:
         enum_values = enum_match.group(1)
         error_message = re.sub(enum_regex, "", error_message).strip()
-        return error_path, error_message, enum_values
+
 
     # Check if the error message contains regex validation error
+    regex_string = None
     regex_error_regex = r"Key '(.+)' does not match any regex '(.+)'\."
     regex_error_match = re.search(regex_error_regex, error_message)
     if regex_error_match:
         key = regex_error_match.group(1)
-        regex = regex_error_match.group(2)
-        error_message = f"Key '{key}' does not match regex '{regex}'."
-        return error_path, error_message, None
+        regex_string = regex_error_match.group(2)
+        error_message = f"Key '{key}' invalid value."
+    
+    # Additional processing
+    if "Path ." in error_message:
+      error_message = error_message.replace("Path .", "")
+    if "Path." in error_message:
+      error_message = error_message.replace("Path.", "")
+    if "required.novalue" in error_message:
+      property = error_path.split("/")[-1]
+      error_message = f"Should have required value '{property}'"
+    
+    # Additional properties that should not be in the doc
+    property_match = re.findall(r"Key '([^']*)' was not defined", error_message)
+    if property_match:
+        additional_property = property_match[0]
+        error_message = f"Should not have additional key '{additional_property}'"
 
-    return error_path, error_message, None
+
+
+    return error_path, error_message, enum_values, regex_string
 
 
 def main():
@@ -334,29 +351,22 @@ def main():
   except SchemaError as e:
       errors = e.msg
       for error in errors.split("\n")[1:]:
-          error_path, error_message, enum_values = parse_error(error)
+          error_path, error_message, enum_values, regex_string = parse_error(error)
+          if regex_string == "^/":
+              print(error_path)
           print("Error Path:", error_path)
           print("Error line", getLineNumberFromPath(doc_json, error_path))
           print("Error Message:", error_message)
+          print("Enum values:", enum_values)
+          print("Error regex string:", regex_string)
           print()
-      # for entry in e.args:
-      #   if isinstance(entry, SchemaError.SchemaErrorEntry):
-      #       # Access properties of the SchemaErrorEntry
-      #       msg = entry.msg
-      #       path = entry.path
-      #       value = entry.value
-      #       # Do something with the properties
-      #       print(f"Message: {msg}")
-      #       print(f"Path: {path}")
-      #       print(f"Value: {value}")
-          
-          
-          
-
   
-  # path = "/paths//discretionaryWithdrawals/55Withdrawals/v1/updateMemberCreditStatusForPayNow/post/responses/200/content/application/json/schema/properties/Section/properties/programId/type"
-  
-  # print(getLineNumberFromPath(doc_json, path[1:]))
+  # try:
+  #     paths = list(doc_json["paths"])
+  #     for path in paths:
+  #         # check 
+  # except:
+  #     pass
 
 
 if __name__ == "__main__":
