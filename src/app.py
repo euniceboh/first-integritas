@@ -10,6 +10,8 @@ import nltk
 from nltk.corpus import wordnet as wn
 from collections import defaultdict
 
+# if ValueError("Could not find a default download directory") occurs on Windows,
+# just create folder in your default drive called "nltk_data"
 nltk.download("wordnet")
 
 app = Flask(__name__)
