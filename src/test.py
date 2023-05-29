@@ -4,13 +4,86 @@ from collections import defaultdict
 from pykwalify.core import Core
 from pykwalify.errors import SchemaError
 from cerberus import Validator
+import ruamel.yaml
+
+class Str(ruamel.yaml.scalarstring.ScalarString):
+    __slots__ = ('lc')
+
+    style = ""
+
+    def __new__(cls, value):
+        return ruamel.yaml.scalarstring.ScalarString.__new__(cls, value)
+
+class MyPreservedScalarString(ruamel.yaml.scalarstring.PreservedScalarString):
+    __slots__ = ('lc')
+
+class MyDoubleQuotedScalarString(ruamel.yaml.scalarstring.DoubleQuotedScalarString):
+    __slots__ = ('lc')
+
+class MySingleQuotedScalarString(ruamel.yaml.scalarstring.SingleQuotedScalarString):
+    __slots__ = ('lc')
+
+class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
+    def construct_yaml_omap(self, node):
+        omap = ruamel.yaml.comments.CommentedOrderedMap()
+        self.construct_mapping(node, omap)
+        return omap
+
+    def construct_scalar(self, node):
+        # type: (Any) -> Any
+        if not isinstance(node, ruamel.yaml.nodes.ScalarNode):
+            raise ruamel.yaml.constructor.ConstructorError(
+                None, None,
+                "expected a scalar node, but found %s" % node.id,
+                node.start_mark)
+
+        if node.style == '|' and isinstance(node.value, str):
+            ret_val = MyPreservedScalarString(node.value)
+        elif bool(self._preserve_quotes) and isinstance(node.value, str):
+            if node.style == "'":
+                ret_val = MySingleQuotedScalarString(node.value)
+            elif node.style == '"':
+                ret_val = MyDoubleQuotedScalarString(node.value)
+            else:
+                ret_val = Str(node.value)
+        else:
+            ret_val = Str(node.value)
+        ret_val.lc = ruamel.yaml.comments.LineCol()
+        ret_val.lc.line = node.start_mark.line
+        ret_val.lc.col = node.start_mark.column
+        return ret_val
 
 # For Specification Extensions
-def extension(field, value, error):
+def check_extension(field, value, error):
     extension_pattern = f'^x-.+'
     regex = re.compile(extension_pattern)
     if regex.match(field) is None: # field does not match the regex
         error(field, "Must start with 'x-'")
+
+def check_path(field, value, error):
+    path_pattern = f'^/.+'
+    regex = re.compile(path_pattern)
+    if regex.match(field) is None: # field does not match the regex
+        error(field, "Must start with '/'")
+
+# RFC 6838
+def check_media_type(field, value, error):
+    media_types = ["application/json",
+                   "application/xml",
+                   "application/x-www-form-urlencoded",
+                   "multipart/form-data",
+                   "text/plain; charset=utf-8",
+                   "text/html",
+                   "application/pdf",
+                   "image/png",
+                   "application/vnd.mycompany.myapp.v2+json",
+                   "application/vnd.ms-excel",
+                   "application/vnd.openstreetmap.data+xml",
+                   "application/vnd.github-issue.text+json",
+                   "application/vnd.github.v3.diff",
+                   "image/vnd.djvu"]
+    if field not in media_types:
+        error(field, "Field not compliant with RFC 6838")
 
 
 doc = '''openapi: 3.0.0
@@ -161,7 +234,12 @@ paths:
                 required:
                   - Section'''
 
+# can add custom function checks for all of the fields
+# going to do the ones corresponding to the templates given first
 schema = {
+    'allow_unknown': {
+        'check_with': check_extension
+    },
     'openapi': {
         'required': True,
         'type': 'string',
@@ -171,7 +249,7 @@ schema = {
         'required': True,
         'type': 'dict',
         'allow_unknown': {
-            'check_with': extension
+            'check_with': check_extension
         },
         'schema': {
             'title': {
@@ -190,6 +268,9 @@ schema = {
             },
             'contact': {
                 'type': 'dict',
+                'allow_unknown': {
+                  'check_with': check_extension
+                },
                 'schema': {
                     'name': {
                         'type': 'string'
@@ -204,6 +285,9 @@ schema = {
             },
             'license': {
                 'type': 'dict',
+                'allow_unknown': {
+                  'check_with': check_extension
+                },
                 'schema': {
                     'name': {
                         'required': True,
@@ -211,6 +295,180 @@ schema = {
                     },
                     'url': {
                         'type': 'string'
+                    }
+                }
+            }
+        }
+    },
+    'servers': {
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'allow_unknown': {
+              'check_with': check_extension
+            },
+            'schema': {
+                'url': {
+                    'required': True,
+                    'type': 'string'
+                },
+                'description': {
+                    'type': 'string'
+                },
+                'variables': {
+                    'type': 'dict',
+                    'valuesrules': {
+                        'type': 'dict',
+                        'allow_unknown': {
+                          'check_with': check_extension
+                        },
+                        'schema': {
+                            'enum': {
+                                'type': 'list',
+                                'schema': {
+                                    'type': 'string'
+                                }
+                            },
+                            'default': {
+                                'required': True,
+                                'type': 'string'
+                            },
+                            'description': {
+                                'type': 'string'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    'paths': {
+        'required': True,
+        'type': 'dict',
+        'allow_unknown': {
+          'anyof': [{'check_with': check_path}, {'check_with': check_extension}]
+        },
+        'schema': {
+            'type': 'dict',
+            'allow_unknown': {
+              'check_with': check_extension
+            },
+            '$ref': {
+                'type': 'string'
+            },
+            'summary': {
+                'type': 'string'
+            },
+            'description': {
+                'type': 'string'
+            },
+            'get': {
+                'type': 'dict',
+                'allow_unknown': {
+                  'check_with': check_extension
+                },
+                'schema': {
+                    'tags': {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'string'
+                        }
+                    },
+                    'summary': {
+                        'type': 'string'
+                    },
+                    'description': {
+                        'type': 'string'
+                    },
+                    'externalDocs': {
+                        'type': 'dict',
+                        'schema': {
+                            'description': {
+                                'type': 'string'
+                            },
+                            'url': {
+                                'required': True,
+                                'type': 'string'
+                            }
+                        }
+                    },
+                    'operationId': {
+                        'type': 'string'
+                    },
+                    'parameters': {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                  'required': True,
+                                  'type': 'string',
+                                  'excludes': ['name', 'in', 'description', 'required', 'deprecated', 'allowEmptyValue']
+                                },
+                                'name': {
+                                    'required': True,
+                                    'type': 'string',
+                                    'excludes': '$ref'
+                                },
+                                'in': {
+                                    'required': True,
+                                    'type': 'string',
+                                    'excludes': '$ref'
+                                },
+                                'description': {
+                                    'type': 'string',
+                                    'excludes': '$ref'
+                                },
+                                'required': {
+                                    'type': 'boolean',
+                                    'default': False,
+                                    'excludes': '$ref'
+                                },
+                                'deprecated': {
+                                    'type': 'boolean',
+                                    'default': False,
+                                    'excludes': '$ref'
+                                },
+                                'allowEmptyValue': {
+                                    'type': 'boolean',
+                                    'default': False,
+                                    'excludes': '$ref'
+                                }
+                            }
+                            
+                        }
+                    },
+                    'requestBody': {
+                        'type': 'dict',
+                        'allow_unknown': {
+                          'check_with': check_extension
+                        },
+                        'schema': {
+                            '$ref': {
+                                'required': True,
+                                'type': 'string',
+                                'excludes': ['description', 'content', 'required']
+                            },
+                            'description': {
+                                'type': 'string',
+                                'excludes': '$ref'
+                            },
+                            'content': {
+                                'required': True,
+                                'excludes': '$ref',
+                                'type': 'dict',
+                                'allow_unknown': {
+                                  'check_with': check_media_type
+                                },
+                                'schema': {
+                                    
+                                }
+                            },
+                            'required': {
+                                'type': 'boolean',
+                                'default': False
+                            }
+                        }
                     }
                 }
             }
@@ -242,56 +500,6 @@ def is_key_nested(dictionary, parent_key, nested_key):
     
     return False
 
-
-import ruamel.yaml
-
-class Str(ruamel.yaml.scalarstring.ScalarString):
-    __slots__ = ('lc')
-
-    style = ""
-
-    def __new__(cls, value):
-        return ruamel.yaml.scalarstring.ScalarString.__new__(cls, value)
-
-class MyPreservedScalarString(ruamel.yaml.scalarstring.PreservedScalarString):
-    __slots__ = ('lc')
-
-class MyDoubleQuotedScalarString(ruamel.yaml.scalarstring.DoubleQuotedScalarString):
-    __slots__ = ('lc')
-
-class MySingleQuotedScalarString(ruamel.yaml.scalarstring.SingleQuotedScalarString):
-    __slots__ = ('lc')
-
-class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
-    def construct_yaml_omap(self, node):
-        omap = ruamel.yaml.comments.CommentedOrderedMap()
-        self.construct_mapping(node, omap)
-        return omap
-
-    def construct_scalar(self, node):
-        # type: (Any) -> Any
-        if not isinstance(node, ruamel.yaml.nodes.ScalarNode):
-            raise ruamel.yaml.constructor.ConstructorError(
-                None, None,
-                "expected a scalar node, but found %s" % node.id,
-                node.start_mark)
-
-        if node.style == '|' and isinstance(node.value, str):
-            ret_val = MyPreservedScalarString(node.value)
-        elif bool(self._preserve_quotes) and isinstance(node.value, str):
-            if node.style == "'":
-                ret_val = MySingleQuotedScalarString(node.value)
-            elif node.style == '"':
-                ret_val = MyDoubleQuotedScalarString(node.value)
-            else:
-                ret_val = Str(node.value)
-        else:
-            ret_val = Str(node.value)
-        ret_val.lc = ruamel.yaml.comments.LineCol()
-        ret_val.lc.line = node.start_mark.line
-        ret_val.lc.col = node.start_mark.column
-        return ret_val
-    
 def getLineNumberFromPath(doc, path):
     if path == "":
         return True
@@ -374,17 +582,7 @@ def main():
 
   doc_json = yaml.load(doc)
 
-  # openapi = title = description = infoVersion = x_author = x_date = paths = None
-  # try:
-  #     openapi = doc_json["openapi"]
-  #     title = doc_json["info"]["title"]
-  #     description = doc_json["info"]["description"]
-  #     infoVersion = doc_json["info"]["version"]
-  #     x_author = doc_json["info"]["x-author"]
-  #     x_date = doc_json["info"]["x-date"]
-  #     paths = list(doc_json["paths"])
-  # except (TypeError): # If the component is not found, it will be handled by the checkFunctions
-  #     pass
+
   
   # keyList = keysInNestedDictionary_recursive(doc_json)
   # for key in keyList:
@@ -429,7 +627,38 @@ def main():
           'version': '1.0.0',
           'x-author': 'Jennylyn Sze',
           'x-date': '2022-12-22',
-          'date': '1'
+      },
+      'servers': [
+        {
+          "url": "https://{username}.gigantic-server.com:{port}/{basePath}",
+          "description": "The production API server",
+          "variables": {
+            "username": {
+              "default": "demo",
+              "description": "this value is assigned by the service provider, in this example `gigantic-server.com`"
+            },
+            "port": {
+              "enum": [
+                "8443",
+                "443"
+              ],
+              "default": "8443",
+            },
+            "basePath": {
+              "default": "v2"
+            }
+          }
+        }
+      ],
+      'paths': {
+        '/dummy1': {
+          'summary': 'dummy1',
+          'date': '2022'
+        },
+        '/dummy2': {
+          'summary': 'dummy2'
+        },
+          
       }
   }
   v.validate(document)
