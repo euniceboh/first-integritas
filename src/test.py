@@ -3,6 +3,15 @@ import yaml
 from collections import defaultdict
 from pykwalify.core import Core
 from pykwalify.errors import SchemaError
+from cerberus import Validator
+
+# For Specification Extensions
+def extension(field, value, error):
+    extension_pattern = f'^x-.+'
+    regex = re.compile(extension_pattern)
+    if regex.match(field) is None: # field does not match the regex
+        error(field, "Must start with 'x-'")
+
 
 doc = '''openapi: 3.0.0
 info:
@@ -152,6 +161,63 @@ paths:
                 required:
                   - Section'''
 
+schema = {
+    'openapi': {
+        'required': True,
+        'type': 'string',
+        'allowed': ['2.0', '3.0.0', '3.0.3', '3.1.0']
+    },
+    'info': {
+        'required': True,
+        'type': 'dict',
+        'allow_unknown': {
+            'check_with': extension
+        },
+        'schema': {
+            'title': {
+                'required': True,
+                'type': 'string'
+            },
+            'version': {
+                'required': True,
+                'type': 'string'
+            },
+            'description': {
+                'type': 'string'
+            },
+            'termsOfService': {
+                'type': 'string'
+            },
+            'contact': {
+                'type': 'dict',
+                'schema': {
+                    'name': {
+                        'type': 'string'
+                    },
+                    'url': {
+                        'type': 'string'
+                    },
+                    'email': {
+                        'type': 'string'
+                    }
+                }
+            },
+            'license': {
+                'type': 'dict',
+                'schema': {
+                    'name': {
+                        'required': True,
+                        'type': 'string'
+                    },
+                    'url': {
+                        'type': 'string'
+                    }
+                }
+            }
+        }
+    }
+}
+
 def flattenDict(d):
     keyValueList = []
     for key, value in d.items():
@@ -178,16 +244,6 @@ def is_key_nested(dictionary, parent_key, nested_key):
 
 
 import ruamel.yaml
-
-yaml_str = """
-key1: 
-  - key2: item2
-  - key3: item3
-  - key4:
-    - key5: 'item5'
-    - key6: |
-        item6
-"""
 
 class Str(ruamel.yaml.scalarstring.ScalarString):
     __slots__ = ('lc')
@@ -311,6 +367,7 @@ def parse_error(error):
     return error_path, error_message, enum_values, regex_string
 
 
+
 def main():
   yaml = ruamel.yaml.YAML()
   yaml.Constructor = MyConstructor
@@ -345,28 +402,38 @@ def main():
   # print(doc_json["openapi"].lc.col) # no col for omap keys
 
 
-  try:
-    c = Core(source_data=doc_json, schema_files=["schema1.yaml"])
-    c.validate()
-  except SchemaError as e:
-      errors = e.msg
-      for error in errors.split("\n")[1:]:
-          error_path, error_message, enum_values, regex_string = parse_error(error)
-          if regex_string == "^/":
-              print(error_path)
-          print("Error Path:", error_path)
-          print("Error line", getLineNumberFromPath(doc_json, error_path))
-          print("Error Message:", error_message)
-          print("Enum values:", enum_values)
-          print("Error regex string:", regex_string)
-          print()
-  
   # try:
-  #     paths = list(doc_json["paths"])
-  #     for path in paths:
-  #         # check 
-  # except:
-  #     pass
+  #   c = Core(source_data=doc_json, schema_files=["schema1.yaml"])
+  #   c.validate()
+  # except SchemaError as e:
+  #     errors = e.msg
+  #     for error in errors.split("\n")[1:]:
+  #         error_path, error_message, enum_values, regex_string = parse_error(error)
+  #         if regex_string == "^/":
+  #             print(error_path)
+  #         print("Error Path:", error_path)
+  #         print("Error line", getLineNumberFromPath(doc_json, error_path))
+  #         print("Error Message:", error_message)
+  #         print("Enum values:", enum_values)
+  #         print("Error regex string:", regex_string)
+  #         print()
+
+  # print(extension('x-author', -1, -1))
+  
+  v = Validator(schema)
+  document = {
+      'openapi': '3.0.0',
+      'info': {
+          'title': 'Update Crediting Status of 55 WDL Application PayNow',
+          'description': "This API is to update the crediting status of the member's 55 WDL Application for PayNow",
+          'version': '1.0.0',
+          'x-author': 'Jennylyn Sze',
+          'x-date': '2022-12-22',
+          'date': '1'
+      }
+  }
+  v.validate(document)
+  print(v.errors)
 
 
 if __name__ == "__main__":
