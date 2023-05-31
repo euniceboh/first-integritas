@@ -222,7 +222,7 @@
 
   <div style="padding-top: 3cm; padding-left: 1cm">
     <h3 class="route-identifier">CPF OAS Validator Tool</h3>
-    <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below, and click the "How is my OAS?" button to check if there are any errors on the OAS format.</p>
+    <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below, and wait 2 seconds to check if there are any errors on the OAS format.</p>
   </div>
     
 
@@ -236,8 +236,9 @@
       </div>
       <div style="margin-top: 10.5cm; text-align: right;">
         <!-- Upload Feature -->
-        <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; float: left;"/>
-        <button class = "my-0 px-5 align-self-start" id="fileUploadButton" style="display: inline-block;" onclick=uploadFile()>Upload</button>
+        <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; float: left;", accept=".yml, .yaml, .json" onclick="this.value=null" onchange="uploadFile()"/>
+        <input type="hidden" id="fileNameInput">
+        <!-- <button class = "my-0 px-5 align-self-start" id="fileUploadButton" style="display: inline-block;" onclick=uploadFile()>Upload</button> -->
         <!-- Save Text to File Feature -->
         <button class = "my-0 px-5 align-self-start" id="savefile" style="display: inline-block" onclick="saveFile()">Save to File</button>
         <!-- Check OAS -->
@@ -263,7 +264,7 @@ age</textarea></grammarly-editor-plugin>
     </div>
   </div>
   <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 35%; padding-right: 1cm; ">
-    <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 17.02px;" readonly></textarea>
+    <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 18px;" readonly></textarea>
     <div>
       <div class="card text-white bg-success mb-3" style="width: 100%; max-width: 15rem; margin-left: 1cm; margin-top: 0.5cm; display:inline-block">
         <div class="card-body">
@@ -370,6 +371,8 @@ age</textarea></grammarly-editor-plugin>
           alert("No file provided!");
         }
       }
+
+    // $('#fileUpload').on
 
     function saveFile() {
       var textArea = editor.getValue();
