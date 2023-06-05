@@ -105,6 +105,8 @@
           left: 0;
           height: 8cm;
           margin-bottom: 3rem;
+          border: 2px solid #000;
+          border-radius: 5px;
       }
     
     .styled-table {
@@ -226,7 +228,7 @@
   </div>
     
 
-  <div class="page vh-100" style="display:flex; flex-direction: row; padding-top: 0">
+  <div class="page" style="display:flex; flex-direction: row; padding-top: 0">
     <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 70%; flex: 1; padding: 1cm">
       <!-- OAS Text Box -->
       <div style="position: relative">
@@ -248,7 +250,7 @@
       <!-- Dictionary Text Box -->
       <p wrap="on" style="margin-bottom: 2rem !important; margin-top: 1rem !important;">Paste dictionary word here (from least important to most important order):</p>
       <grammarly-editor-plugin contenteditable="true">
-        <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 50%; height: 3cm;">
+        <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 70%; height: 3cm;">
 discretionary
 withdrawals
 update
@@ -263,9 +265,12 @@ check
 age</textarea></grammarly-editor-plugin>
     </div>
   </div>
-  <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 35%; padding-right: 1cm; ">
-    <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 18px;" readonly></textarea>
-    <div>
+
+  <!-- Error Panel -->
+  <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 30%; padding-right: 1cm; ">
+    <!-- <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 18px;" readonly></textarea> -->
+    <div class="accordion" id="errorStack"></div>
+    <!-- <div>
       <div class="card text-white bg-success mb-3" style="width: 100%; max-width: 15rem; margin-left: 1cm; margin-top: 0.5cm; display:inline-block">
         <div class="card-body">
           <p class="card-text" id="errorCount" style="text-align: center;">Valid</p>
@@ -274,7 +279,7 @@ age</textarea></grammarly-editor-plugin>
       <div style="display: inline-block">
         <button id="errorScroller">Next Error</button>
       </div>
-    </div>
+    </div> -->
     
   </div>
 </div>
@@ -285,7 +290,7 @@ age</textarea></grammarly-editor-plugin>
 
   <!-- Modals -->
   <link href="static/css/swagger-ui.css" rel="stylesheet" type="text/css">
-  <div class="modal fade" id="oasSuccess" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
+  <!-- <div class="modal fade" id="oasSuccess" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content" style="min-height:100%;">
         <div class="modal-header">
@@ -323,7 +328,7 @@ age</textarea></grammarly-editor-plugin>
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <script src="/static/js/bootstrap.bundle.min.js.download"></script>
   <script src="/static/js/swagger-ui-bundle.js.download"></script>
@@ -350,29 +355,25 @@ age</textarea></grammarly-editor-plugin>
     var errorCounterFlag = false;
 
     // Sync Scrolling
-    $('.ace_scrollbar-v').scroll(function () {
-      $("#errorTextArea").scrollTop($('.ace_scrollbar-v').scrollTop());
-      $("#errorTextArea").scrollLeft($('.ace_scrollbar-v').scrollLeft());
-    });
-    $("#errorTextArea").scroll(function () {
-      $(".ace_scrollbar-v").scrollTop($("#errorTextArea").scrollTop());
-      $(".ace_scrollbar-v").scrollLeft($("#errorTextArea").scrollLeft());
-    })
+    // $('.ace_scrollbar-v').scroll(function () {
+    //   $("#errorTextArea").scrollTop($('.ace_scrollbar-v').scrollTop());
+    //   $("#errorTextArea").scrollLeft($('.ace_scrollbar-v').scrollLeft());
+    // });
+    // $("#errorTextArea").scroll(function () {
+    //   $(".ace_scrollbar-v").scrollTop($("#errorTextArea").scrollTop());
+    //   $(".ace_scrollbar-v").scrollLeft($("#errorTextArea").scrollLeft());
+    // })
 
     function uploadFile() {
-        var file = document.getElementById("fileUpload").files[0];
-        if (file != undefined) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-          editor.setValue(e.target.result);
-          }
-          reader.readAsText(file);
-        } else {
-          alert("No file provided!");
+      var file = document.getElementById("fileUpload").files[0];
+      if (file != undefined) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+        editor.setValue(e.target.result);
         }
+        reader.readAsText(file);
       }
-
-    // $('#fileUpload').on
+    }
 
     function saveFile() {
       var textArea = editor.getValue();
@@ -396,31 +397,93 @@ age</textarea></grammarly-editor-plugin>
       }
     }
 
+    function addAccordionItem(id, errorLineNumber, errorText, errorInfo) {
+      var newItemId =  'item' + id + Date.now();
+
+      var newItem = document.createElement('div');
+      newItem.classList.add('accordion-item');
+      newItem.setAttribute('style', 'margin-bottom: 10px');
+
+      var newItemHeader = document.createElement('div');
+      newItemHeader.classList.add('accordion-header');
+      newItemHeader.id = newItemId + '-header';
+
+      var newItemButton = document.createElement('button');
+      newItemButton.classList.add('accordion-button');
+      newItemButton.setAttribute('type', 'button');
+      newItemButton.setAttribute('data-bs-toggle', 'collapse');
+      newItemButton.setAttribute('data-bs-target', '#' + newItemId + '-collapse');
+      newItemButton.setAttribute('aria-expanded', "false");
+      newItemButton.setAttribute('aria-controls', newItemId + '-collapse');
+      newItemButton.setAttribute('style', 'margin-bottom: 0')
+      newItemButton.textContent = "Line " + errorLineNumber + " --- " + errorText;
+
+      var newItemCollapse = document.createElement('div');
+      newItemCollapse.classList.add('accordion-collapse', 'collapse');
+      newItemCollapse.setAttribute('id', newItemId + '-collapse');
+      newItemCollapse.setAttribute('aria-labelledby', newItemId + '-header');
+      newItemCollapse.setAttribute('data-bs-parent', '#accordion');
+
+      var newItemBody = document.createElement('div');
+      newItemBody.classList.add('accordion-body');
+      newItemBody.textContent = 'Additional Information on Error'; // errorInfo
+
+      // Append the elements to the accordion container
+      newItemHeader.appendChild(newItemButton);
+      newItemCollapse.appendChild(newItemBody);
+      newItem.appendChild(newItemHeader);
+      newItem.appendChild(newItemCollapse);
+
+      var accordionContainer = document.getElementById('errorStack');
+      accordionContainer.appendChild(newItem); 
+
+    }
+
+    function refreshAccordion() {
+      var accordionContainer = document.getElementById('errorStack');
+
+      // Remove all existing accordion items
+      accordionContainer.innerHTML = '';
+
+      // Create and add new accordion items
+      // var newItem1 = createAccordionItem('New Panel 1', 'Content of New Panel 1');
+      // var newItem2 = createAccordionItem('New Panel 2', 'Content of New Panel 2');
+      // var newItem3 = createAccordionItem('New Panel 3', 'Content of New Panel 3');
+
+      // accordionContainer.appendChild(newItem1);
+      // accordionContainer.appendChild(newItem2);
+      // accordionContainer.appendChild(newItem3);
+
+    }
+
     // =========================================================================================================================
 
     // Updates error counter
-    function updateErrorCounter() {
-      var errorCount = 0;
-      var errorPanel = document.getElementById("errorTextArea").innerHTML;
+    // function updateErrorCounter() {
+    //   var errorCount = 0;
+    //   var errorPanel = document.getElementById("errorTextArea").innerHTML;
       
-      errorTextArea_array = errorPanel.split("\n");
-      for (let i = 0; i < errorTextArea_array.length; i++) {
-        if (errorTextArea_array[i] != "") {
-          errorCount += 1;
-        }
-      }
+    //   errorTextArea_array = errorPanel.split("\n");
+    //   for (let i = 0; i < errorTextArea_array.length; i++) {
+    //     if (errorTextArea_array[i] != "") {
+    //       errorCount += 1;
+    //     }
+    //   }
 
-      if (errorCount == 0) {
-        document.getElementById('errorCount').innerHTML = "Valid";
-      } else {
-        document.getElementById('errorCount').innerHTML = "No. of Errors: " + (errorCount);
-      }
-    }
+    //   if (errorCount == 0) {
+    //     document.getElementById('errorCount').innerHTML = "Valid";
+    //   } else {
+    //     document.getElementById('errorCount').innerHTML = "No. of Errors: " + (errorCount);
+    //   }
+    // }
 
     // Real-time side panel refresh by posting to backend
     // Using debounce concept to buffer each post request
     var debounce = null;
     editor.getSession().on("change", function (e) {
+      var editorBorder = document.querySelector('#editor');
+      editorBorder.style.border = '2px solid #000';
+
       clearTimeout(debounce);
       debounce = setTimeout(function extractOAS () {
           // $(document).ready(function() {
@@ -505,6 +568,8 @@ age</textarea></grammarly-editor-plugin>
           dictionary = JSON.stringify(dictionaryWordsDictionary);
           
           $('#loading').show();
+
+          
           
           $.ajax({
             data: {
@@ -521,10 +586,14 @@ age</textarea></grammarly-editor-plugin>
               // oasSuccessModal.modal("show");
 
               // fill with empty lines in error side panel
-              var errorTextArea = document.getElementById("errorTextArea");
-              var numLines = editor.session.getLength();
-              var emptyLines = "\n".repeat(numLines - 1);
-              errorTextArea.innerHTML = emptyLines;
+              // var errorTextArea = document.getElementById("errorTextArea");
+              // var numLines = editor.session.getLength();
+              // var emptyLines = "\n".repeat(numLines - 1);
+              // errorTextArea.innerHTML = emptyLines;
+              
+              refreshAccordion();
+
+              editorBorder.style.border = '2px solid #20c997';
             },
             error: function(response) {
               $('#loading').hide();
@@ -533,7 +602,10 @@ age</textarea></grammarly-editor-plugin>
               
               // oasErrorModal = $('#oasErrors');
               // oasErrorModal.find('.styled-table tbody').empty();
+
+              refreshAccordion();
               for (let i = 0; i < listErrors.length; i++){
+                var id = i;
                 var errorText = listErrors[i][0];
                 var errorLine = listErrors[i][1];
                 var errorColumn = listErrors[i][2];
@@ -543,61 +615,67 @@ age</textarea></grammarly-editor-plugin>
                 //                                           </tr>
                 //                                         `);
                 dictErrors[errorLine] = [errorText, errorColumn];
+
+                addAccordionItem(id, errorLine, errorText, errorColumn);
+
+                editorBorder.style.border = '2px solid #f00';
               }
               // oasErrorModal.modal("show");
 
               // fill lines without errors with empty lines while those with with error description
-              var errorTextArea = document.getElementById("errorTextArea");
-              var emptyLines = "";
-              var numLines = editor.session.getLength();
-              // TODO: Check for errors on the same line and combine the error description
-              for (let i = 0; i < numLines; i++) {
-                if (dictErrors[i] != undefined) {
-                  emptyLines += `${dictErrors[i][0]} @ line number ${i + 1}`;
-                } 
-                if (i == numLines - 1) {
-                  break;
-                }
-                emptyLines += "\n";
-              }
-              errorTextArea.innerHTML = emptyLines;
+              // var errorTextArea = document.getElementById("errorTextArea");
+              // var emptyLines = "";
+              // var numLines = editor.session.getLength();
+              // // TODO: Check for errors on the same line and combine the error description
+              // for (let i = 0; i < numLines; i++) {
+              //   if (dictErrors[i] != undefined) {
+              //     emptyLines += `${dictErrors[i][0]} @ line number ${i + 1}`;
+              //   } 
+              //   if (i == numLines - 1) {
+              //     break;
+              //   }
+              //   emptyLines += "\n";
+              // }
+              // errorTextArea.innerHTML = emptyLines;
+
+
             },
-            complete: function() {
-              errorCounterFlag = false;
-              updateErrorCounter();
-            }
+            // complete: function() {
+            //   errorCounterFlag = false;
+            //   updateErrorCounter();
+            // }
           });
       }, 1500);
     });
 
-    var errorLines_queue = [];
-    $('#errorScroller').on('click', function () {
-      if (errorCounterFlag == false) { // error list newly updated
-        errorLines_queue = [];
-        var errorPanel = document.getElementById("errorTextArea").innerHTML;
-        errorTextArea_array = errorPanel.split("\n");
-        for (let i = 0; i < errorTextArea_array.length; i++) {
-          if (errorTextArea_array[i] != "") {
-            errorLines_queue.push(i + 1);
-          }
-        }
-        if (errorLines_queue.length == 0) {
-          return;
-        } else {
-          nextErrorLine = errorLines_queue.shift();
-          errorLines_queue.push(nextErrorLine);
-          errorCounterFlag = true;
-          editor.gotoLine(nextErrorLine);
-        }
-      } else { // same session
-        if (errorLines_queue.length == 0) {
-          return;
-        }
-        nextErrorLine = errorLines_queue.shift();
-        errorLines_queue.push(nextErrorLine);
-        editor.gotoLine(nextErrorLine);
-      }
-    })
+    // var errorLines_queue = [];
+    // $('#errorScroller').on('click', function () {
+    //   if (errorCounterFlag == false) { // error list newly updated
+    //     errorLines_queue = [];
+    //     var errorPanel = document.getElementById("errorTextArea").innerHTML;
+    //     errorTextArea_array = errorPanel.split("\n");
+    //     for (let i = 0; i < errorTextArea_array.length; i++) {
+    //       if (errorTextArea_array[i] != "") {
+    //         errorLines_queue.push(i + 1);
+    //       }
+    //     }
+    //     if (errorLines_queue.length == 0) {
+    //       return;
+    //     } else {
+    //       nextErrorLine = errorLines_queue.shift();
+    //       errorLines_queue.push(nextErrorLine);
+    //       errorCounterFlag = true;
+    //       editor.gotoLine(nextErrorLine);
+    //     }
+    //   } else { // same session
+    //     if (errorLines_queue.length == 0) {
+    //       return;
+    //     }
+    //     nextErrorLine = errorLines_queue.shift();
+    //     errorLines_queue.push(nextErrorLine);
+    //     editor.gotoLine(nextErrorLine);
+    //   }
+    // })
   </script>
     
 <script src="/static/js/kong.utils.js.download"></script>
