@@ -9196,29 +9196,31 @@ schema = {
     }
 }
 
-def flattenDict(d):
-    keyValueList = []
-    for key, value in d.items():
-        if value == None:
-            keyValueList.append((key, None))
-        else:
-            keyValueList.append((key, value))
-        if isinstance(value, dict):
-            keyValueList.extend(flattenDict(value))
-    return keyValueList
 
-def is_key_nested(dictionary, parent_key, nested_key):
-    if parent_key in dictionary and nested_key in dictionary[parent_key]:
-        return True
+
+# def flattenDict(d):
+#     keyValueList = []
+#     for key, value in d.items():
+#         if value == None:
+#             keyValueList.append((key, None))
+#         else:
+#             keyValueList.append((key, value))
+#         if isinstance(value, dict):
+#             keyValueList.extend(flattenDict(value))
+#     return keyValueList
+
+# def is_key_nested(dictionary, parent_key, nested_key):
+#     if parent_key in dictionary and nested_key in dictionary[parent_key]:
+#         return True
     
-    for value in dictionary.values():
-        if isinstance(value, dict):
-            if is_key_nested(value, parent_key, nested_key):
-                return True
-            elif nested_key in value:
-                return True
+#     for value in dictionary.values():
+#         if isinstance(value, dict):
+#             if is_key_nested(value, parent_key, nested_key):
+#                 return True
+#             elif nested_key in value:
+#                 return True
     
-    return False
+#     return False
 
 def getLineNumberFromPath(doc, path):
     if path == "":
@@ -9245,54 +9247,62 @@ def getLineNumberFromPath(doc, path):
                 return res
     return False
 
-def parse_error(error):
-    # Extract the error path using regular expression
-    path_regex = r": '([^']*)'"
-    path_match = re.search(path_regex, error)
-    if path_match:
-        error_path = path_match.group(1)
-    else:
-        error_path = ""
+def getLineNumberFromDictPath(dictPath):
 
-    # Extract the error message by removing the path from the error and some additional processing
-    error_message = re.sub(path_regex, "", error).strip()
-
-    # Check if the error message contains enum information
-    enum_values = None
-    enum_regex = r"Enum: \[(.+)\]"
-    enum_match = re.search(enum_regex, error_message)
-    if enum_match:
-        enum_values = enum_match.group(1)
-        error_message = re.sub(enum_regex, "", error_message).strip()
+    print(dictPath.keys())
+    print()
+    print(dictPath.values())
+    print()
+    for value in dictPath.values():
+        print(type(value))
 
 
-    # Check if the error message contains regex validation error
-    regex_string = None
-    regex_error_regex = r"Key '(.+)' does not match any regex '(.+)'\."
-    regex_error_match = re.search(regex_error_regex, error_message)
-    if regex_error_match:
-        key = regex_error_match.group(1)
-        regex_string = regex_error_match.group(2)
-        error_message = f"Key '{key}' invalid value."
+# def parse_error(error):
+#     # Extract the error path using regular expression
+#     path_regex = r": '([^']*)'"
+#     path_match = re.search(path_regex, error)
+#     if path_match:
+#         error_path = path_match.group(1)
+#     else:
+#         error_path = ""
+
+#     # Extract the error message by removing the path from the error and some additional processing
+#     error_message = re.sub(path_regex, "", error).strip()
+
+#     # Check if the error message contains enum information
+#     enum_values = None
+#     enum_regex = r"Enum: \[(.+)\]"
+#     enum_match = re.search(enum_regex, error_message)
+#     if enum_match:
+#         enum_values = enum_match.group(1)
+#         error_message = re.sub(enum_regex, "", error_message).strip()
+
+
+#     # Check if the error message contains regex validation error
+#     regex_string = None
+#     regex_error_regex = r"Key '(.+)' does not match any regex '(.+)'\."
+#     regex_error_match = re.search(regex_error_regex, error_message)
+#     if regex_error_match:
+#         key = regex_error_match.group(1)
+#         regex_string = regex_error_match.group(2)
+#         error_message = f"Key '{key}' invalid value."
     
-    # Additional processing
-    if "Path ." in error_message:
-      error_message = error_message.replace("Path .", "")
-    if "Path." in error_message:
-      error_message = error_message.replace("Path.", "")
-    if "required.novalue" in error_message:
-      property = error_path.split("/")[-1]
-      error_message = f"Should have required value '{property}'"
+#     # Additional processing
+#     if "Path ." in error_message:
+#       error_message = error_message.replace("Path .", "")
+#     if "Path." in error_message:
+#       error_message = error_message.replace("Path.", "")
+#     if "required.novalue" in error_message:
+#       property = error_path.split("/")[-1]
+#       error_message = f"Should have required value '{property}'"
     
-    # Additional properties that should not be in the doc
-    property_match = re.findall(r"Key '([^']*)' was not defined", error_message)
-    if property_match:
-        additional_property = property_match[0]
-        error_message = f"Should not have additional key '{additional_property}'"
+#     # Additional properties that should not be in the doc
+#     property_match = re.findall(r"Key '([^']*)' was not defined", error_message)
+#     if property_match:
+#         additional_property = property_match[0]
+#         error_message = f"Should not have additional key '{additional_property}'"
 
-
-
-    return error_path, error_message, enum_values, regex_string
+#     return error_path, error_message, enum_values, regex_string
 
 
 
@@ -9340,16 +9350,14 @@ def main():
   
   v = Validator(schema)
   document = {
-      'openapi': '3.0.0', 
       'info': {
-          'title': 'grvrws', 
+          'title': 'grvrws',
           'description': "This API is to update the crediting status of the member's 55 WDL Application for PayNow", 
           'version': '1.0.0', 
           'x-author': 'Jennylyn Sze', 
           'x-date': '2022-12-22'
       }, 
       'paths': {
-        #   'x-date': 'test',
           '/dummy': {
               'get': {
                   'requestBody': {
@@ -9370,13 +9378,13 @@ def main():
                                                   'maxLength': 10
                                               }, 
                                               'userId': {
-                                                  'type': 'string', 
+                                                 'type': 'string', 
                                                   'description': 'User ID of the consumer', 
                                                   'example': 'RSD001'
                                               }, 
                                               'accountNumber': {
-                                                  'type': 'string',
-                                                  'description': "Member's Account Number",
+                                                  'type': 'string', 
+                                                  'description': "Member's Account Number", 
                                                   'example': 'S1234567A', 
                                                   'minLength': 9, 
                                                   'maxLength': 9
@@ -9394,7 +9402,7 @@ def main():
                                                   'maxLength': 1
                                               }, 
                                               'ocbcTransactionNumber': {
-                                                  'type': 'string',
+                                                  'type': 'string', 
                                                   'description': 'OCBC Transaction Number', 
                                                   'example': '20200928034440888853', 
                                                   'maxLength': 20
@@ -9431,7 +9439,7 @@ def main():
                       }
                   }, 
                   'responses': {
-                      '200': {
+                      '900': {
                           'description': "Successfully called the API to update credit status of Member's 55 WDL Application for PayNow. This can include application and data error.", 
                           'content': {
                               'application/json': {
@@ -9517,10 +9525,9 @@ def main():
                                               ]
                                           }
                                       }, 
-                                      'required': [
-                                          'Section'
-                                      ]
-                                  }
+                                  'required': [
+                                      'Section'
+                                  ]
                               }
                           }
                       }
