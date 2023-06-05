@@ -107,6 +107,12 @@ def check_list_unique(field, value, error):
             duplicates.add(item)
     if duplicates:
         error(field, "List not unique. Duplicates: " + ", ".join(duplicates))
+
+def check_component_keys(field, value, error):
+    key_pattern = f'^[a-zA-Z0-9\.\-_]+$'
+    regex = re.compile(key_pattern)
+    if regex.match(value) is None:
+        error(field, "Component key does not match regex")
         
 # def check_or(field, value, error):
 #     if value and "$ref" in value.keys():
@@ -369,12 +375,12 @@ schema = {
     'paths': {
         'required': True,
         'type': 'dict',
-        'keysrules': {
-            'anyof': [
-                {'check_with': check_path},
-                {'check_with': check_extension}
-            ]  
+        'allow_unknown' : {
+            'check_with': check_path 
         },
+        # 'keysrules': { 
+        #     'check_with': check_path 
+        # },
         'valuesrules': {
             'type': 'dict',
             'allow_unknown': {
@@ -467,6 +473,1848 @@ schema = {
                                             'allowEmptyValue': {
                                                 'type': 'boolean',
                                                 'default': False,
+                                            },
+                                            'style': {
+                                                'type': 'string'
+                                            },
+                                            'explode': {
+                                                'type': 'boolean',
+                                            },
+                                            'allowReserved': {
+                                                'type': 'boolean',
+                                                'default': False
+                                            },
+                                            'schema': {
+                                                'anyof': [
+                                                    {
+                                                        'type': 'dict',
+                                                        'schema': {
+                                                            '$ref': {
+                                                                'required': True,
+                                                                'type': 'string'
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        'type': 'dict',
+                                                        'allow_unknown': {
+                                                            'check_with': check_extension
+                                                        },
+                                                        'schema': {
+                                                            'title': {
+                                                                'type': 'string'
+                                                            },
+                                                            'multipleOf': {
+                                                                'type': 'integer',
+                                                                'min': 1
+                                                            },
+                                                            'maximum': {
+                                                                'type': 'integer'
+                                                            },
+                                                            'exclusiveMaximum': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            },
+                                                            'minimum': {
+                                                                'type': 'integer'
+                                                            },
+                                                            'exclusiveMinimum': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            },
+                                                            'maxLength': {
+                                                                'type': 'integer',
+                                                                'min': 0
+                                                            },
+                                                            'minLength': {
+                                                                'type': 'integer',
+                                                                'min': 0
+                                                            },
+                                                            'pattern': {
+                                                                'type': 'string'
+                                                            },
+                                                            'maxItems': {
+                                                                'type': 'integer',
+                                                                'min': 0
+                                                            },
+                                                            'minItems': {
+                                                                'type': 'integer',
+                                                                'min': 0,
+                                                                'default': 0
+                                                            },
+                                                            'uniqueItems': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            },
+                                                            'maxProperties': {
+                                                                'type': 'integer',
+                                                                'min': 0
+                                                            },
+                                                            'minProperties': {
+                                                                'type': 'integer',
+                                                                'min': 0,
+                                                                'default': 0
+                                                            },
+                                                            'required': {
+                                                                'type': 'list',
+                                                                'minlength': 1,
+                                                                'schema': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'check_with': check_list_unique
+                                                            },
+                                                            'enum': {
+                                                                'type': 'list',
+                                                                'minlength': 1,
+                                                                'valuesrules': {
+                                                                    'nullable': True
+                                                                }
+                                                            },
+                                                            'type': {
+                                                                'type': 'string'
+                                                            },
+                                                            # allOf, oneOf, anyOf, not, items, additionalProperties, and default are not added due to conplications
+                                                            'allOf': {},
+                                                            'oneOf': {},
+                                                            'anyOf': {},
+                                                            'not': {},
+                                                            'additionalProperties': {},
+                                                            'default': {},
+                                                            'properties': { # restricted to 2 loops
+                                                                'type': 'dict',
+                                                                'keysrules': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'valuesrules': {
+                                                                    'type': 'dict',
+                                                                    'schema': {
+                                                                        'title': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'multipleOf': {
+                                                                            'type': 'integer',
+                                                                            'min': 1
+                                                                        },
+                                                                        'maximum': {
+                                                                            'type': 'integer'
+                                                                        },
+                                                                        'exclusiveMaximum': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'minimum': {
+                                                                            'type': 'integer'
+                                                                        },
+                                                                        'exclusiveMinimum': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'maxLength': {
+                                                                            'type': 'integer',
+                                                                            'min': 0
+                                                                        },
+                                                                        'minLength': {
+                                                                            'type': 'integer',
+                                                                            'min': 0
+                                                                        },
+                                                                        'pattern': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'maxItems': {
+                                                                            'type': 'integer',
+                                                                            'min': 0
+                                                                        },
+                                                                        'minItems': {
+                                                                            'type': 'integer',
+                                                                            'min': 0,
+                                                                            'default': 0
+                                                                        },
+                                                                        'uniqueItems': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'maxProperties': {
+                                                                            'type': 'integer',
+                                                                            'min': 0
+                                                                        },
+                                                                        'minProperties': {
+                                                                            'type': 'integer',
+                                                                            'min': 0,
+                                                                            'default': 0
+                                                                        },
+                                                                        'required': {
+                                                                            'type': 'list',
+                                                                            'minlength': 1,
+                                                                            'schema': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'check_with': check_list_unique
+                                                                        },
+                                                                        'enum': {
+                                                                            'type': 'list',
+                                                                            'minlength': 1,
+                                                                            'valuesrules': {
+                                                                                'nullable': True
+                                                                            }
+                                                                        },
+                                                                        'type': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'allOf': {},
+                                                                        'oneOf': {},
+                                                                        'anyOf': {},
+                                                                        'not': {},
+                                                                        'additionalProperties': {},
+                                                                        'default': {},
+                                                                        'properties': { 
+                                                                            'type': 'dict',
+                                                                            'keysrules': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'valuesrules': {
+                                                                                'type': 'dict',
+                                                                                'schema': {
+                                                                                    'title': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'multipleOf': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 1
+                                                                                    },
+                                                                                    'maximum': {
+                                                                                        'type': 'integer'
+                                                                                    },
+                                                                                    'exclusiveMaximum': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'minimum': {
+                                                                                        'type': 'integer'
+                                                                                    },
+                                                                                    'exclusiveMinimum': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'maxLength': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0
+                                                                                    },
+                                                                                    'minLength': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0
+                                                                                    },
+                                                                                    'pattern': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'maxItems': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0
+                                                                                    },
+                                                                                    'minItems': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0,
+                                                                                        'default': 0
+                                                                                    },
+                                                                                    'uniqueItems': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'maxProperties': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0
+                                                                                    },
+                                                                                    'minProperties': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0,
+                                                                                        'default': 0
+                                                                                    },
+                                                                                    'required': {
+                                                                                        'type': 'list',
+                                                                                        'minlength': 1,
+                                                                                        'schema': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'check_with': check_list_unique
+                                                                                    },
+                                                                                    'enum': {
+                                                                                        'type': 'list',
+                                                                                        'minlength': 1,
+                                                                                        'valuesrules': {
+                                                                                            'nullable': True
+                                                                                        }
+                                                                                    },
+                                                                                    'type': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'allOf': {},
+                                                                                    'oneOf': {},
+                                                                                    'anyOf': {},
+                                                                                    'not': {},
+                                                                                    'additionalProperties': {},
+                                                                                    'default': {},
+                                                                                    'description': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'format': {
+                                                                                        'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                    },
+                                                                                    'nullable': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'discriminator': {
+                                                                                        'type': 'dict',
+                                                                                        'anyof': [
+                                                                                            {'dependencies': 'oneOf'},
+                                                                                            {'dependencies': 'anyOf'},
+                                                                                            {'dependencies': 'allOf'}
+                                                                                        ],
+                                                                                        'schema': {
+                                                                                            'propertyName': {
+                                                                                                'required': True,
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'mapping': {
+                                                                                                'type': 'dict',
+                                                                                                'keysrules': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'valuesrules': {
+                                                                                                    'type': 'string'
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    'readOnly': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'writeOnly': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'xml': {
+                                                                                        'type': 'dict',
+                                                                                        'allow_unknown': {
+                                                                                            'check_with': check_extension
+                                                                                        },
+                                                                                        'schema': {
+                                                                                            'name': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'namespace': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'prefix': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'attribute': {
+                                                                                                'type': 'boolean',
+                                                                                                'default': False
+                                                                                            },
+                                                                                            'wrapped': {
+                                                                                                'type': 'boolean',
+                                                                                                'default': False
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    'externalDocs': {
+                                                                                        'type': 'dict',
+                                                                                        'allow_unknown': {
+                                                                                            'check_with': check_extension
+                                                                                        },
+                                                                                        'schema': {
+                                                                                            'description': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'url': {
+                                                                                                'required': True,
+                                                                                                'type': 'string',
+                                                                                                'check_with': check_url
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    'example': {},
+                                                                                    'deprecated': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        'description': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'format': {
+                                                                            'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                        },
+                                                                        'nullable': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'discriminator': {
+                                                                            'type': 'dict',
+                                                                            'anyof': [
+                                                                                {'dependencies': 'oneOf'},
+                                                                                {'dependencies': 'anyOf'},
+                                                                                {'dependencies': 'allOf'}
+                                                                            ],
+                                                                            'schema': {
+                                                                                'propertyName': {
+                                                                                    'required': True,
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'mapping': {
+                                                                                    'type': 'dict',
+                                                                                    'keysrules': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'valuesrules': {
+                                                                                        'type': 'string'
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        'readOnly': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'writeOnly': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'xml': {
+                                                                            'type': 'dict',
+                                                                            'allow_unknown': {
+                                                                                'check_with': check_extension
+                                                                            },
+                                                                            'schema': {
+                                                                                'name': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'namespace': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'prefix': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'attribute': {
+                                                                                    'type': 'boolean',
+                                                                                    'default': False
+                                                                                },
+                                                                                'wrapped': {
+                                                                                    'type': 'boolean',
+                                                                                    'default': False
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        'externalDocs': {
+                                                                            'type': 'dict',
+                                                                            'allow_unknown': {
+                                                                                'check_with': check_extension
+                                                                            },
+                                                                            'schema': {
+                                                                                'description': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'url': {
+                                                                                    'required': True,
+                                                                                    'type': 'string',
+                                                                                    'check_with': check_url
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        'example': {},
+                                                                        'deprecated': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            'description': {
+                                                                'type': 'string'
+                                                            },
+                                                            'format': {
+                                                                'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                            },
+                                                            'nullable': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            },
+                                                            'discriminator': {
+                                                                'type': 'dict',
+                                                                'anyof': [
+                                                                    {'dependencies': 'oneOf'},
+                                                                    {'dependencies': 'anyOf'},
+                                                                    {'dependencies': 'allOf'}
+                                                                ],
+                                                                'schema': {
+                                                                    'propertyName': {
+                                                                        'required': True,
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'mapping': {
+                                                                        'type': 'dict',
+                                                                        'keysrules': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'valuesrules': {
+                                                                            'type': 'string'
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            'readOnly': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            },
+                                                            'writeOnly': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            },
+                                                            'xml': {
+                                                                'type': 'dict',
+                                                                'allow_unknown': {
+                                                                    'check_with': check_extension
+                                                                },
+                                                                'schema': {
+                                                                    'name': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'namespace': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'prefix': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'attribute': {
+                                                                        'type': 'boolean',
+                                                                        'default': False
+                                                                    },
+                                                                    'wrapped': {
+                                                                        'type': 'boolean',
+                                                                        'default': False
+                                                                    }
+                                                                }
+                                                            },
+                                                            'externalDocs': {
+                                                                'type': 'dict',
+                                                                'allow_unknown': {
+                                                                    'check_with': check_extension
+                                                                },
+                                                                'schema': {
+                                                                    'description': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'url': {
+                                                                        'required': True,
+                                                                        'type': 'string',
+                                                                        'check_with': check_url
+                                                                    }
+                                                                }
+                                                            },
+                                                            'example': {},
+                                                            'deprecated': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            }
+                                                        }
+                                                    }
+                                                ],
+                                            },
+                                            'example': {},
+                                            'examples': {
+                                                'type': 'dict',
+                                                'keysrules': {
+                                                    'type': 'string'
+                                                },
+                                                'valuesrules': {
+                                                    'anyof': [
+                                                        {
+                                                            'type': 'dict',
+                                                            'schema': {
+                                                                '$ref': {
+                                                                    'required': True,
+                                                                    'type': 'string'
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            'type': 'dict',
+                                                            'allow_unknown': {
+                                                                'check_with': check_extension
+                                                            },
+                                                            'schema': {
+                                                                'summary': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'description': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'value': {
+                                                                    'excludes': 'externalValue'
+                                                                },
+                                                                'externalValue': {
+                                                                    'type': 'string',
+                                                                    'excludes': 'value'
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            'content': {
+                                                'keysrules': {
+                                                    'type': 'string',
+                                                    'check_with': check_media_type
+                                                },
+                                                'valuesrules': {
+                                                    'type': 'dict',
+                                                    'allow_unknown': {
+                                                        'check_with': check_extension
+                                                    },
+                                                    'schema': {
+                                                        'schema': {
+                                                            'anyof': [
+                                                                {
+                                                                    'type': 'dict',
+                                                                    'schema': {
+                                                                        '$ref': {
+                                                                            'required': True,
+                                                                            'type': 'string'
+                                                                        }
+                                                                    }
+                                                                },
+                                                                {
+                                                                    'type': 'dict',
+                                                                    'allow_unknown': {
+                                                                        'check_with': check_extension
+                                                                    },
+                                                                    'schema': {
+                                                                        'title': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'multipleOf': {
+                                                                            'type': 'integer',
+                                                                            'min': 1
+                                                                        },
+                                                                        'maximum': {
+                                                                            'type': 'integer'
+                                                                        },
+                                                                        'exclusiveMaximum': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'minimum': {
+                                                                            'type': 'integer'
+                                                                        },
+                                                                        'exclusiveMinimum': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'maxLength': {
+                                                                            'type': 'integer',
+                                                                            'min': 0
+                                                                        },
+                                                                        'minLength': {
+                                                                            'type': 'integer',
+                                                                            'min': 0
+                                                                        },
+                                                                        'pattern': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'maxItems': {
+                                                                            'type': 'integer',
+                                                                            'min': 0
+                                                                        },
+                                                                        'minItems': {
+                                                                            'type': 'integer',
+                                                                            'min': 0,
+                                                                            'default': 0
+                                                                        },
+                                                                        'uniqueItems': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'maxProperties': {
+                                                                            'type': 'integer',
+                                                                            'min': 0
+                                                                        },
+                                                                        'minProperties': {
+                                                                            'type': 'integer',
+                                                                            'min': 0,
+                                                                            'default': 0
+                                                                        },
+                                                                        'required': {
+                                                                            'type': 'list',
+                                                                            'minlength': 1,
+                                                                            'schema': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'check_with': check_list_unique
+                                                                        },
+                                                                        'enum': {
+                                                                            'type': 'list',
+                                                                            'minlength': 1,
+                                                                            'valuesrules': {
+                                                                                'nullable': True
+                                                                            }
+                                                                        },
+                                                                        'type': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        # allOf, oneOf, anyOf, not, items, additionalProperties, and default are not added due to conplications
+                                                                        'allOf': {},
+                                                                        'oneOf': {},
+                                                                        'anyOf': {},
+                                                                        'not': {},
+                                                                        'additionalProperties': {},
+                                                                        'default': {},
+                                                                        'properties': { # restricted to 2 loops
+                                                                            'type': 'dict',
+                                                                            'keysrules': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'valuesrules': {
+                                                                                'type': 'dict',
+                                                                                'schema': {
+                                                                                    'title': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'multipleOf': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 1
+                                                                                    },
+                                                                                    'maximum': {
+                                                                                        'type': 'integer'
+                                                                                    },
+                                                                                    'exclusiveMaximum': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'minimum': {
+                                                                                        'type': 'integer'
+                                                                                    },
+                                                                                    'exclusiveMinimum': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'maxLength': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0
+                                                                                    },
+                                                                                    'minLength': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0
+                                                                                    },
+                                                                                    'pattern': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'maxItems': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0
+                                                                                    },
+                                                                                    'minItems': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0,
+                                                                                        'default': 0
+                                                                                    },
+                                                                                    'uniqueItems': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'maxProperties': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0
+                                                                                    },
+                                                                                    'minProperties': {
+                                                                                        'type': 'integer',
+                                                                                        'min': 0,
+                                                                                        'default': 0
+                                                                                    },
+                                                                                    'required': {
+                                                                                        'type': 'list',
+                                                                                        'minlength': 1,
+                                                                                        'schema': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'check_with': check_list_unique
+                                                                                    },
+                                                                                    'enum': {
+                                                                                        'type': 'list',
+                                                                                        'minlength': 1,
+                                                                                        'valuesrules': {
+                                                                                            'nullable': True
+                                                                                        }
+                                                                                    },
+                                                                                    'type': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'allOf': {},
+                                                                                    'oneOf': {},
+                                                                                    'anyOf': {},
+                                                                                    'not': {},
+                                                                                    'additionalProperties': {},
+                                                                                    'default': {},
+                                                                                    'properties': { 
+                                                                                        'type': 'dict',
+                                                                                        'keysrules': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'valuesrules': {
+                                                                                            'type': 'dict',
+                                                                                            'schema': {
+                                                                                                'title': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'multipleOf': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 1
+                                                                                                },
+                                                                                                'maximum': {
+                                                                                                    'type': 'integer'
+                                                                                                },
+                                                                                                'exclusiveMaximum': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'minimum': {
+                                                                                                    'type': 'integer'
+                                                                                                },
+                                                                                                'exclusiveMinimum': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'maxLength': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0
+                                                                                                },
+                                                                                                'minLength': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0
+                                                                                                },
+                                                                                                'pattern': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'maxItems': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0
+                                                                                                },
+                                                                                                'minItems': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0,
+                                                                                                    'default': 0
+                                                                                                },
+                                                                                                'uniqueItems': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'maxProperties': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0
+                                                                                                },
+                                                                                                'minProperties': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0,
+                                                                                                    'default': 0
+                                                                                                },
+                                                                                                'required': {
+                                                                                                    'type': 'list',
+                                                                                                    'minlength': 1,
+                                                                                                    'schema': {
+                                                                                                        'type': 'string'
+                                                                                                    },
+                                                                                                    'check_with': check_list_unique
+                                                                                                },
+                                                                                                'enum': {
+                                                                                                    'type': 'list',
+                                                                                                    'minlength': 1,
+                                                                                                    'valuesrules': {
+                                                                                                        'nullable': True
+                                                                                                    }
+                                                                                                },
+                                                                                                'type': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'allOf': {},
+                                                                                                'oneOf': {},
+                                                                                                'anyOf': {},
+                                                                                                'not': {},
+                                                                                                'additionalProperties': {},
+                                                                                                'default': {},
+                                                                                                'description': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'format': {
+                                                                                                    'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                                },
+                                                                                                'nullable': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'discriminator': {
+                                                                                                    'type': 'dict',
+                                                                                                    'anyof': [
+                                                                                                        {'dependencies': 'oneOf'},
+                                                                                                        {'dependencies': 'anyOf'},
+                                                                                                        {'dependencies': 'allOf'}
+                                                                                                    ],
+                                                                                                    'schema': {
+                                                                                                        'propertyName': {
+                                                                                                            'required': True,
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'mapping': {
+                                                                                                            'type': 'dict',
+                                                                                                            'keysrules': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'valuesrules': {
+                                                                                                                'type': 'string'
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                'readOnly': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'writeOnly': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'xml': {
+                                                                                                    'type': 'dict',
+                                                                                                    'allow_unknown': {
+                                                                                                        'check_with': check_extension
+                                                                                                    },
+                                                                                                    'schema': {
+                                                                                                        'name': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'namespace': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'prefix': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'attribute': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        },
+                                                                                                        'wrapped': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                'externalDocs': {
+                                                                                                    'type': 'dict',
+                                                                                                    'allow_unknown': {
+                                                                                                        'check_with': check_extension
+                                                                                                    },
+                                                                                                    'schema': {
+                                                                                                        'description': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'url': {
+                                                                                                            'required': True,
+                                                                                                            'type': 'string',
+                                                                                                            'check_with': check_url
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                'example': {},
+                                                                                                'deprecated': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    'description': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'format': {
+                                                                                        'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                    },
+                                                                                    'nullable': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'discriminator': {
+                                                                                        'type': 'dict',
+                                                                                        'anyof': [
+                                                                                            {'dependencies': 'oneOf'},
+                                                                                            {'dependencies': 'anyOf'},
+                                                                                            {'dependencies': 'allOf'}
+                                                                                        ],
+                                                                                        'schema': {
+                                                                                            'propertyName': {
+                                                                                                'required': True,
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'mapping': {
+                                                                                                'type': 'dict',
+                                                                                                'keysrules': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'valuesrules': {
+                                                                                                    'type': 'string'
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    'readOnly': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'writeOnly': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'xml': {
+                                                                                        'type': 'dict',
+                                                                                        'allow_unknown': {
+                                                                                            'check_with': check_extension
+                                                                                        },
+                                                                                        'schema': {
+                                                                                            'name': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'namespace': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'prefix': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'attribute': {
+                                                                                                'type': 'boolean',
+                                                                                                'default': False
+                                                                                            },
+                                                                                            'wrapped': {
+                                                                                                'type': 'boolean',
+                                                                                                'default': False
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    'externalDocs': {
+                                                                                        'type': 'dict',
+                                                                                        'allow_unknown': {
+                                                                                            'check_with': check_extension
+                                                                                        },
+                                                                                        'schema': {
+                                                                                            'description': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'url': {
+                                                                                                'required': True,
+                                                                                                'type': 'string',
+                                                                                                'check_with': check_url
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    'example': {},
+                                                                                    'deprecated': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        'description': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'format': {
+                                                                            'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                        },
+                                                                        'nullable': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'discriminator': {
+                                                                            'type': 'dict',
+                                                                            'anyof': [
+                                                                                {'dependencies': 'oneOf'},
+                                                                                {'dependencies': 'anyOf'},
+                                                                                {'dependencies': 'allOf'}
+                                                                            ],
+                                                                            'schema': {
+                                                                                'propertyName': {
+                                                                                    'required': True,
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'mapping': {
+                                                                                    'type': 'dict',
+                                                                                    'keysrules': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'valuesrules': {
+                                                                                        'type': 'string'
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        'readOnly': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'writeOnly': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'xml': {
+                                                                            'type': 'dict',
+                                                                            'allow_unknown': {
+                                                                                'check_with': check_extension
+                                                                            },
+                                                                            'schema': {
+                                                                                'name': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'namespace': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'prefix': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'attribute': {
+                                                                                    'type': 'boolean',
+                                                                                    'default': False
+                                                                                },
+                                                                                'wrapped': {
+                                                                                    'type': 'boolean',
+                                                                                    'default': False
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        'externalDocs': {
+                                                                            'type': 'dict',
+                                                                            'allow_unknown': {
+                                                                                'check_with': check_extension
+                                                                            },
+                                                                            'schema': {
+                                                                                'description': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'url': {
+                                                                                    'required': True,
+                                                                                    'type': 'string',
+                                                                                    'check_with': check_url
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        'example': {},
+                                                                        'deprecated': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ],
+                                                        },
+                                                        'example': {},
+                                                        'examples': {
+                                                            'type': 'dict',
+                                                            'keysrules': {
+                                                                'type': 'string'
+                                                            },
+                                                            'valuesrules': {
+                                                                'anyof': [
+                                                                    {
+                                                                        'type': 'dict',
+                                                                        'schema': {
+                                                                            '$ref': {
+                                                                                'required': True,
+                                                                                'type': 'string'
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        'type': 'dict',
+                                                                        'allow_unknown': {
+                                                                        'check_with': check_extension
+                                                                        },
+                                                                        'schema': {
+                                                                            'summary': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'description': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'value': {
+                                                                                'excludes': 'externalValue'
+                                                                            },
+                                                                            'externalValue': {
+                                                                                'type': 'string',
+                                                                                'excludes': 'value'
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        'encoding': {
+                                                            'type': 'dict',
+                                                            'keysrules': {
+                                                                'type': 'string'
+                                                            },
+                                                            'valuesrules': {
+                                                                'type': 'dict',
+                                                                'allow_unknown': {
+                                                                'check_with': check_extension
+                                                                },
+                                                                'schema': {
+                                                                    'contentType': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'headers': {
+                                                                        'keysrules': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'valuesrules': {
+                                                                            'anyof': [
+                                                                                {
+                                                                                    'type': 'dict',
+                                                                                    'schema': {
+                                                                                        '$ref': {
+                                                                                            'required': True,
+                                                                                            'type': 'string'
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                {
+                                                                                    'type': 'dict',
+                                                                                    'allow_unknown': {
+                                                                                    'check_with': check_extension
+                                                                                    },
+                                                                                    'schema': {
+                                                                                        'description': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'required': {
+                                                                                            'required': True,
+                                                                                            'allowed': [True]
+                                                                                        },
+                                                                                        'deprecated': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'allowEmptyValue': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'style': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'explode': {
+                                                                                            'type': 'boolean',
+                                                                                        },
+                                                                                        'allowReserved': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'schema': {
+                                                                                            'anyof': [
+                                                                                                {
+                                                                                                    'type': 'dict',
+                                                                                                    'schema': {
+                                                                                                        '$ref': {
+                                                                                                            'required': True,
+                                                                                                            'type': 'string'
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    'type': 'dict',
+                                                                                                    'allow_unknown': {
+                                                                                                        'check_with': check_extension
+                                                                                                    },
+                                                                                                    'schema': {
+                                                                                                        'title': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'multipleOf': {
+                                                                                                            'type': 'integer',
+                                                                                                            'min': 1
+                                                                                                        },
+                                                                                                        'maximum': {
+                                                                                                            'type': 'integer'
+                                                                                                        },
+                                                                                                        'exclusiveMaximum': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        },
+                                                                                                        'minimum': {
+                                                                                                            'type': 'integer'
+                                                                                                        },
+                                                                                                        'exclusiveMinimum': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        },
+                                                                                                        'maxLength': {
+                                                                                                            'type': 'integer',
+                                                                                                            'min': 0
+                                                                                                        },
+                                                                                                        'minLength': {
+                                                                                                            'type': 'integer',
+                                                                                                            'min': 0
+                                                                                                        },
+                                                                                                        'pattern': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'maxItems': {
+                                                                                                            'type': 'integer',
+                                                                                                            'min': 0
+                                                                                                        },
+                                                                                                        'minItems': {
+                                                                                                            'type': 'integer',
+                                                                                                            'min': 0,
+                                                                                                            'default': 0
+                                                                                                        },
+                                                                                                        'uniqueItems': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        },
+                                                                                                        'maxProperties': {
+                                                                                                            'type': 'integer',
+                                                                                                            'min': 0
+                                                                                                        },
+                                                                                                        'minProperties': {
+                                                                                                            'type': 'integer',
+                                                                                                            'min': 0,
+                                                                                                            'default': 0
+                                                                                                        },
+                                                                                                        'required': {
+                                                                                                            'type': 'list',
+                                                                                                            'minlength': 1,
+                                                                                                            'schema': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'check_with': check_list_unique
+                                                                                                        },
+                                                                                                        'enum': {
+                                                                                                            'type': 'list',
+                                                                                                            'minlength': 1,
+                                                                                                            'valuesrules': {
+                                                                                                                'nullable': True
+                                                                                                            }
+                                                                                                        },
+                                                                                                        'type': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        # allOf, oneOf, anyOf, not, items, additionalProperties, and default are not added due to conplications
+                                                                                                        'allOf': {},
+                                                                                                        'oneOf': {},
+                                                                                                        'anyOf': {},
+                                                                                                        'not': {},
+                                                                                                        'additionalProperties': {},
+                                                                                                        'default': {},
+                                                                                                        'properties': { # restricted to 2 loops
+                                                                                                            'type': 'dict',
+                                                                                                            'keysrules': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'valuesrules': {
+                                                                                                                'type': 'dict',
+                                                                                                                'schema': {
+                                                                                                                    'title': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'multipleOf': {
+                                                                                                                        'type': 'integer',
+                                                                                                                        'min': 1
+                                                                                                                    },
+                                                                                                                    'maximum': {
+                                                                                                                        'type': 'integer'
+                                                                                                                    },
+                                                                                                                    'exclusiveMaximum': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    },
+                                                                                                                    'minimum': {
+                                                                                                                        'type': 'integer'
+                                                                                                                    },
+                                                                                                                    'exclusiveMinimum': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    },
+                                                                                                                    'maxLength': {
+                                                                                                                        'type': 'integer',
+                                                                                                                        'min': 0
+                                                                                                                    },
+                                                                                                                    'minLength': {
+                                                                                                                        'type': 'integer',
+                                                                                                                        'min': 0
+                                                                                                                    },
+                                                                                                                    'pattern': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'maxItems': {
+                                                                                                                        'type': 'integer',
+                                                                                                                        'min': 0
+                                                                                                                    },
+                                                                                                                    'minItems': {
+                                                                                                                        'type': 'integer',
+                                                                                                                        'min': 0,
+                                                                                                                        'default': 0
+                                                                                                                    },
+                                                                                                                    'uniqueItems': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    },
+                                                                                                                    'maxProperties': {
+                                                                                                                        'type': 'integer',
+                                                                                                                        'min': 0
+                                                                                                                    },
+                                                                                                                    'minProperties': {
+                                                                                                                        'type': 'integer',
+                                                                                                                        'min': 0,
+                                                                                                                        'default': 0
+                                                                                                                    },
+                                                                                                                    'required': {
+                                                                                                                        'type': 'list',
+                                                                                                                        'minlength': 1,
+                                                                                                                        'schema': {
+                                                                                                                            'type': 'string'
+                                                                                                                        },
+                                                                                                                        'check_with': check_list_unique
+                                                                                                                    },
+                                                                                                                    'enum': {
+                                                                                                                        'type': 'list',
+                                                                                                                        'minlength': 1,
+                                                                                                                        'valuesrules': {
+                                                                                                                            'nullable': True
+                                                                                                                        }
+                                                                                                                    },
+                                                                                                                    'type': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'allOf': {},
+                                                                                                                    'oneOf': {},
+                                                                                                                    'anyOf': {},
+                                                                                                                    'not': {},
+                                                                                                                    'additionalProperties': {},
+                                                                                                                    'default': {},
+                                                                                                                    'properties': { 
+                                                                                                                        'type': 'dict',
+                                                                                                                        'keysrules': {
+                                                                                                                            'type': 'string'
+                                                                                                                        },
+                                                                                                                        'valuesrules': {
+                                                                                                                            'type': 'dict',
+                                                                                                                            'schema': {
+                                                                                                                                'title': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'multipleOf': {
+                                                                                                                                    'type': 'integer',
+                                                                                                                                    'min': 1
+                                                                                                                                },
+                                                                                                                                'maximum': {
+                                                                                                                                    'type': 'integer'
+                                                                                                                                },
+                                                                                                                                'exclusiveMaximum': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                },
+                                                                                                                                'minimum': {
+                                                                                                                                    'type': 'integer'
+                                                                                                                                },
+                                                                                                                                'exclusiveMinimum': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                },
+                                                                                                                                'maxLength': {
+                                                                                                                                    'type': 'integer',
+                                                                                                                                    'min': 0
+                                                                                                                                },
+                                                                                                                                'minLength': {
+                                                                                                                                    'type': 'integer',
+                                                                                                                                    'min': 0
+                                                                                                                                },
+                                                                                                                                'pattern': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'maxItems': {
+                                                                                                                                    'type': 'integer',
+                                                                                                                                    'min': 0
+                                                                                                                                },
+                                                                                                                                'minItems': {
+                                                                                                                                    'type': 'integer',
+                                                                                                                                    'min': 0,
+                                                                                                                                    'default': 0
+                                                                                                                                },
+                                                                                                                                'uniqueItems': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                },
+                                                                                                                                'maxProperties': {
+                                                                                                                                    'type': 'integer',
+                                                                                                                                    'min': 0
+                                                                                                                                },
+                                                                                                                                'minProperties': {
+                                                                                                                                    'type': 'integer',
+                                                                                                                                    'min': 0,
+                                                                                                                                    'default': 0
+                                                                                                                                },
+                                                                                                                                'required': {
+                                                                                                                                    'type': 'list',
+                                                                                                                                    'minlength': 1,
+                                                                                                                                    'schema': {
+                                                                                                                                        'type': 'string'
+                                                                                                                                    },
+                                                                                                                                    'check_with': check_list_unique
+                                                                                                                                },
+                                                                                                                                'enum': {
+                                                                                                                                    'type': 'list',
+                                                                                                                                    'minlength': 1,
+                                                                                                                                    'valuesrules': {
+                                                                                                                                        'nullable': True
+                                                                                                                                    }
+                                                                                                                                },
+                                                                                                                                'type': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'allOf': {},
+                                                                                                                                'oneOf': {},
+                                                                                                                                'anyOf': {},
+                                                                                                                                'not': {},
+                                                                                                                                'additionalProperties': {},
+                                                                                                                                'default': {},
+                                                                                                                                'description': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'format': {
+                                                                                                                                    'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                                                                },
+                                                                                                                                'nullable': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                },
+                                                                                                                                'discriminator': {
+                                                                                                                                    'type': 'dict',
+                                                                                                                                    'anyof': [
+                                                                                                                                        {'dependencies': 'oneOf'},
+                                                                                                                                        {'dependencies': 'anyOf'},
+                                                                                                                                        {'dependencies': 'allOf'}
+                                                                                                                                    ],
+                                                                                                                                    'schema': {
+                                                                                                                                        'propertyName': {
+                                                                                                                                            'required': True,
+                                                                                                                                            'type': 'string'
+                                                                                                                                        },
+                                                                                                                                        'mapping': {
+                                                                                                                                            'type': 'dict',
+                                                                                                                                            'keysrules': {
+                                                                                                                                                'type': 'string'
+                                                                                                                                            },
+                                                                                                                                            'valuesrules': {
+                                                                                                                                                'type': 'string'
+                                                                                                                                            }
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                },
+                                                                                                                                'readOnly': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                },
+                                                                                                                                'writeOnly': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                },
+                                                                                                                                'xml': {
+                                                                                                                                    'type': 'dict',
+                                                                                                                                    'allow_unknown': {
+                                                                                                                                        'check_with': check_extension
+                                                                                                                                    },
+                                                                                                                                    'schema': {
+                                                                                                                                        'name': {
+                                                                                                                                            'type': 'string'
+                                                                                                                                        },
+                                                                                                                                        'namespace': {
+                                                                                                                                            'type': 'string'
+                                                                                                                                        },
+                                                                                                                                        'prefix': {
+                                                                                                                                            'type': 'string'
+                                                                                                                                        },
+                                                                                                                                        'attribute': {
+                                                                                                                                            'type': 'boolean',
+                                                                                                                                            'default': False
+                                                                                                                                        },
+                                                                                                                                        'wrapped': {
+                                                                                                                                            'type': 'boolean',
+                                                                                                                                            'default': False
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                },
+                                                                                                                                'externalDocs': {
+                                                                                                                                    'type': 'dict',
+                                                                                                                                    'allow_unknown': {
+                                                                                                                                        'check_with': check_extension
+                                                                                                                                    },
+                                                                                                                                    'schema': {
+                                                                                                                                        'description': {
+                                                                                                                                            'type': 'string'
+                                                                                                                                        },
+                                                                                                                                        'url': {
+                                                                                                                                            'required': True,
+                                                                                                                                            'type': 'string',
+                                                                                                                                            'check_with': check_url
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                },
+                                                                                                                                'example': {},
+                                                                                                                                'deprecated': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    },
+                                                                                                                    'description': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'format': {
+                                                                                                                        'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                                                    },
+                                                                                                                    'nullable': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    },
+                                                                                                                    'discriminator': {
+                                                                                                                        'type': 'dict',
+                                                                                                                        'anyof': [
+                                                                                                                            {'dependencies': 'oneOf'},
+                                                                                                                            {'dependencies': 'anyOf'},
+                                                                                                                            {'dependencies': 'allOf'}
+                                                                                                                        ],
+                                                                                                                        'schema': {
+                                                                                                                            'propertyName': {
+                                                                                                                                'required': True,
+                                                                                                                                'type': 'string'
+                                                                                                                            },
+                                                                                                                            'mapping': {
+                                                                                                                                'type': 'dict',
+                                                                                                                                'keysrules': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'valuesrules': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    },
+                                                                                                                    'readOnly': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    },
+                                                                                                                    'writeOnly': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    },
+                                                                                                                    'xml': {
+                                                                                                                        'type': 'dict',
+                                                                                                                        'allow_unknown': {
+                                                                                                                            'check_with': check_extension
+                                                                                                                        },
+                                                                                                                        'schema': {
+                                                                                                                            'name': {
+                                                                                                                                'type': 'string'
+                                                                                                                            },
+                                                                                                                            'namespace': {
+                                                                                                                                'type': 'string'
+                                                                                                                            },
+                                                                                                                            'prefix': {
+                                                                                                                                'type': 'string'
+                                                                                                                            },
+                                                                                                                            'attribute': {
+                                                                                                                                'type': 'boolean',
+                                                                                                                                'default': False
+                                                                                                                            },
+                                                                                                                            'wrapped': {
+                                                                                                                                'type': 'boolean',
+                                                                                                                                'default': False
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    },
+                                                                                                                    'externalDocs': {
+                                                                                                                        'type': 'dict',
+                                                                                                                        'allow_unknown': {
+                                                                                                                            'check_with': check_extension
+                                                                                                                        },
+                                                                                                                        'schema': {
+                                                                                                                            'description': {
+                                                                                                                                'type': 'string'
+                                                                                                                            },
+                                                                                                                            'url': {
+                                                                                                                                'required': True,
+                                                                                                                                'type': 'string',
+                                                                                                                                'check_with': check_url
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    },
+                                                                                                                    'example': {},
+                                                                                                                    'deprecated': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        },
+                                                                                                        'description': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'format': {
+                                                                                                            'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                                        },
+                                                                                                        'nullable': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        },
+                                                                                                        'discriminator': {
+                                                                                                            'type': 'dict',
+                                                                                                            'anyof': [
+                                                                                                                {'dependencies': 'oneOf'},
+                                                                                                                {'dependencies': 'anyOf'},
+                                                                                                                {'dependencies': 'allOf'}
+                                                                                                            ],
+                                                                                                            'schema': {
+                                                                                                                'propertyName': {
+                                                                                                                    'required': True,
+                                                                                                                    'type': 'string'
+                                                                                                                },
+                                                                                                                'mapping': {
+                                                                                                                    'type': 'dict',
+                                                                                                                    'keysrules': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'valuesrules': {
+                                                                                                                        'type': 'string'
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        },
+                                                                                                        'readOnly': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        },
+                                                                                                        'writeOnly': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        },
+                                                                                                        'xml': {
+                                                                                                            'type': 'dict',
+                                                                                                            'allow_unknown': {
+                                                                                                                'check_with': check_extension
+                                                                                                            },
+                                                                                                            'schema': {
+                                                                                                                'name': {
+                                                                                                                    'type': 'string'
+                                                                                                                },
+                                                                                                                'namespace': {
+                                                                                                                    'type': 'string'
+                                                                                                                },
+                                                                                                                'prefix': {
+                                                                                                                    'type': 'string'
+                                                                                                                },
+                                                                                                                'attribute': {
+                                                                                                                    'type': 'boolean',
+                                                                                                                    'default': False
+                                                                                                                },
+                                                                                                                'wrapped': {
+                                                                                                                    'type': 'boolean',
+                                                                                                                    'default': False
+                                                                                                                }
+                                                                                                            }
+                                                                                                        },
+                                                                                                        'externalDocs': {
+                                                                                                            'type': 'dict',
+                                                                                                            'allow_unknown': {
+                                                                                                                'check_with': check_extension
+                                                                                                            },
+                                                                                                            'schema': {
+                                                                                                                'description': {
+                                                                                                                    'type': 'string'
+                                                                                                                },
+                                                                                                                'url': {
+                                                                                                                    'required': True,
+                                                                                                                    'type': 'string',
+                                                                                                                    'check_with': check_url
+                                                                                                                }
+                                                                                                            }
+                                                                                                        },
+                                                                                                        'example': {},
+                                                                                                        'deprecated': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            ],
+                                                                                        },
+                                                                                        'example': {},
+                                                                                        'examples': {
+                                                                                            'type': 'dict',
+                                                                                            'keysrules': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'valuesrules': {
+                                                                                                'anyof': [
+                                                                                                    {
+                                                                                                        'type': 'dict',
+                                                                                                        'schema': {
+                                                                                                            '$ref': {
+                                                                                                                'required': True,
+                                                                                                                'type': 'string'
+                                                                                                            }
+                                                                                                        }
+                                                                                                    },
+                                                                                                    {
+                                                                                                        'type': 'dict',
+                                                                                                        'allow_unknown': {
+                                                                                                        'check_with': check_extension
+                                                                                                        },
+                                                                                                        'schema': {
+                                                                                                            'summary': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'description': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'value': {
+                                                                                                                'excludes': 'externalValue'
+                                                                                                            },
+                                                                                                            'externalValue': {
+                                                                                                                'type': 'string',
+                                                                                                                'excludes': 'value'
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                ]
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    'style': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'explode': {
+                                                                        'type': 'boolean'
+                                                                    },
+                                                                    'allowReserved': {
+                                                                        'type': 'boolean',
+                                                                        'default': False
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -3011,12 +4859,11 @@ schema = {
                             'required': True,
                             'type': 'dict',
                             'keysrules': {
-                                # 'anyof': [
-                                #     {'check_with': check_status_code},
-                                #     {'check_with': check_extension}
-                                # ]   
                                 'check_with': check_status_code
                             },
+                            # 'keysrules': {  
+                            #     'check_with': [check_status_code, check_extension]
+                            # },
                             'valuesrules': {
                                 'anyof': [
                                     {
@@ -5113,19 +6960,2241 @@ schema = {
                 'patch': {},
                 'trace': {},
                 'servers': {
-                    # 'type': 'list',
-                    # 'schema': {
-                    #     'type': 'dict',
-
-                    # }
+                    'type': 'list',
+                    'schema': {
+                        'type': 'dict',
+                        'allow_unknown': {
+                            'check_with': check_extension
+                        },
+                        'schema': {
+                            'url': {
+                                'required': True,
+                                'type': 'string',
+                                'check_with': check_url
+                            },
+                            'description': {
+                                'type': 'string'
+                            },
+                            'variables': {
+                                'type': 'dict',
+                                'keysrules': {
+                                    'type': 'string'
+                                },
+                                'valuesrules': {
+                                    'type': 'dict',
+                                    'allow_unknown': {
+                                        'check_with': check_extension
+                                    },
+                                    'schema': {
+                                        'enum': {
+                                            'type': 'list',
+                                            'minlength': 1,
+                                            'schema': {
+                                                'type': 'string'
+                                            }
+                                        },
+                                        'default': {
+                                            'required': True,
+                                            'type': 'string'
+                                        },
+                                        'description': {
+                                            'type': 'string'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
-                'parameters': {}
+                'parameters': {
+                    'type': 'list',
+                    'schema': {
+                        'anyof': [
+                            {
+                                'type': 'dict',
+                                'schema': {
+                                    '$ref': {
+                                        'required': True,
+                                        'type': 'string'
+                                    }
+                                }
+                            },
+                            {
+                                'type': 'dict',
+                                'allow_unknown': {
+                                    'check_with': check_extension
+                                },
+                                'schema': {
+                                    'name': {
+                                        'required': True,
+                                        'type': 'string',
+                                    },
+                                    'in': {
+                                        'required': True,
+                                        'type': 'string',
+                                    },
+                                    'description': {
+                                        'type': 'string',
+                                    },
+                                    'required': {
+                                        'type': 'boolean',
+                                        'default': False,
+                                    },
+                                    'deprecated': {
+                                        'type': 'boolean',
+                                        'default': False,
+                                    },
+                                    'allowEmptyValue': {
+                                        'type': 'boolean',
+                                        'default': False,
+                                    },
+                                    'style': {
+                                        'type': 'string'
+                                    },
+                                    'explode': {
+                                        'type': 'boolean',
+                                    },
+                                    'allowReserved': {
+                                        'type': 'boolean',
+                                        'default': False
+                                    },
+                                    'schema': {
+                                        'anyof': [
+                                            {
+                                                'type': 'dict',
+                                                'schema': {
+                                                    '$ref': {
+                                                        'required': True,
+                                                        'type': 'string'
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                'type': 'dict',
+                                                'allow_unknown': {
+                                                    'check_with': check_extension
+                                                },
+                                                'schema': {
+                                                    'title': {
+                                                        'type': 'string'
+                                                    },
+                                                    'multipleOf': {
+                                                        'type': 'integer',
+                                                        'min': 1
+                                                    },
+                                                    'maximum': {
+                                                        'type': 'integer'
+                                                    },
+                                                    'exclusiveMaximum': {
+                                                        'type': 'boolean',
+                                                        'default': False
+                                                    },
+                                                    'minimum': {
+                                                        'type': 'integer'
+                                                    },
+                                                    'exclusiveMinimum': {
+                                                        'type': 'boolean',
+                                                        'default': False
+                                                    },
+                                                    'maxLength': {
+                                                        'type': 'integer',
+                                                        'min': 0
+                                                    },
+                                                    'minLength': {
+                                                        'type': 'integer',
+                                                        'min': 0
+                                                    },
+                                                    'pattern': {
+                                                        'type': 'string'
+                                                    },
+                                                    'maxItems': {
+                                                        'type': 'integer',
+                                                        'min': 0
+                                                    },
+                                                    'minItems': {
+                                                        'type': 'integer',
+                                                        'min': 0,
+                                                        'default': 0
+                                                    },
+                                                    'uniqueItems': {
+                                                        'type': 'boolean',
+                                                        'default': False
+                                                    },
+                                                    'maxProperties': {
+                                                        'type': 'integer',
+                                                        'min': 0
+                                                    },
+                                                    'minProperties': {
+                                                        'type': 'integer',
+                                                        'min': 0,
+                                                        'default': 0
+                                                    },
+                                                    'required': {
+                                                        'type': 'list',
+                                                        'minlength': 1,
+                                                        'schema': {
+                                                            'type': 'string'
+                                                        },
+                                                        'check_with': check_list_unique
+                                                    },
+                                                    'enum': {
+                                                        'type': 'list',
+                                                        'minlength': 1,
+                                                        'valuesrules': {
+                                                            'nullable': True
+                                                        }
+                                                    },
+                                                    'type': {
+                                                        'type': 'string'
+                                                    },
+                                                    # allOf, oneOf, anyOf, not, items, additionalProperties, and default are not added due to conplications
+                                                    'allOf': {},
+                                                    'oneOf': {},
+                                                    'anyOf': {},
+                                                    'not': {},
+                                                    'additionalProperties': {},
+                                                    'default': {},
+                                                    'properties': { # restricted to 2 loops
+                                                        'type': 'dict',
+                                                        'keysrules': {
+                                                            'type': 'string'
+                                                        },
+                                                        'valuesrules': {
+                                                            'type': 'dict',
+                                                            'schema': {
+                                                                'title': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'multipleOf': {
+                                                                    'type': 'integer',
+                                                                    'min': 1
+                                                                },
+                                                                'maximum': {
+                                                                    'type': 'integer'
+                                                                },
+                                                                'exclusiveMaximum': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'minimum': {
+                                                                    'type': 'integer'
+                                                                },
+                                                                'exclusiveMinimum': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'maxLength': {
+                                                                    'type': 'integer',
+                                                                    'min': 0
+                                                                },
+                                                                'minLength': {
+                                                                    'type': 'integer',
+                                                                    'min': 0
+                                                                },
+                                                                'pattern': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'maxItems': {
+                                                                    'type': 'integer',
+                                                                    'min': 0
+                                                                },
+                                                                'minItems': {
+                                                                    'type': 'integer',
+                                                                    'min': 0,
+                                                                    'default': 0
+                                                                },
+                                                                'uniqueItems': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'maxProperties': {
+                                                                    'type': 'integer',
+                                                                    'min': 0
+                                                                },
+                                                                'minProperties': {
+                                                                    'type': 'integer',
+                                                                    'min': 0,
+                                                                    'default': 0
+                                                                },
+                                                                'required': {
+                                                                    'type': 'list',
+                                                                    'minlength': 1,
+                                                                    'schema': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'check_with': check_list_unique
+                                                                },
+                                                                'enum': {
+                                                                    'type': 'list',
+                                                                    'minlength': 1,
+                                                                    'valuesrules': {
+                                                                        'nullable': True
+                                                                    }
+                                                                },
+                                                                'type': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'allOf': {},
+                                                                'oneOf': {},
+                                                                'anyOf': {},
+                                                                'not': {},
+                                                                'additionalProperties': {},
+                                                                'default': {},
+                                                                'properties': { 
+                                                                    'type': 'dict',
+                                                                    'keysrules': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'valuesrules': {
+                                                                        'type': 'dict',
+                                                                        'schema': {
+                                                                            'title': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'multipleOf': {
+                                                                                'type': 'integer',
+                                                                                'min': 1
+                                                                            },
+                                                                            'maximum': {
+                                                                                'type': 'integer'
+                                                                            },
+                                                                            'exclusiveMaximum': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'minimum': {
+                                                                                'type': 'integer'
+                                                                            },
+                                                                            'exclusiveMinimum': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'maxLength': {
+                                                                                'type': 'integer',
+                                                                                'min': 0
+                                                                            },
+                                                                            'minLength': {
+                                                                                'type': 'integer',
+                                                                                'min': 0
+                                                                            },
+                                                                            'pattern': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'maxItems': {
+                                                                                'type': 'integer',
+                                                                                'min': 0
+                                                                            },
+                                                                            'minItems': {
+                                                                                'type': 'integer',
+                                                                                'min': 0,
+                                                                                'default': 0
+                                                                            },
+                                                                            'uniqueItems': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'maxProperties': {
+                                                                                'type': 'integer',
+                                                                                'min': 0
+                                                                            },
+                                                                            'minProperties': {
+                                                                                'type': 'integer',
+                                                                                'min': 0,
+                                                                                'default': 0
+                                                                            },
+                                                                            'required': {
+                                                                                'type': 'list',
+                                                                                'minlength': 1,
+                                                                                'schema': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'check_with': check_list_unique
+                                                                            },
+                                                                            'enum': {
+                                                                                'type': 'list',
+                                                                                'minlength': 1,
+                                                                                'valuesrules': {
+                                                                                    'nullable': True
+                                                                                }
+                                                                            },
+                                                                            'type': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'allOf': {},
+                                                                            'oneOf': {},
+                                                                            'anyOf': {},
+                                                                            'not': {},
+                                                                            'additionalProperties': {},
+                                                                            'default': {},
+                                                                            'description': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'format': {
+                                                                                'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                            },
+                                                                            'nullable': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'discriminator': {
+                                                                                'type': 'dict',
+                                                                                'anyof': [
+                                                                                    {'dependencies': 'oneOf'},
+                                                                                    {'dependencies': 'anyOf'},
+                                                                                    {'dependencies': 'allOf'}
+                                                                                ],
+                                                                                'schema': {
+                                                                                    'propertyName': {
+                                                                                        'required': True,
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'mapping': {
+                                                                                        'type': 'dict',
+                                                                                        'keysrules': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'valuesrules': {
+                                                                                            'type': 'string'
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            'readOnly': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'writeOnly': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'xml': {
+                                                                                'type': 'dict',
+                                                                                'allow_unknown': {
+                                                                                    'check_with': check_extension
+                                                                                },
+                                                                                'schema': {
+                                                                                    'name': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'namespace': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'prefix': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'attribute': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'wrapped': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            'externalDocs': {
+                                                                                'type': 'dict',
+                                                                                'allow_unknown': {
+                                                                                    'check_with': check_extension
+                                                                                },
+                                                                                'schema': {
+                                                                                    'description': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'url': {
+                                                                                        'required': True,
+                                                                                        'type': 'string',
+                                                                                        'check_with': check_url
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            'example': {},
+                                                                            'deprecated': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                'description': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'format': {
+                                                                    'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                },
+                                                                'nullable': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'discriminator': {
+                                                                    'type': 'dict',
+                                                                    'anyof': [
+                                                                        {'dependencies': 'oneOf'},
+                                                                        {'dependencies': 'anyOf'},
+                                                                        {'dependencies': 'allOf'}
+                                                                    ],
+                                                                    'schema': {
+                                                                        'propertyName': {
+                                                                            'required': True,
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'mapping': {
+                                                                            'type': 'dict',
+                                                                            'keysrules': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'valuesrules': {
+                                                                                'type': 'string'
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                'readOnly': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'writeOnly': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'xml': {
+                                                                    'type': 'dict',
+                                                                    'allow_unknown': {
+                                                                        'check_with': check_extension
+                                                                    },
+                                                                    'schema': {
+                                                                        'name': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'namespace': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'prefix': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'attribute': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'wrapped': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        }
+                                                                    }
+                                                                },
+                                                                'externalDocs': {
+                                                                    'type': 'dict',
+                                                                    'allow_unknown': {
+                                                                        'check_with': check_extension
+                                                                    },
+                                                                    'schema': {
+                                                                        'description': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'url': {
+                                                                            'required': True,
+                                                                            'type': 'string',
+                                                                            'check_with': check_url
+                                                                        }
+                                                                    }
+                                                                },
+                                                                'example': {},
+                                                                'deprecated': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    'description': {
+                                                        'type': 'string'
+                                                    },
+                                                    'format': {
+                                                        'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                    },
+                                                    'nullable': {
+                                                        'type': 'boolean',
+                                                        'default': False
+                                                    },
+                                                    'discriminator': {
+                                                        'type': 'dict',
+                                                        'anyof': [
+                                                            {'dependencies': 'oneOf'},
+                                                            {'dependencies': 'anyOf'},
+                                                            {'dependencies': 'allOf'}
+                                                        ],
+                                                        'schema': {
+                                                            'propertyName': {
+                                                                'required': True,
+                                                                'type': 'string'
+                                                            },
+                                                            'mapping': {
+                                                                'type': 'dict',
+                                                                'keysrules': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'valuesrules': {
+                                                                    'type': 'string'
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    'readOnly': {
+                                                        'type': 'boolean',
+                                                        'default': False
+                                                    },
+                                                    'writeOnly': {
+                                                        'type': 'boolean',
+                                                        'default': False
+                                                    },
+                                                    'xml': {
+                                                        'type': 'dict',
+                                                        'allow_unknown': {
+                                                            'check_with': check_extension
+                                                        },
+                                                        'schema': {
+                                                            'name': {
+                                                                'type': 'string'
+                                                            },
+                                                            'namespace': {
+                                                                'type': 'string'
+                                                            },
+                                                            'prefix': {
+                                                                'type': 'string'
+                                                            },
+                                                            'attribute': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            },
+                                                            'wrapped': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            }
+                                                        }
+                                                    },
+                                                    'externalDocs': {
+                                                        'type': 'dict',
+                                                        'allow_unknown': {
+                                                            'check_with': check_extension
+                                                        },
+                                                        'schema': {
+                                                            'description': {
+                                                                'type': 'string'
+                                                            },
+                                                            'url': {
+                                                                'required': True,
+                                                                'type': 'string',
+                                                                'check_with': check_url
+                                                            }
+                                                        }
+                                                    },
+                                                    'example': {},
+                                                    'deprecated': {
+                                                        'type': 'boolean',
+                                                        'default': False
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                    },
+                                    'example': {},
+                                    'examples': {
+                                        'type': 'dict',
+                                        'keysrules': {
+                                            'type': 'string'
+                                        },
+                                        'valuesrules': {
+                                            'anyof': [
+                                                {
+                                                    'type': 'dict',
+                                                    'schema': {
+                                                        '$ref': {
+                                                            'required': True,
+                                                            'type': 'string'
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    'type': 'dict',
+                                                    'allow_unknown': {
+                                                        'check_with': check_extension
+                                                    },
+                                                    'schema': {
+                                                        'summary': {
+                                                            'type': 'string'
+                                                        },
+                                                        'description': {
+                                                            'type': 'string'
+                                                        },
+                                                        'value': {
+                                                            'excludes': 'externalValue'
+                                                        },
+                                                        'externalValue': {
+                                                            'type': 'string',
+                                                            'excludes': 'value'
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    'content': {
+                                        'keysrules': {
+                                            'type': 'string',
+                                            'check_with': check_media_type
+                                        },
+                                        'valuesrules': {
+                                            'type': 'dict',
+                                            'allow_unknown': {
+                                                'check_with': check_extension
+                                            },
+                                            'schema': {
+                                                'schema': {
+                                                    'anyof': [
+                                                        {
+                                                            'type': 'dict',
+                                                            'schema': {
+                                                                '$ref': {
+                                                                    'required': True,
+                                                                    'type': 'string'
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            'type': 'dict',
+                                                            'allow_unknown': {
+                                                                'check_with': check_extension
+                                                            },
+                                                            'schema': {
+                                                                'title': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'multipleOf': {
+                                                                    'type': 'integer',
+                                                                    'min': 1
+                                                                },
+                                                                'maximum': {
+                                                                    'type': 'integer'
+                                                                },
+                                                                'exclusiveMaximum': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'minimum': {
+                                                                    'type': 'integer'
+                                                                },
+                                                                'exclusiveMinimum': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'maxLength': {
+                                                                    'type': 'integer',
+                                                                    'min': 0
+                                                                },
+                                                                'minLength': {
+                                                                    'type': 'integer',
+                                                                    'min': 0
+                                                                },
+                                                                'pattern': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'maxItems': {
+                                                                    'type': 'integer',
+                                                                    'min': 0
+                                                                },
+                                                                'minItems': {
+                                                                    'type': 'integer',
+                                                                    'min': 0,
+                                                                    'default': 0
+                                                                },
+                                                                'uniqueItems': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'maxProperties': {
+                                                                    'type': 'integer',
+                                                                    'min': 0
+                                                                },
+                                                                'minProperties': {
+                                                                    'type': 'integer',
+                                                                    'min': 0,
+                                                                    'default': 0
+                                                                },
+                                                                'required': {
+                                                                    'type': 'list',
+                                                                    'minlength': 1,
+                                                                    'schema': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'check_with': check_list_unique
+                                                                },
+                                                                'enum': {
+                                                                    'type': 'list',
+                                                                    'minlength': 1,
+                                                                    'valuesrules': {
+                                                                        'nullable': True
+                                                                    }
+                                                                },
+                                                                'type': {
+                                                                    'type': 'string'
+                                                                },
+                                                                # allOf, oneOf, anyOf, not, items, additionalProperties, and default are not added due to conplications
+                                                                'allOf': {},
+                                                                'oneOf': {},
+                                                                'anyOf': {},
+                                                                'not': {},
+                                                                'additionalProperties': {},
+                                                                'default': {},
+                                                                'properties': { # restricted to 2 loops
+                                                                    'type': 'dict',
+                                                                    'keysrules': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'valuesrules': {
+                                                                        'type': 'dict',
+                                                                        'schema': {
+                                                                            'title': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'multipleOf': {
+                                                                                'type': 'integer',
+                                                                                'min': 1
+                                                                            },
+                                                                            'maximum': {
+                                                                                'type': 'integer'
+                                                                            },
+                                                                            'exclusiveMaximum': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'minimum': {
+                                                                                'type': 'integer'
+                                                                            },
+                                                                            'exclusiveMinimum': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'maxLength': {
+                                                                                'type': 'integer',
+                                                                                'min': 0
+                                                                            },
+                                                                            'minLength': {
+                                                                                'type': 'integer',
+                                                                                'min': 0
+                                                                            },
+                                                                            'pattern': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'maxItems': {
+                                                                                'type': 'integer',
+                                                                                'min': 0
+                                                                            },
+                                                                            'minItems': {
+                                                                                'type': 'integer',
+                                                                                'min': 0,
+                                                                                'default': 0
+                                                                            },
+                                                                            'uniqueItems': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'maxProperties': {
+                                                                                'type': 'integer',
+                                                                                'min': 0
+                                                                            },
+                                                                            'minProperties': {
+                                                                                'type': 'integer',
+                                                                                'min': 0,
+                                                                                'default': 0
+                                                                            },
+                                                                            'required': {
+                                                                                'type': 'list',
+                                                                                'minlength': 1,
+                                                                                'schema': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'check_with': check_list_unique
+                                                                            },
+                                                                            'enum': {
+                                                                                'type': 'list',
+                                                                                'minlength': 1,
+                                                                                'valuesrules': {
+                                                                                    'nullable': True
+                                                                                }
+                                                                            },
+                                                                            'type': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'allOf': {},
+                                                                            'oneOf': {},
+                                                                            'anyOf': {},
+                                                                            'not': {},
+                                                                            'additionalProperties': {},
+                                                                            'default': {},
+                                                                            'properties': { 
+                                                                                'type': 'dict',
+                                                                                'keysrules': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'valuesrules': {
+                                                                                    'type': 'dict',
+                                                                                    'schema': {
+                                                                                        'title': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'multipleOf': {
+                                                                                            'type': 'integer',
+                                                                                            'min': 1
+                                                                                        },
+                                                                                        'maximum': {
+                                                                                            'type': 'integer'
+                                                                                        },
+                                                                                        'exclusiveMaximum': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'minimum': {
+                                                                                            'type': 'integer'
+                                                                                        },
+                                                                                        'exclusiveMinimum': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'maxLength': {
+                                                                                            'type': 'integer',
+                                                                                            'min': 0
+                                                                                        },
+                                                                                        'minLength': {
+                                                                                            'type': 'integer',
+                                                                                            'min': 0
+                                                                                        },
+                                                                                        'pattern': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'maxItems': {
+                                                                                            'type': 'integer',
+                                                                                            'min': 0
+                                                                                        },
+                                                                                        'minItems': {
+                                                                                            'type': 'integer',
+                                                                                            'min': 0,
+                                                                                            'default': 0
+                                                                                        },
+                                                                                        'uniqueItems': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'maxProperties': {
+                                                                                            'type': 'integer',
+                                                                                            'min': 0
+                                                                                        },
+                                                                                        'minProperties': {
+                                                                                            'type': 'integer',
+                                                                                            'min': 0,
+                                                                                            'default': 0
+                                                                                        },
+                                                                                        'required': {
+                                                                                            'type': 'list',
+                                                                                            'minlength': 1,
+                                                                                            'schema': {
+                                                                                                'type': 'string'
+                                                                                            },
+                                                                                            'check_with': check_list_unique
+                                                                                        },
+                                                                                        'enum': {
+                                                                                            'type': 'list',
+                                                                                            'minlength': 1,
+                                                                                            'valuesrules': {
+                                                                                                'nullable': True
+                                                                                            }
+                                                                                        },
+                                                                                        'type': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'allOf': {},
+                                                                                        'oneOf': {},
+                                                                                        'anyOf': {},
+                                                                                        'not': {},
+                                                                                        'additionalProperties': {},
+                                                                                        'default': {},
+                                                                                        'description': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'format': {
+                                                                                            'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                        },
+                                                                                        'nullable': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'discriminator': {
+                                                                                            'type': 'dict',
+                                                                                            'anyof': [
+                                                                                                {'dependencies': 'oneOf'},
+                                                                                                {'dependencies': 'anyOf'},
+                                                                                                {'dependencies': 'allOf'}
+                                                                                            ],
+                                                                                            'schema': {
+                                                                                                'propertyName': {
+                                                                                                    'required': True,
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'mapping': {
+                                                                                                    'type': 'dict',
+                                                                                                    'keysrules': {
+                                                                                                        'type': 'string'
+                                                                                                    },
+                                                                                                    'valuesrules': {
+                                                                                                        'type': 'string'
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        'readOnly': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'writeOnly': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        },
+                                                                                        'xml': {
+                                                                                            'type': 'dict',
+                                                                                            'allow_unknown': {
+                                                                                                'check_with': check_extension
+                                                                                            },
+                                                                                            'schema': {
+                                                                                                'name': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'namespace': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'prefix': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'attribute': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'wrapped': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        'externalDocs': {
+                                                                                            'type': 'dict',
+                                                                                            'allow_unknown': {
+                                                                                                'check_with': check_extension
+                                                                                            },
+                                                                                            'schema': {
+                                                                                                'description': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'url': {
+                                                                                                    'required': True,
+                                                                                                    'type': 'string',
+                                                                                                    'check_with': check_url
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        'example': {},
+                                                                                        'deprecated': {
+                                                                                            'type': 'boolean',
+                                                                                            'default': False
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            'description': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'format': {
+                                                                                'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                            },
+                                                                            'nullable': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'discriminator': {
+                                                                                'type': 'dict',
+                                                                                'anyof': [
+                                                                                    {'dependencies': 'oneOf'},
+                                                                                    {'dependencies': 'anyOf'},
+                                                                                    {'dependencies': 'allOf'}
+                                                                                ],
+                                                                                'schema': {
+                                                                                    'propertyName': {
+                                                                                        'required': True,
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'mapping': {
+                                                                                        'type': 'dict',
+                                                                                        'keysrules': {
+                                                                                            'type': 'string'
+                                                                                        },
+                                                                                        'valuesrules': {
+                                                                                            'type': 'string'
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            'readOnly': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'writeOnly': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            },
+                                                                            'xml': {
+                                                                                'type': 'dict',
+                                                                                'allow_unknown': {
+                                                                                    'check_with': check_extension
+                                                                                },
+                                                                                'schema': {
+                                                                                    'name': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'namespace': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'prefix': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'attribute': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    },
+                                                                                    'wrapped': {
+                                                                                        'type': 'boolean',
+                                                                                        'default': False
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            'externalDocs': {
+                                                                                'type': 'dict',
+                                                                                'allow_unknown': {
+                                                                                    'check_with': check_extension
+                                                                                },
+                                                                                'schema': {
+                                                                                    'description': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'url': {
+                                                                                        'required': True,
+                                                                                        'type': 'string',
+                                                                                        'check_with': check_url
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            'example': {},
+                                                                            'deprecated': {
+                                                                                'type': 'boolean',
+                                                                                'default': False
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                'description': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'format': {
+                                                                    'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                },
+                                                                'nullable': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'discriminator': {
+                                                                    'type': 'dict',
+                                                                    'anyof': [
+                                                                        {'dependencies': 'oneOf'},
+                                                                        {'dependencies': 'anyOf'},
+                                                                        {'dependencies': 'allOf'}
+                                                                    ],
+                                                                    'schema': {
+                                                                        'propertyName': {
+                                                                            'required': True,
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'mapping': {
+                                                                            'type': 'dict',
+                                                                            'keysrules': {
+                                                                                'type': 'string'
+                                                                            },
+                                                                            'valuesrules': {
+                                                                                'type': 'string'
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                'readOnly': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'writeOnly': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                },
+                                                                'xml': {
+                                                                    'type': 'dict',
+                                                                    'allow_unknown': {
+                                                                        'check_with': check_extension
+                                                                    },
+                                                                    'schema': {
+                                                                        'name': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'namespace': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'prefix': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'attribute': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        },
+                                                                        'wrapped': {
+                                                                            'type': 'boolean',
+                                                                            'default': False
+                                                                        }
+                                                                    }
+                                                                },
+                                                                'externalDocs': {
+                                                                    'type': 'dict',
+                                                                    'allow_unknown': {
+                                                                        'check_with': check_extension
+                                                                    },
+                                                                    'schema': {
+                                                                        'description': {
+                                                                            'type': 'string'
+                                                                        },
+                                                                        'url': {
+                                                                            'required': True,
+                                                                            'type': 'string',
+                                                                            'check_with': check_url
+                                                                        }
+                                                                    }
+                                                                },
+                                                                'example': {},
+                                                                'deprecated': {
+                                                                    'type': 'boolean',
+                                                                    'default': False
+                                                                }
+                                                            }
+                                                        }
+                                                    ],
+                                                },
+                                                'example': {},
+                                                'examples': {
+                                                    'type': 'dict',
+                                                    'keysrules': {
+                                                        'type': 'string'
+                                                    },
+                                                    'valuesrules': {
+                                                        'anyof': [
+                                                            {
+                                                                'type': 'dict',
+                                                                'schema': {
+                                                                    '$ref': {
+                                                                        'required': True,
+                                                                        'type': 'string'
+                                                                    }
+                                                                }
+                                                            },
+                                                            {
+                                                                'type': 'dict',
+                                                                'allow_unknown': {
+                                                                'check_with': check_extension
+                                                                },
+                                                                'schema': {
+                                                                    'summary': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'description': {
+                                                                        'type': 'string'
+                                                                    },
+                                                                    'value': {
+                                                                        'excludes': 'externalValue'
+                                                                    },
+                                                                    'externalValue': {
+                                                                        'type': 'string',
+                                                                        'excludes': 'value'
+                                                                    }
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                'encoding': {
+                                                    'type': 'dict',
+                                                    'keysrules': {
+                                                        'type': 'string'
+                                                    },
+                                                    'valuesrules': {
+                                                        'type': 'dict',
+                                                        'allow_unknown': {
+                                                        'check_with': check_extension
+                                                        },
+                                                        'schema': {
+                                                            'contentType': {
+                                                                'type': 'string'
+                                                            },
+                                                            'headers': {
+                                                                'keysrules': {
+                                                                    'type': 'string'
+                                                                },
+                                                                'valuesrules': {
+                                                                    'anyof': [
+                                                                        {
+                                                                            'type': 'dict',
+                                                                            'schema': {
+                                                                                '$ref': {
+                                                                                    'required': True,
+                                                                                    'type': 'string'
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            'type': 'dict',
+                                                                            'allow_unknown': {
+                                                                            'check_with': check_extension
+                                                                            },
+                                                                            'schema': {
+                                                                                'description': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'required': {
+                                                                                    'required': True,
+                                                                                    'allowed': [True]
+                                                                                },
+                                                                                'deprecated': {
+                                                                                    'type': 'boolean',
+                                                                                    'default': False
+                                                                                },
+                                                                                'allowEmptyValue': {
+                                                                                    'type': 'boolean',
+                                                                                    'default': False
+                                                                                },
+                                                                                'style': {
+                                                                                    'type': 'string'
+                                                                                },
+                                                                                'explode': {
+                                                                                    'type': 'boolean',
+                                                                                },
+                                                                                'allowReserved': {
+                                                                                    'type': 'boolean',
+                                                                                    'default': False
+                                                                                },
+                                                                                'schema': {
+                                                                                    'anyof': [
+                                                                                        {
+                                                                                            'type': 'dict',
+                                                                                            'schema': {
+                                                                                                '$ref': {
+                                                                                                    'required': True,
+                                                                                                    'type': 'string'
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            'type': 'dict',
+                                                                                            'allow_unknown': {
+                                                                                                'check_with': check_extension
+                                                                                            },
+                                                                                            'schema': {
+                                                                                                'title': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'multipleOf': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 1
+                                                                                                },
+                                                                                                'maximum': {
+                                                                                                    'type': 'integer'
+                                                                                                },
+                                                                                                'exclusiveMaximum': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'minimum': {
+                                                                                                    'type': 'integer'
+                                                                                                },
+                                                                                                'exclusiveMinimum': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'maxLength': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0
+                                                                                                },
+                                                                                                'minLength': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0
+                                                                                                },
+                                                                                                'pattern': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'maxItems': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0
+                                                                                                },
+                                                                                                'minItems': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0,
+                                                                                                    'default': 0
+                                                                                                },
+                                                                                                'uniqueItems': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'maxProperties': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0
+                                                                                                },
+                                                                                                'minProperties': {
+                                                                                                    'type': 'integer',
+                                                                                                    'min': 0,
+                                                                                                    'default': 0
+                                                                                                },
+                                                                                                'required': {
+                                                                                                    'type': 'list',
+                                                                                                    'minlength': 1,
+                                                                                                    'schema': {
+                                                                                                        'type': 'string'
+                                                                                                    },
+                                                                                                    'check_with': check_list_unique
+                                                                                                },
+                                                                                                'enum': {
+                                                                                                    'type': 'list',
+                                                                                                    'minlength': 1,
+                                                                                                    'valuesrules': {
+                                                                                                        'nullable': True
+                                                                                                    }
+                                                                                                },
+                                                                                                'type': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                # allOf, oneOf, anyOf, not, items, additionalProperties, and default are not added due to conplications
+                                                                                                'allOf': {},
+                                                                                                'oneOf': {},
+                                                                                                'anyOf': {},
+                                                                                                'not': {},
+                                                                                                'additionalProperties': {},
+                                                                                                'default': {},
+                                                                                                'properties': { # restricted to 2 loops
+                                                                                                    'type': 'dict',
+                                                                                                    'keysrules': {
+                                                                                                        'type': 'string'
+                                                                                                    },
+                                                                                                    'valuesrules': {
+                                                                                                        'type': 'dict',
+                                                                                                        'schema': {
+                                                                                                            'title': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'multipleOf': {
+                                                                                                                'type': 'integer',
+                                                                                                                'min': 1
+                                                                                                            },
+                                                                                                            'maximum': {
+                                                                                                                'type': 'integer'
+                                                                                                            },
+                                                                                                            'exclusiveMaximum': {
+                                                                                                                'type': 'boolean',
+                                                                                                                'default': False
+                                                                                                            },
+                                                                                                            'minimum': {
+                                                                                                                'type': 'integer'
+                                                                                                            },
+                                                                                                            'exclusiveMinimum': {
+                                                                                                                'type': 'boolean',
+                                                                                                                'default': False
+                                                                                                            },
+                                                                                                            'maxLength': {
+                                                                                                                'type': 'integer',
+                                                                                                                'min': 0
+                                                                                                            },
+                                                                                                            'minLength': {
+                                                                                                                'type': 'integer',
+                                                                                                                'min': 0
+                                                                                                            },
+                                                                                                            'pattern': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'maxItems': {
+                                                                                                                'type': 'integer',
+                                                                                                                'min': 0
+                                                                                                            },
+                                                                                                            'minItems': {
+                                                                                                                'type': 'integer',
+                                                                                                                'min': 0,
+                                                                                                                'default': 0
+                                                                                                            },
+                                                                                                            'uniqueItems': {
+                                                                                                                'type': 'boolean',
+                                                                                                                'default': False
+                                                                                                            },
+                                                                                                            'maxProperties': {
+                                                                                                                'type': 'integer',
+                                                                                                                'min': 0
+                                                                                                            },
+                                                                                                            'minProperties': {
+                                                                                                                'type': 'integer',
+                                                                                                                'min': 0,
+                                                                                                                'default': 0
+                                                                                                            },
+                                                                                                            'required': {
+                                                                                                                'type': 'list',
+                                                                                                                'minlength': 1,
+                                                                                                                'schema': {
+                                                                                                                    'type': 'string'
+                                                                                                                },
+                                                                                                                'check_with': check_list_unique
+                                                                                                            },
+                                                                                                            'enum': {
+                                                                                                                'type': 'list',
+                                                                                                                'minlength': 1,
+                                                                                                                'valuesrules': {
+                                                                                                                    'nullable': True
+                                                                                                                }
+                                                                                                            },
+                                                                                                            'type': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'allOf': {},
+                                                                                                            'oneOf': {},
+                                                                                                            'anyOf': {},
+                                                                                                            'not': {},
+                                                                                                            'additionalProperties': {},
+                                                                                                            'default': {},
+                                                                                                            'properties': { 
+                                                                                                                'type': 'dict',
+                                                                                                                'keysrules': {
+                                                                                                                    'type': 'string'
+                                                                                                                },
+                                                                                                                'valuesrules': {
+                                                                                                                    'type': 'dict',
+                                                                                                                    'schema': {
+                                                                                                                        'title': {
+                                                                                                                            'type': 'string'
+                                                                                                                        },
+                                                                                                                        'multipleOf': {
+                                                                                                                            'type': 'integer',
+                                                                                                                            'min': 1
+                                                                                                                        },
+                                                                                                                        'maximum': {
+                                                                                                                            'type': 'integer'
+                                                                                                                        },
+                                                                                                                        'exclusiveMaximum': {
+                                                                                                                            'type': 'boolean',
+                                                                                                                            'default': False
+                                                                                                                        },
+                                                                                                                        'minimum': {
+                                                                                                                            'type': 'integer'
+                                                                                                                        },
+                                                                                                                        'exclusiveMinimum': {
+                                                                                                                            'type': 'boolean',
+                                                                                                                            'default': False
+                                                                                                                        },
+                                                                                                                        'maxLength': {
+                                                                                                                            'type': 'integer',
+                                                                                                                            'min': 0
+                                                                                                                        },
+                                                                                                                        'minLength': {
+                                                                                                                            'type': 'integer',
+                                                                                                                            'min': 0
+                                                                                                                        },
+                                                                                                                        'pattern': {
+                                                                                                                            'type': 'string'
+                                                                                                                        },
+                                                                                                                        'maxItems': {
+                                                                                                                            'type': 'integer',
+                                                                                                                            'min': 0
+                                                                                                                        },
+                                                                                                                        'minItems': {
+                                                                                                                            'type': 'integer',
+                                                                                                                            'min': 0,
+                                                                                                                            'default': 0
+                                                                                                                        },
+                                                                                                                        'uniqueItems': {
+                                                                                                                            'type': 'boolean',
+                                                                                                                            'default': False
+                                                                                                                        },
+                                                                                                                        'maxProperties': {
+                                                                                                                            'type': 'integer',
+                                                                                                                            'min': 0
+                                                                                                                        },
+                                                                                                                        'minProperties': {
+                                                                                                                            'type': 'integer',
+                                                                                                                            'min': 0,
+                                                                                                                            'default': 0
+                                                                                                                        },
+                                                                                                                        'required': {
+                                                                                                                            'type': 'list',
+                                                                                                                            'minlength': 1,
+                                                                                                                            'schema': {
+                                                                                                                                'type': 'string'
+                                                                                                                            },
+                                                                                                                            'check_with': check_list_unique
+                                                                                                                        },
+                                                                                                                        'enum': {
+                                                                                                                            'type': 'list',
+                                                                                                                            'minlength': 1,
+                                                                                                                            'valuesrules': {
+                                                                                                                                'nullable': True
+                                                                                                                            }
+                                                                                                                        },
+                                                                                                                        'type': {
+                                                                                                                            'type': 'string'
+                                                                                                                        },
+                                                                                                                        'allOf': {},
+                                                                                                                        'oneOf': {},
+                                                                                                                        'anyOf': {},
+                                                                                                                        'not': {},
+                                                                                                                        'additionalProperties': {},
+                                                                                                                        'default': {},
+                                                                                                                        'description': {
+                                                                                                                            'type': 'string'
+                                                                                                                        },
+                                                                                                                        'format': {
+                                                                                                                            'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                                                        },
+                                                                                                                        'nullable': {
+                                                                                                                            'type': 'boolean',
+                                                                                                                            'default': False
+                                                                                                                        },
+                                                                                                                        'discriminator': {
+                                                                                                                            'type': 'dict',
+                                                                                                                            'anyof': [
+                                                                                                                                {'dependencies': 'oneOf'},
+                                                                                                                                {'dependencies': 'anyOf'},
+                                                                                                                                {'dependencies': 'allOf'}
+                                                                                                                            ],
+                                                                                                                            'schema': {
+                                                                                                                                'propertyName': {
+                                                                                                                                    'required': True,
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'mapping': {
+                                                                                                                                    'type': 'dict',
+                                                                                                                                    'keysrules': {
+                                                                                                                                        'type': 'string'
+                                                                                                                                    },
+                                                                                                                                    'valuesrules': {
+                                                                                                                                        'type': 'string'
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        },
+                                                                                                                        'readOnly': {
+                                                                                                                            'type': 'boolean',
+                                                                                                                            'default': False
+                                                                                                                        },
+                                                                                                                        'writeOnly': {
+                                                                                                                            'type': 'boolean',
+                                                                                                                            'default': False
+                                                                                                                        },
+                                                                                                                        'xml': {
+                                                                                                                            'type': 'dict',
+                                                                                                                            'allow_unknown': {
+                                                                                                                                'check_with': check_extension
+                                                                                                                            },
+                                                                                                                            'schema': {
+                                                                                                                                'name': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'namespace': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'prefix': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'attribute': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                },
+                                                                                                                                'wrapped': {
+                                                                                                                                    'type': 'boolean',
+                                                                                                                                    'default': False
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        },
+                                                                                                                        'externalDocs': {
+                                                                                                                            'type': 'dict',
+                                                                                                                            'allow_unknown': {
+                                                                                                                                'check_with': check_extension
+                                                                                                                            },
+                                                                                                                            'schema': {
+                                                                                                                                'description': {
+                                                                                                                                    'type': 'string'
+                                                                                                                                },
+                                                                                                                                'url': {
+                                                                                                                                    'required': True,
+                                                                                                                                    'type': 'string',
+                                                                                                                                    'check_with': check_url
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        },
+                                                                                                                        'example': {},
+                                                                                                                        'deprecated': {
+                                                                                                                            'type': 'boolean',
+                                                                                                                            'default': False
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            },
+                                                                                                            'description': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'format': {
+                                                                                                                'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                                            },
+                                                                                                            'nullable': {
+                                                                                                                'type': 'boolean',
+                                                                                                                'default': False
+                                                                                                            },
+                                                                                                            'discriminator': {
+                                                                                                                'type': 'dict',
+                                                                                                                'anyof': [
+                                                                                                                    {'dependencies': 'oneOf'},
+                                                                                                                    {'dependencies': 'anyOf'},
+                                                                                                                    {'dependencies': 'allOf'}
+                                                                                                                ],
+                                                                                                                'schema': {
+                                                                                                                    'propertyName': {
+                                                                                                                        'required': True,
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'mapping': {
+                                                                                                                        'type': 'dict',
+                                                                                                                        'keysrules': {
+                                                                                                                            'type': 'string'
+                                                                                                                        },
+                                                                                                                        'valuesrules': {
+                                                                                                                            'type': 'string'
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            },
+                                                                                                            'readOnly': {
+                                                                                                                'type': 'boolean',
+                                                                                                                'default': False
+                                                                                                            },
+                                                                                                            'writeOnly': {
+                                                                                                                'type': 'boolean',
+                                                                                                                'default': False
+                                                                                                            },
+                                                                                                            'xml': {
+                                                                                                                'type': 'dict',
+                                                                                                                'allow_unknown': {
+                                                                                                                    'check_with': check_extension
+                                                                                                                },
+                                                                                                                'schema': {
+                                                                                                                    'name': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'namespace': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'prefix': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'attribute': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    },
+                                                                                                                    'wrapped': {
+                                                                                                                        'type': 'boolean',
+                                                                                                                        'default': False
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            },
+                                                                                                            'externalDocs': {
+                                                                                                                'type': 'dict',
+                                                                                                                'allow_unknown': {
+                                                                                                                    'check_with': check_extension
+                                                                                                                },
+                                                                                                                'schema': {
+                                                                                                                    'description': {
+                                                                                                                        'type': 'string'
+                                                                                                                    },
+                                                                                                                    'url': {
+                                                                                                                        'required': True,
+                                                                                                                        'type': 'string',
+                                                                                                                        'check_with': check_url
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            },
+                                                                                                            'example': {},
+                                                                                                            'deprecated': {
+                                                                                                                'type': 'boolean',
+                                                                                                                'default': False
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                'description': {
+                                                                                                    'type': 'string'
+                                                                                                },
+                                                                                                'format': {
+                                                                                                    'allowed': ['int32', 'int64', 'float', 'double', 'byte', 'binary', 'date', 'date-time', 'password']
+                                                                                                },
+                                                                                                'nullable': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'discriminator': {
+                                                                                                    'type': 'dict',
+                                                                                                    'anyof': [
+                                                                                                        {'dependencies': 'oneOf'},
+                                                                                                        {'dependencies': 'anyOf'},
+                                                                                                        {'dependencies': 'allOf'}
+                                                                                                    ],
+                                                                                                    'schema': {
+                                                                                                        'propertyName': {
+                                                                                                            'required': True,
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'mapping': {
+                                                                                                            'type': 'dict',
+                                                                                                            'keysrules': {
+                                                                                                                'type': 'string'
+                                                                                                            },
+                                                                                                            'valuesrules': {
+                                                                                                                'type': 'string'
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                'readOnly': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'writeOnly': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                },
+                                                                                                'xml': {
+                                                                                                    'type': 'dict',
+                                                                                                    'allow_unknown': {
+                                                                                                        'check_with': check_extension
+                                                                                                    },
+                                                                                                    'schema': {
+                                                                                                        'name': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'namespace': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'prefix': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'attribute': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        },
+                                                                                                        'wrapped': {
+                                                                                                            'type': 'boolean',
+                                                                                                            'default': False
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                'externalDocs': {
+                                                                                                    'type': 'dict',
+                                                                                                    'allow_unknown': {
+                                                                                                        'check_with': check_extension
+                                                                                                    },
+                                                                                                    'schema': {
+                                                                                                        'description': {
+                                                                                                            'type': 'string'
+                                                                                                        },
+                                                                                                        'url': {
+                                                                                                            'required': True,
+                                                                                                            'type': 'string',
+                                                                                                            'check_with': check_url
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                'example': {},
+                                                                                                'deprecated': {
+                                                                                                    'type': 'boolean',
+                                                                                                    'default': False
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    ],
+                                                                                },
+                                                                                'example': {},
+                                                                                'examples': {
+                                                                                    'type': 'dict',
+                                                                                    'keysrules': {
+                                                                                        'type': 'string'
+                                                                                    },
+                                                                                    'valuesrules': {
+                                                                                        'anyof': [
+                                                                                            {
+                                                                                                'type': 'dict',
+                                                                                                'schema': {
+                                                                                                    '$ref': {
+                                                                                                        'required': True,
+                                                                                                        'type': 'string'
+                                                                                                    }
+                                                                                                }
+                                                                                            },
+                                                                                            {
+                                                                                                'type': 'dict',
+                                                                                                'allow_unknown': {
+                                                                                                'check_with': check_extension
+                                                                                                },
+                                                                                                'schema': {
+                                                                                                    'summary': {
+                                                                                                        'type': 'string'
+                                                                                                    },
+                                                                                                    'description': {
+                                                                                                        'type': 'string'
+                                                                                                    },
+                                                                                                    'value': {
+                                                                                                        'excludes': 'externalValue'
+                                                                                                    },
+                                                                                                    'externalValue': {
+                                                                                                        'type': 'string',
+                                                                                                        'excludes': 'value'
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            },
+                                                            'style': {
+                                                                'type': 'string'
+                                                            },
+                                                            'explode': {
+                                                                'type': 'boolean'
+                                                            },
+                                                            'allowReserved': {
+                                                                'type': 'boolean',
+                                                                'default': False
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
             }
+        }
+    },
+    'components': {
+        'type': 'dict',
+        'allow_unknown': {
+            'check_with': check_extension
+        },
+        'schema': {
+            'schemas': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            },
+            'responses': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            },
+            'parameters': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            },
+            'examples': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            },
+            'requestBodies': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            },
+            'headers': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            },
+            'securitySchemes': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            },
+            'links': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            },
+            'callbacks': {
+                'type': 'dict',
+                'keysrules': {
+                    'type': 'string',
+                    'check_with': check_component_keys
+                },
+                'valuesrules': {
+                    'anyof': [
+                        {
+                            'type': 'dict',
+                            'schema': {
+                                '$ref': {
+                                    'required': True,
+                                    'type': 'string'
+                                }
+                            }
+                        },
+                        {
+
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    'security': {
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'keysrules': {
+                'type': 'string'
+            },
+            'valuesrules': {
+                'type': 'list',
+                'schema': {
+                    'type': 'string'
+                }
+            }
+        }
+    },
+    'tags': {
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'allow_unknown': {
+                'check_with': check_extension   
+            },
+            'schema': {
+                'name': {
+                    'required': True,
+                    'type': 'string'
+                },
+                'description': {
+                    'type': 'string'
+                },
+                'externalDocs': {
+                    'type': 'dict',
+                    'allow_unknown': {
+                        'check_with': check_extension   
+                    },
+                    'schema': {
+                        'description': {
+                            'type': 'string'
+                        },
+                        'url': {
+                            'required': True,
+                            'type': 'string',
+                            'check_with': check_url
+                        }
+                    }
+                }
+            }
+        }
+    },
+    'externalDocs': {
+        'type': 'dict',
+        'allow_unknown': {
+            'check_with': check_extension   
+        },
+        'schema': {
+            'description': {
+                'type': 'string'
+            },
+            'url': {
+                'required': True,
+                'type': 'string',
+                'check_with': check_url
+            }
+        }
+    },
+    'test': {
+        'type': 'dict',
+        'keysrules': {
+        },
+        'valuesrules': {
+            'anyof': [
+                {
+                    'check_with': check_path
+                },
+                {
+                    'type': 'string',
+                    'check_with': check_extension
+                }
+            ]
         }
     }
 }
-
-
 
 def flattenDict(d):
     keyValueList = []
@@ -5280,8 +9349,9 @@ def main():
           'x-date': '2022-12-22'
       }, 
       'paths': {
-          'dummy': {
-              'post': {
+        #   'x-date': 'test',
+          '/dummy': {
+              'get': {
                   'requestBody': {
                       'content': {
                           'application/json': {
@@ -5289,11 +9359,213 @@ def main():
                                   'type': 'object', 
                                   'properties': {
                                       'Section': {
-                                          'type': 'object', 'description': 'The main request body', 'properties': {'programId': {'type': 'string', 'description': 'Program ID of the consumer', 'example': 'ESERVICE', 'minLength': 1, 'maxLength': 10}, 'userId': {'type': 'string', 'description': 'User ID of the consumer', 'example': 'RSD001'}, 'accountNumber': {'type': 'string', 'description': "Member's Account Number", 'example': 'S1234567A', 'minLength': 9, 'maxLength': 9}, 'electronicFormTransactionNumber': {'type': 'string', 'description': 'electronicForm Transaction Number', 'example': '1500142799903518', 'maxLength': 16}, 'creditStatusTag': {'type': 'string', 'description': 'Credit Status Tag', 'example': 'Y', 'maxLength': 1}, 'ocbcTransactionNumber': {'type': 'string', 'description': 'OCBC Transaction Number', 'example': '20200928034440888853', 'maxLength': 20}, 'ocbcReturnCode': {'type': 'string', 'description': 'OCBC Return Code', 'example': '', 'maxLength': 4}, 'guid': {'type': 'string', 'description': 'The GUID of the API call', 'example': '123456789012345678901234567890123456', 'maxLength': 36}}, 'required': ['programId', 'accountNumber', 'electronicFormTransactionNumber', 'creditStatusTag', 'ocbcTransactionNumber', 'ocbcReturnCode', 'guid']}}, 'required': ['Section']}}}}, 'responses': {'200': {'description': "Successfully called the API to update credit status of Member's 55 WDL Application for PayNow. This can include application and data error.", 'content': {'application/json': {'schema': {'type': 'object', 'properties': {'Section': {'type': 'object', 'description': 'The main response body', 'properties': {'programId': {'type': 'string', 'description': 'Program ID of the consumer', 'example': 'ESERVICE', 'minLength': 1, 'maxLength': 10}, 'userId': {'type': 'string', 'description': 'User ID of the consumer', 'example': 'RSD001'}, 'accountNumber': {'type': 'string', 'description': "Member's Account Number", 'example': 'S1234567A', 'minLength': 9, 'maxLength': 9}, 'electronicFormTransactionNumber': {'type': 'string', 'description': 'electronicForm Transaction Number', 'example': '1500142799903518', 'maxLength': 16}, 'creditStatusTag': {'type': 'string', 'description': 'Credit Status Tag', 'example': 'Y', 'maxLength': 1}, 'ocbcTransactionNumber': {'type': 'string', 'description': 'OCBC Transaction Number', 'example': '20200928034440888853', 'maxLength': 20}, 'ocbcReturnCode': {'type': 'string', 'description': 'OCBC Return COde', 'example': '', 'maxLength': 4}, 'returnCode': {'type': 'string', 'description': 'Program Return Code', 'example': '0000', 'maxLength': 4}, 'returnMessage': {'type': 'string', 'description': 'Program Return Message', 'example': 'Successful', 'maxLength': 50}, 'guid': {'type': 'string', 'description': 'The GUID of the API call', 'example': '123456789012345678901234567890123456', 'maxLength': 36}}, 'required': ['programId', 'accountNumber', 'electronicFormTransactionNumber', 'creditStatusTag', 'ocbcTransactionNumber', 'ocbcReturnCode', 'returnCode', 'returnMessage', 'guid']}}, 'required': ['Section']}}}}}}}}}
+                                          'type': 'object', 
+                                          'description': 'The main request body', 
+                                          'properties': {
+                                              'programId': {
+                                                  'type': 'string', 
+                                                  'description': 'Program ID of the consumer', 
+                                                  'example': 'ESERVICE', 
+                                                  'minLength': 1, 
+                                                  'maxLength': 10
+                                              }, 
+                                              'userId': {
+                                                  'type': 'string', 
+                                                  'description': 'User ID of the consumer', 
+                                                  'example': 'RSD001'
+                                              }, 
+                                              'accountNumber': {
+                                                  'type': 'string',
+                                                  'description': "Member's Account Number",
+                                                  'example': 'S1234567A', 
+                                                  'minLength': 9, 
+                                                  'maxLength': 9
+                                              }, 
+                                              'electronicFormTransactionNumber': {
+                                                  'type': 'string', 
+                                                  'description': 'electronicForm Transaction Number', 
+                                                  'example': '1500142799903518', 
+                                                  'maxLength': 16
+                                              }, 
+                                              'creditStatusTag': {
+                                                  'type': 'string', 
+                                                  'description': 'Credit Status Tag', 
+                                                  'example': 'Y', 
+                                                  'maxLength': 1
+                                              }, 
+                                              'ocbcTransactionNumber': {
+                                                  'type': 'string',
+                                                  'description': 'OCBC Transaction Number', 
+                                                  'example': '20200928034440888853', 
+                                                  'maxLength': 20
+                                              }, 
+                                              'ocbcReturnCode': {
+                                                  'type': 'string', 
+                                                  'description': 'OCBC Return Code', 
+                                                  'example': '', 
+                                                  'maxLength': 4
+                                              }, 
+                                              'guid': {
+                                                  'type': 'string', 
+                                                  'description': 'The GUID of the API call', 
+                                                  'example': '123456789012345678901234567890123456', 
+                                                  'maxLength': 36
+                                              }
+                                          }, 
+                                          'required': [
+                                              'programId', 
+                                              'accountNumber', 
+                                              'electronicFormTransactionNumber', 
+                                              'creditStatusTag', 
+                                              'ocbcTransactionNumber', 
+                                              'ocbcReturnCode', 
+                                              'guid'
+                                          ]
+                                      }
+                                  }, 
+                                  'required': [
+                                      'Section'
+                                  ]
+                              }
+                          }
+                      }
+                  }, 
+                  'responses': {
+                      '200': {
+                          'description': "Successfully called the API to update credit status of Member's 55 WDL Application for PayNow. This can include application and data error.", 
+                          'content': {
+                              'application/json': {
+                                  'schema': {
+                                      'type': 'object', 
+                                      'properties': {
+                                          'Section': {
+                                              'type': 'object', 
+                                              'description': 'The main response body', 
+                                              'properties': {
+                                                  'programId': {
+                                                      'type': 'string', 
+                                                      'description': 'Program ID of the consumer', 
+                                                      'example': 'ESERVICE', 
+                                                      'minLength': 1, 
+                                                      'maxLength': 10
+                                                  }, 
+                                                  'userId': {
+                                                      'type': 'string', 
+                                                      'description': 'User ID of the consumer', 
+                                                      'example': 'RSD001'
+                                                  }, 
+                                                  'accountNumber': {
+                                                      'type': 'string', 
+                                                      'description': "Member's Account Number", 
+                                                      'example': 'S1234567A', 
+                                                      'minLength': 9, 
+                                                      'maxLength': 9
+                                                  }, 
+                                                  'electronicFormTransactionNumber': {
+                                                      'type': 'string', 
+                                                      'description': 'electronicForm Transaction Number', 
+                                                      'example': '1500142799903518', 
+                                                      'maxLength': 16
+                                                  }, 
+                                                  'creditStatusTag': {
+                                                      'type': 'string', 
+                                                      'description': 'Credit Status Tag', 
+                                                      'example': 'Y', 
+                                                      'maxLength': 1
+                                                  }, 
+                                                  'ocbcTransactionNumber': {
+                                                      'type': 'string', 
+                                                      'description': 'OCBC Transaction Number', 
+                                                      'example': '20200928034440888853', 
+                                                      'maxLength': 20
+                                                  }, 
+                                                  'ocbcReturnCode': {
+                                                      'type': 'string', 
+                                                      'description': 'OCBC Return COde', 
+                                                      'example': '', 
+                                                      'maxLength': 4
+                                                  }, 
+                                                  'returnCode': {
+                                                      'type': 'string', 
+                                                      'description': 'Program Return Code', 
+                                                      'example': '0000', 
+                                                      'maxLength': 4
+                                                  }, 
+                                                  'returnMessage': {
+                                                      'type': 'string', 
+                                                      'description': 'Program Return Message', 
+                                                      'example': 'Successful', 
+                                                      'maxLength': 50
+                                                  }, 
+                                                  'guid': {
+                                                      'type': 'string', 
+                                                      'description': 'The GUID of the API call', 
+                                                      'example': '123456789012345678901234567890123456', 
+                                                      'maxLength': 36
+                                                  }
+                                              }, 
+                                              'required': [
+                                                  'programId', 
+                                                  'accountNumber', 
+                                                  'electronicFormTransactionNumber', 
+                                                  'creditStatusTag', 
+                                                  'ocbcTransactionNumber', 
+                                                  'ocbcReturnCode', 
+                                                  'returnCode', 
+                                                  'returnMessage', 
+                                                  'guid'
+                                              ]
+                                          }
+                                      }, 
+                                      'required': [
+                                          'Section'
+                                      ]
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      },
+      'components': {
+          'schemas': {
+              'User_': {
+                '$ref': 'test'
+              }
+          }  
+      },
+      'security': [
+          {
+              'api_key':[]
+          },
+          {
+              'petstore_auth': [
+                  'write:pets',
+                  'read:pets'
+              ]
+          }
+      ],
+      'tags': [
+          {
+              'name': 'pet',
+              'description': 'pets operations',
+          }
+      ],
+      'externalDocs': {
+          'description': 'test',
+          'url': 'http://www.google.com'
+      },
+      'test': {
+          'x-date': 'test'
+      }
+  }
   v.validate(document)
   print(v.errors)
 #   for error in v._errors:
 #       print(error.document_path)
+#       print(error.code)
+#       print(error.value)
 
 
 if __name__ == "__main__":
