@@ -9566,7 +9566,8 @@ def main():
       'test': {
           'x-date': 'test'
       }
-  }
+   }
+}
   v.validate(document)
   print(v.errors)
 #   for error in v._errors:
