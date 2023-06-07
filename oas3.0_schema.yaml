@@ -1,6 +1,5 @@
 ---
-id: https://spec.openapis.org/oas/3.0/schema/2021-08-12
-$schema: http://json-schema.org/draft-04/schema#
+$id: https://spec.openapis.org/oas/3.0/schema/2021-08-12
 description: Validation schema for OpenAPI Specification 3.0.X.
 type: object
 required:
@@ -46,6 +45,7 @@ definitions:
       $ref:
         type: string
         format: uri-reference
+    additionalProperties: false
   Info:
     type: object
     required:
@@ -134,101 +134,164 @@ definitions:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/Schema"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/Schema"
+            type: 'object'
+            if: 
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/Schema"
       responses:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/Response"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/Response"
+            type: 'object'
+            if:
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/Response"
       parameters:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/Parameter"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/Parameter"
+            type: 'object'
+            if: 
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/Parameter"
       examples:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/Example"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/Example"
+            type: 'object'
+            if: 
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/Example"
       requestBodies:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/RequestBody"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/RequestBody"
+            type: 'object'
+            if: 
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/RequestBody"
       headers:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/Header"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/Header"
+            type: 'object'
+            if:
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/Header"
       securitySchemes:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/SecurityScheme"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/SecurityScheme"
+            type: 'object'
+            if: 
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/SecurityScheme"
       links:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/Link"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/Link"
+            type: 'object'
+            if: 
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/Link"
       callbacks:
         type: object
         patternProperties:
           "^[a-zA-Z0-9\\.\\-_]+$":
-            switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/Callback"
+            # switch:
+            # - if:
+            #     required: [$ref]
+            #   then:
+            #     $ref: "#/definitions/Reference"
+            # - then:
+            #     $ref: "#/definitions/Callback"
+            type: 'object'
+            if: 
+              required: [$ref]
+            then:
+              $ref: "#/definitions/Reference"
+            else:
+              $ref: "#/definitions/Callback"
     patternProperties:
       "^x-": {}
     additionalProperties: false
@@ -240,7 +303,7 @@ definitions:
       multipleOf:
         type: number
         minimum: 0
-        exclusiveMinimum: true
+        exclusiveMinimum: -1
       maximum:
         type: number
       exclusiveMaximum:
@@ -301,76 +364,132 @@ definitions:
         - object
         - string
       not:
-        switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Schema"
+        # switch:
+        #   - if:
+        #       required: [$ref]
+        #     then:
+        #       $ref: "#/definitions/Reference"
+        #   - then:
+        #       $ref: "#/definitions/Schema"
+        type: 'object'
+        if: 
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          $ref: "#/definitions/Schema"
       allOf:
         type: array
         items:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Schema"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Schema"
+          type: 'object'
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Schema"
       oneOf:
         type: array
         items:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Schema"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Schema"
+          type: 'object'
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Schema"
       anyOf:
         type: array
         items:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Schema"
-      items:
-        switch:
-        - if:
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Schema"
+          type: 'object'
+          if: 
             required: [$ref]
           then:
             $ref: "#/definitions/Reference"
-        - then:
+          else:
             $ref: "#/definitions/Schema"
+      items:
+        # switch:
+        # - if:
+        #     required: [$ref]
+        #   then:
+        #     $ref: "#/definitions/Reference"
+        # - then:
+        #     $ref: "#/definitions/Schema"
+        type: 'object'
+        if: 
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          $ref: "#/definitions/Schema"
       properties:
         type: object
         additionalProperties:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Schema"
-      additionalProperties:
-        default: true
-        switch:
-        - if:
-            type: object
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Schema"
+          type: 'object'
+          if: 
             required: [$ref]
           then:
             $ref: "#/definitions/Reference"
-        - if:
+          else:
+            $ref: "#/definitions/Schema"
+      additionalProperties:
+        default: true
+        # switch:
+        # - if:
+        #     type: object
+        #     required: [$ref]
+        #   then:
+        #     $ref: "#/definitions/Reference"
+        # - if:
+        #     type: object
+        #   then:
+        #     $ref: "#/definitions/Schema"
+        # - then:
+        #     type: boolean
+        #     errorMessage: "should be a Reference Object, Schema Object, or boolean value"
+        if:
+          type: object
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          if:
             type: object
           then:
             $ref: "#/definitions/Schema"
-        - then:
+          else:
             type: boolean
             errorMessage: "should be a Reference Object, Schema Object, or boolean value"
+
       description:
         type: string
       format:
@@ -438,13 +557,20 @@ definitions:
       headers:
         type: object
         additionalProperties:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Header"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Header"
+          type: 'object'
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Header"
       content:
         type: object
         additionalProperties:
@@ -452,13 +578,20 @@ definitions:
       links:
         type: object
         additionalProperties:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Link"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Link"
+          type: 'object'
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Link"
     patternProperties:
       "^x-": {}
     additionalProperties: false
@@ -466,24 +599,38 @@ definitions:
     type: object
     properties:
       schema:
-        switch:
-        - if:
-            required: [$ref]
-          then:
-            $ref: "#/definitions/Reference"
-        - then:
-            $ref: "#/definitions/Schema"
+        # switch:
+        # - if:
+        #     required: [$ref]
+        #   then:
+        #     $ref: "#/definitions/Reference"
+        # - then:
+        #     $ref: "#/definitions/Schema"
+        type: 'object'
+        if: 
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          $ref: "#/definitions/Schema"
       example: {}
       examples:
         type: object
         additionalProperties:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Example"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Example"
+          type: 'object'
+          if:
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Example"
       encoding:
         type: object
         additionalProperties:
@@ -532,13 +679,20 @@ definitions:
         type: boolean
         default: false
       schema:
-        switch:
-        - if:
-            required: [$ref]
-          then:
-            $ref: "#/definitions/Reference"
-        - then:
-            $ref: "#/definitions/Schema"
+        # switch:
+        # - if:
+        #     required: [$ref]
+        #   then:
+        #     $ref: "#/definitions/Reference"
+        # - then:
+        #     $ref: "#/definitions/Schema"
+        type: 'object'
+        if: 
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          $ref: "#/definitions/Schema"
       content:
         type: object
         additionalProperties:
@@ -549,13 +703,20 @@ definitions:
       examples:
         type: object
         additionalProperties:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Example"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Example"
+          type: 'object'
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Example"
     patternProperties:
       "^x-": {}
     additionalProperties: false
@@ -565,12 +726,11 @@ definitions:
   Paths:
     type: object
     patternProperties:
-      "^\\/": {
+      "^\\/": 
         $ref: "#/definitions/PathItem"
-      }
       "^x-": {}
     additionalProperties: false
-    errorMessage:
+    errorMessage: 
       additionalProperties: "should only have path names that start with `/`"
   PathItem:
     type: object
@@ -588,13 +748,20 @@ definitions:
       parameters:
         type: array
         items:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Parameter"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Parameter"
+          type: 'object'
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Parameter"
         uniqueItems: true
     patternProperties:
       "^(get|put|post|delete|options|head|patch|trace)$":
@@ -621,34 +788,55 @@ definitions:
       parameters:
         type: array
         items:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Parameter"
-        uniqueItems: true
-      requestBody:
-        switch:
-        - if:
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Parameter"
+          type: 'object'
+          if: 
             required: [$ref]
           then:
             $ref: "#/definitions/Reference"
-        - then:
-            $ref: "#/definitions/RequestBody"
+          else:
+            $ref: "#/definitions/Parameter"
+        uniqueItems: true
+      requestBody:
+        # switch:
+        # - if:
+        #     required: [$ref]
+        #   then:
+        #     $ref: "#/definitions/Reference"
+        # - then:
+        #     $ref: "#/definitions/RequestBody"
+        type: 'object'
+        if: 
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          $ref: "#/definitions/RequestBody"
       responses:
         $ref: "#/definitions/Responses"
       callbacks:
         type: object
         additionalProperties:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Callback"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Callback"
+          type: 'object'
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Callback"
       deprecated:
         type: boolean
         default: false
@@ -667,22 +855,36 @@ definitions:
     type: object
     properties:
       default:
-        switch:
-        - if:
-            required: [$ref]
-          then:
-            $ref: "#/definitions/Reference"
-        - then:
-            $ref: "#/definitions/Response"
+        # switch:
+        # - if:
+        #     required: [$ref]
+        #   then:
+        #     $ref: "#/definitions/Reference"
+        # - then:
+        #     $ref: "#/definitions/Response"
+        type: 'object'
+        if: 
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          $ref: "#/definitions/Response"
     patternProperties:
       "^[1-5](?:\\d{2}|XX)$":
-        switch:
-        - if:
-            required: [$ref]
-          then:
-            $ref: "#/definitions/Reference"
-        - then:
-            $ref: "#/definitions/Response"
+        # switch:
+        # - if:
+        #     required: [$ref]
+        #   then:
+        #     $ref: "#/definitions/Reference"
+        # - then:
+        #     $ref: "#/definitions/Response"
+        type: 'object'
+        if: 
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          $ref: "#/definitions/Response"
       "^x-": {}
     minProperties: 1
     additionalProperties: false
@@ -738,39 +940,74 @@ definitions:
       - examples
   SchemaXORContent:
     description: Schema and content are mutually exclusive, at least one is required
-    switch:
-    - if:
-        # fails mutual exclusion of `schema` and `content`
-        required:
+    # switch:
+    # - if:
+    #     # fails mutual exclusion of `schema` and `content`
+    #     required:
+    #     - schema
+    #     - content
+    #   then: false
+    # - if:
+    #     required: [schema]
+    #   then: true
+    # - if:
+    #     required: [content]
+    #   then:
+    #     description: Some properties are not allowed if content is present
+    #     errorMessage: "should not have `style`, `explode`, `allowReserved`, `example`, or `examples` when `content` is present"
+    #     allOf:
+    #     - not:
+    #         required:
+    #         - style
+    #     - not:
+    #         required:
+    #         - explode
+    #     - not:
+    #         required:
+    #         - allowReserved
+    #     - not:
+    #         required:
+    #         - example
+    #     - not:
+    #         required:
+    #         - examples
+    # - then:
+    #     required: [schema, content]
+
+    if:
+      required:
         - schema
         - content
-      then: false
-    - if:
+    then: false
+    else:
+      if:
         required: [schema]
       then: true
-    - if:
-        required: [content]
-      then:
-        description: Some properties are not allowed if content is present
-        errorMessage: "should not have `style`, `explode`, `allowReserved`, `example`, or `examples` when `content` is present"
-        allOf:
-        - not:
-            required:
-            - style
-        - not:
-            required:
-            - explode
-        - not:
-            required:
-            - allowReserved
-        - not:
-            required:
-            - example
-        - not:
-            required:
-            - examples
-    - then:
-        required: [schema, content]
+      else:
+        if: 
+          required: [content]
+        then:
+          description: Some properties are not allowed if content is present
+          errorMessage: "should not have `style`, `explode`, `allowReserved`, `example`, or `examples` when `content` is present"
+          allOf:
+          - not:
+              required:
+              - style
+          - not:
+              required:
+              - explode
+          - not:
+              required:
+              - allowReserved
+          - not:
+              required:
+              - example
+          - not:
+              required:
+              - examples
+        else:
+          required: [schema, content]
+
     errorMessage: "should have either a `schema` or `content` property"
   Parameter:
     type: object
@@ -798,13 +1035,20 @@ definitions:
         type: boolean
         default: false
       schema:
-        switch:
-        - if:
-            required: [$ref]
-          then:
-            $ref: "#/definitions/Reference"
-        - then:
-            $ref: "#/definitions/Schema"
+        # switch:
+        # - if:
+        #     required: [$ref]
+        #   then:
+        #     $ref: "#/definitions/Reference"
+        # - then:
+        #     $ref: "#/definitions/Schema"
+        type: 'object'
+        if: 
+          required: [$ref]
+        then:
+          $ref: "#/definitions/Reference"
+        else:
+          $ref: "#/definitions/Schema"
       content:
         type: object
         additionalProperties:
@@ -815,13 +1059,19 @@ definitions:
       examples:
         type: object
         additionalProperties:
-          switch:
-          - if:
-              required: [$ref]
-            then:
-              $ref: "#/definitions/Reference"
-          - then:
-              $ref: "#/definitions/Example"
+          # switch:
+          # - if:
+          #     required: [$ref]
+          #   then:
+          #     $ref: "#/definitions/Reference"
+          # - then:
+          #     $ref: "#/definitions/Example"
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Example"
     patternProperties:
       "^x-": {}
     additionalProperties: false
@@ -834,25 +1084,82 @@ definitions:
     - $ref: "#/definitions/ParameterLocation"
   ParameterLocation:
     description: Parameter location
-    switch:
-    - if:
-        required: [in]
-        properties: { in: { enum: [path] } }
-      then:
-        description: Parameter in path
+    # switch:
+    # - if:
+    #     required: [in]
+    #     properties: { in: { enum: [path] } }
+    #   then:
+    #     description: Parameter in path
+    #     required:
+    #     - required
+    #     properties:
+    #       style:
+    #         enum:
+    #         - matrix
+    #         - label
+    #         - simple
+    #         default: simple
+    #       required:
+    #         enum:
+    #         - true
+    # - if:
+    #     required: [in]
+    #     properties: { in: { enum: [query] } }
+    #   then:
+    #     description: Parameter in query
+    #     properties:
+    #       style:
+    #         enum:
+    #         - form
+    #         - spaceDelimited
+    #         - pipeDelimited
+    #         - deepObject
+    #         default: form
+    # - if:
+    #     required: [in]
+    #     properties: { in: { enum: [header] } }
+    #   then:
+    #     description: Parameter in header
+    #     properties:
+    #       style:
+    #         enum:
+    #         - simple
+    #         default: simple
+    # - if:
+    #     required: [in]
+    #     properties: { in: { enum: [cookie] } }
+    #   then:
+    #     description: Parameter in cookie
+    #     properties:
+    #       style:
+    #         enum:
+    #         - form
+    #         default: form
+    # - then:
+    #     required: [in]
+    #     properties:
+    #       in:
+    #         enum: [path, query, header, cookie]
+
+    if:
+      required: [in]
+      properties: { in: { enum: [path] } }
+    then:
+      description: Parameter in path
+      required:
+      - required
+      properties:
+        style:
+          enum:
+          - matrix
+          - label
+          - simple
+          default: simple
         required:
-        - required
-        properties:
-          style:
-            enum:
-            - matrix
-            - label
-            - simple
-            default: simple
-          required:
-            enum:
-            - true
-    - if:
+          enum:
+          - true
+    else:
+      if:
         required: [in]
         properties: { in: { enum: [query] } }
       then:
@@ -865,31 +1172,33 @@ definitions:
             - pipeDelimited
             - deepObject
             default: form
-    - if:
-        required: [in]
-        properties: { in: { enum: [header] } }
-      then:
-        description: Parameter in header
-        properties:
-          style:
-            enum:
-            - simple
-            default: simple
-    - if:
-        required: [in]
-        properties: { in: { enum: [cookie] } }
-      then:
-        description: Parameter in cookie
-        properties:
-          style:
-            enum:
-            - form
-            default: form
-    - then:
-        required: [in]
-        properties:
-          in:
-            enum: [path, query, header, cookie]
+      else:
+        if:
+          required: [in]
+          properties: { in: { enum: [header] } }
+        then:
+          description: Parameter in header
+          properties:
+            style:
+              enum:
+              - simple
+              default: simple
+        else:
+          if:
+            required: [in]
+            properties: { in: { enum: [cookie] } }
+          then:
+            description: Parameter in cookie
+            properties:
+              style:
+                enum:
+                - form
+                default: form
+          else:
+            required: [in]
+            properties:
+              in:
+                enum: [path, query, header, cookie]
   RequestBody:
     type: object
     required:
@@ -909,41 +1218,79 @@ definitions:
     additionalProperties: false
   SecurityScheme:
     type: object
-    switch:
-    - if:
-        required: [type]
-        properties:
-          type:
-            enum: [apiKey]
-      then:
-        $ref: "#/definitions/APIKeySecurityScheme"
-    - if:
+    # switch:
+    # - if:
+    #     required: [type]
+    #     properties:
+    #       type:
+    #         enum: [apiKey]
+    #   then:
+    #     $ref: "#/definitions/APIKeySecurityScheme"
+    # - if:
+    #     required: [type]
+    #     properties:
+    #       type:
+    #         enum: [http]
+    #   then:
+    #     $ref: "#/definitions/HTTPSecurityScheme"
+    # - if:
+    #     required: [type]
+    #     properties:
+    #       type:
+    #         enum: [oauth2]
+    #   then:
+    #     $ref: "#/definitions/OAuth2SecurityScheme"
+    # - if:
+    #     required: [type]
+    #     properties:
+    #       type:
+    #         enum: [openIdConnect]
+    #   then:
+    #     $ref: "#/definitions/OpenIdConnectSecurityScheme"
+    # - then:
+    #     required: [type]
+    #     properties:
+    #       type:
+    #         type: string
+    #         enum: [apiKey, http, oauth2, openIdConnect]
+
+    if:
+      required: [type]
+      properties:
+        type:
+          enum: [apiKey]
+    then:
+      $ref: "#/definitions/APIKeySecurityScheme"
+    else:
+      if:
         required: [type]
         properties:
           type:
             enum: [http]
       then:
         $ref: "#/definitions/HTTPSecurityScheme"
-    - if:
-        required: [type]
-        properties:
-          type:
-            enum: [oauth2]
-      then:
-        $ref: "#/definitions/OAuth2SecurityScheme"
-    - if:
-        required: [type]
-        properties:
-          type:
-            enum: [openIdConnect]
-      then:
-        $ref: "#/definitions/OpenIdConnectSecurityScheme"
-    - then:
-        required: [type]
-        properties:
-          type:
-            type: string
-            enum: [apiKey, http, oauth2, openIdConnect]
+      else:
+        if:
+          required: [type]
+          properties:
+            type:
+              enum: [oauth2]
+        then:
+          $ref: "#/definitions/OAuth2SecurityScheme"
+        else:
+          if:
+            required: [type]
+            properties:
+              type:
+                enum: [openIdConnect]
+          then:
+            $ref: "#/definitions/OpenIdConnectSecurityScheme"
+          else:
+            required: [type]
+            properties:
+              type:
+                type: string
+                enum: [apiKey, http, oauth2, openIdConnect]
   APIKeySecurityScheme:
     type: object
     required:
@@ -986,19 +1333,28 @@ definitions:
         - http
     patternProperties:
       "^x-": {}
-    switch:
-    # the inverse (no `bearerFormat` in properties + using a switch to add it
-    # in the case of `scheme: bearer`) doesn't work because of `switch`'s
-    # limitations, so this is the best we can do.
-    - if:
-        not:
-          required: [scheme]
-          properties: { scheme: { enum: [bearer] } }
-      then:
-        properties:
+    # switch:
+    # # the inverse (no `bearerFormat` in properties + using a switch to add it
+    # # in the case of `scheme: bearer`) doesn't work because of `switch`'s
+    # # limitations, so this is the best we can do.
+    # - if:
+    #     not:
+    #       required: [scheme]
+    #       properties: { scheme: { enum: [bearer] } }
+    #   then:
+    #     properties:
+    #       bearerFormat:
+    #         enum: [null]
+    #     errorMessage: "should NOT have a `bearerFormat` property without `scheme: bearer` being set"
+    if:
+      not:
+        required: [scheme]
+        properties: { scheme: { enum: [bearer] } }
+    then:
+      properties:
           bearerFormat:
             enum: [null]
-        errorMessage: "should NOT have a `bearerFormat` property without `scheme: bearer` being set"
+      errorMessage: "should NOT have a `bearerFormat` property without `scheme: bearer` being set"
     additionalProperties: false
   OAuth2SecurityScheme:
     type: object
@@ -1167,13 +1523,20 @@ definitions:
       headers:
         type: object
         additionalProperties:
-          switch:
-            - if:
-                required: [$ref]
-              then:
-                $ref: "#/definitions/Reference"
-            - then:
-                $ref: "#/definitions/Header"
+          # switch:
+          #   - if:
+          #       required: [$ref]
+          #     then:
+          #       $ref: "#/definitions/Reference"
+          #   - then:
+          #       $ref: "#/definitions/Header"
+          type: 'object'
+          if: 
+            required: [$ref]
+          then:
+            $ref: "#/definitions/Reference"
+          else:
+            $ref: "#/definitions/Header"
       style:
         type: string
         enum:

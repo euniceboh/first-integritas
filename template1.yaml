@@ -1,0 +1,147 @@
+openapi: 3.0.0
+info:
+  title: Update Crediting Status of 55 WDL Application PayNow
+  description: This API is to update the crediting status of the member's 55 WDL Application for PayNow
+  version: 1.0.0
+  x-author: Jennylyn Sze
+  x-date: '2022-12-22'
+
+paths:
+  /discretionaryWithdrawals/55Withdrawals/v1/updateMemberCreditStatusForPayNow:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Section:
+                  type: object
+                  description: The main request body 
+                  properties:
+                    programId:
+                      type: string
+                      description: Program ID of the consumer
+                      example: 'ESERVICE'
+                      minLength: 1
+                      maxLength: 10
+                    userId:
+                      type: test
+                      description: User ID of the consumer
+                      example: 'RSD001'
+                    accountNumber:
+                      type: string
+                      description: Member's Account Number
+                      example: 'S1234567A'
+                      minLength: 9
+                      maxLength: 9
+                    electronicFormTransactionNumber:
+                      type: string
+                      description: electronicForm Transaction Number
+                      example: '1500142799903518'
+                      maxLength: 16
+                    creditStatusTag:
+                      type: string
+                      description: Credit Status Tag
+                      example: 'Y'
+                      maxLength: 1
+                    ocbcTransactionNumber:
+                      type: string
+                      description: OCBC Transaction Number
+                      example: '20200928034440888853'
+                      maxLength: 20
+                    ocbcReturnCode:
+                      type: string
+                      description: OCBC Return Code
+                      example: ''
+                      maxLength: 4
+                    guid:
+                      type: string
+                      description: The GUID of the API call
+                      example: '123456789012345678901234567890123456'
+                      maxLength: 36
+                  required:
+                    - programId
+                    - accountNumber
+                    - electronicFormTransactionNumber
+                    - creditStatusTag
+                    - ocbcTransactionNumber
+                    - ocbcReturnCode
+                    - guid
+              required:
+                - Section
+      responses:
+        '200':
+          description: Successfully called the API to update credit status of Member's 55 WDL Application for PayNow. This can include application and data error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Section:
+                    type: object
+                    description: The main response body
+                    properties:                    
+                        programId:
+                          type: string
+                          description: Program ID of the consumer
+                          example: 'ESERVICE'
+                          minLength: 1
+                          maxLength: 10
+                        userId:
+                          type: string
+                          description: User ID of the consumer
+                          example: 'RSD001'
+                        accountNumber:
+                          type: string
+                          description: Member's Account Number
+                          example: 'S1234567A'
+                          minLength: 9
+                          maxLength: 9
+                        electronicFormTransactionNumber:
+                          type: string
+                          description: electronicForm Transaction Number
+                          example: '1500142799903518'
+                          maxLength: 16
+                        creditStatusTag:
+                          type: string
+                          description: Credit Status Tag
+                          example: 'Y'
+                          maxLength: 1
+                        ocbcTransactionNumber:
+                          type: string
+                          description: OCBC Transaction Number
+                          example: '20200928034440888853'
+                          maxLength: 20
+                        ocbcReturnCode:
+                          type: string
+                          description: OCBC Return COde
+                          example: ''
+                          maxLength: 4
+                        returnCode:
+                          type: string
+                          description: Program Return Code
+                          example: '0000'
+                          maxLength: 4
+                        returnMessage:
+                          type: string
+                          description: Program Return Message
+                          example: 'Successful'
+                          maxLength: 50
+                        guid:
+                          type: string
+                          description: The GUID of the API call
+                          example: '123456789012345678901234567890123456'
+                          maxLength: 36
+                    required:
+                        - programId
+                        - accountNumber
+                        - electronicFormTransactionNumber
+                        - creditStatusTag
+                        - ocbcTransactionNumber
+                        - ocbcReturnCode
+                        - returnCode
+                        - returnMessage
+                        - guid
+                required:
+                  - Section
