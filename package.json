@@ -6,6 +6,10 @@
     "ajv-formats": "^2.1.1",
     "ajv-keywords": "^5.1.0",
     "file-system": "^1.2.2",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "spellchecker": "^3.7.1",
+    "typo-js": "^1.2.3",
+    "wordsninja": "^1.0.0"
   }
 }

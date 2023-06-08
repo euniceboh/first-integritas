@@ -728,6 +728,14 @@ definitions:
     patternProperties:
       "^\\/": 
         $ref: "#/definitions/PathItem"
+        path-characters: true
+        path-length: true
+        path-version: true
+        if:
+          path-version: true
+        then:
+          match-version: true
+          subtier-verb: true
       "^x-": {}
     additionalProperties: false
     errorMessage: 

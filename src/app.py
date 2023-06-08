@@ -84,7 +84,7 @@ def checkResponse(doc):
                 return True
     return False
     
-def checkPathCharacters(path):
+def checkPathCharacters(path): 
     # Check for whitespaces, underscores, or hyphens in path
     if ' ' in path or '_' in path or '-' in path:
         return False
@@ -258,6 +258,25 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
         ret_val.lc.line = node.start_mark.line
         ret_val.lc.col = node.start_mark.column
         return ret_val
+
+@app.route('/getLineNumber', methods=['POST', 'GET"'])
+def getLineNumber():
+    data = request.get_json()
+    docString = data.get("docString")
+    pathArray = data.get("pathArray")
+    yaml = ruamel.yaml.YAML()
+    yaml.Constructor = MyConstructor
+    try:
+        docJson = yaml.load(docString)
+    except (ruamel.yaml.parser.ParserError) as e:
+        payload = {"message": "Syntax error!"}
+        return jsonify(payload)
+
+    lineNumber = getLineNumberFromCompletePath(docJson, pathArray)
+
+    payload = {"lineNumber": lineNumber}
+    return jsonify(payload)
+#  return({"lineNumber": -1})
     
 @app.route('/checkOAS', methods=['GET', 'POST'])
 def checkOAS():
@@ -576,6 +595,25 @@ def getLineNumberFromPath(doc, path):
             elif res != False:
                 return res
     return False
+
+def getLineNumberFromCompletePath(docJson, pathArray):
+    numKeys = len(pathArray)
+    if numKeys == 0:
+        return 0
+    try:
+        if numKeys == 1:
+            for key in docJson.keys():
+                if key == pathArray[-1]:
+                    return key.lc.line + 1
+        # Go down the JSON until the last key
+        for i in range(numKeys - 1):
+            docJson = docJson[pathArray[i]]
+        for key in docJson.keys():
+            if key == pathArray[-1]:
+                return key.lc.line + 1 # because the first line is 0 and the first line in the editor is 1
+    except:
+        return -1 # Path Error somewhere...
+    
 
 # Parse error messages from PyKwalify (somehow they dont have this functionality...)
 def parse_error(error):
