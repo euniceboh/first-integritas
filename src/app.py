@@ -34,7 +34,6 @@ def errorPage(my_path):
 Checks to do:
 - Check subtier words not using short forms
     E.g., /api/IND/FRM_IND_GetMbrDPSInfo --> /api/IND/FRM_IND_GetMemberPolicyInformation
-- Auto spelling check and correction for all words in the yaml?
 '''
 def checkOpenapi(openapi):
     if openapi == "" or openapi == None:
@@ -276,7 +275,6 @@ def getLineNumber():
 
     payload = {"lineNumber": lineNumber}
     return jsonify(payload)
-#  return({"lineNumber": -1})
     
 @app.route('/checkOAS', methods=['GET', 'POST'])
 def checkOAS():
