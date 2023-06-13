@@ -7,7 +7,7 @@ info:
   x-date: '2022-12-22'
 
 paths:
-  /discretionaryWithdrawals/55Withdrawals/v1/holyMemberCreditStatusForPayNow:
+  /discretionaryWithdrawals/55Withdrawals/v1/updateMemberCreditStatusForPayNow:
     post:
       requestBody:
         content:

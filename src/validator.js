@@ -24,12 +24,14 @@ var lexicon = new natural.Lexicon(language, defaultCategory, defaultCategoryCapi
 var ruleSet = new natural.RuleSet('EN');
 var tagger = new natural.BrillPOSTagger(lexicon, ruleSet);
 
+const http = require('http');
+
 //======================= Utils =================================================
 
 // customDict is an array of words specific to the CPF context
-var customDict = ["udte"]
+var customDict = []
 
-async function fetchLineNumber(pathArray) {
+async function fetchLineNumber(doc, pathArray) {
   // Uses Fetch API to call our function from Flask server to get line number based on ruamel.yaml number line mapping
   // To simplify line number mapping. If there's a simpler way to do this on JS, this can be deprecated
   // WARNING: Fetch API in experimental-mode 
@@ -39,7 +41,7 @@ async function fetchLineNumber(pathArray) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      docString: data_string,
+      docString: doc,
       pathArray: pathArray
     })
   })
@@ -76,12 +78,6 @@ function wordInCustomDict(word) {
 }
 
 //======================= Ajv Setup =================================================
-
-const schema_string = fs.readFileSync('oas3.0_schema.yaml', 'utf-8')
-const schema = yaml.load(schema_string)
-const data_string = fs.readFileSync('template1.yaml', 'utf-8')
-const data = yaml.load(data_string)
-  
 const ajv = new Ajv({
   schemaId: "id",
   allErrors: true,
@@ -367,6 +363,7 @@ ajv.addKeyword({
     return true
   }
 })
+// TODO: Auto-seggestions for misspelled words
 ajv.addKeyword({
   keyword: "spelling-check",
   validate: function checkSpelling(schema, data, parentSchema, dataPath) {
@@ -388,7 +385,7 @@ ajv.addKeyword({
       var errorMessage = `The following word(s) are spelled wrongly: ${wordsSpelledWrong_string}. Please consider adding the words into the custom dictionary or correcting them.`
       checkSpelling.errors = [
         {
-          keyword: 'customKeyword',
+          keyword: 'spelling-check',
           message: errorMessage,
           params: {
             checkSpelling: false
@@ -401,20 +398,26 @@ ajv.addKeyword({
   }
 })
 
-// TODO: finish up this function that will be called from html frontend
-async function validateYAML() { // will take in doc, schema, and customDict as inputs
+// TODO: What will happen if the input is JSON?
+async function validateYAML(doc, dictionary) { 
   await WordsNinja.loadDictionary(); // forced async function by WordsNinja library
+  customDict = dictionary; // global dictionary in this file
 
   var validate = false
   try {
+    const schema_string = fs.readFileSync('oas3.0_schema.yaml', 'utf-8')
+    const schema = yaml.load(schema_string)
     validate = ajv.compile(schema)
   }
   catch {
     return null
   }
 
+  // const data_string = fs.readFileSync('template1.yaml', 'utf-8')
+  const data = yaml.load(doc)
+
+  var payload = []
   if (!validate(data)) {
-    payload = []
     for (var error of validate.errors) {
       // ignore if/then/else errors because we created more useful error messages
       if (["if", "then", "else"].includes(error["keyword"])) {
@@ -431,7 +434,7 @@ async function validateYAML() { // will take in doc, schema, and customDict as i
       var line = -1;
       
       // get line number, error message, instance path, and schema path
-      await fetchLineNumber(pathArray)
+      await fetchLineNumber(doc, pathArray)
         .then((data) => {
           line = data["lineNumber"]
         })
@@ -439,7 +442,7 @@ async function validateYAML() { // will take in doc, schema, and customDict as i
           // TODO: Handle error instead of just throwing
           return null
         })
-      console.log(error)
+      // console.log(error)
       payload.push({
         line_number: line,
         keyword: error.keyword,
@@ -447,8 +450,63 @@ async function validateYAML() { // will take in doc, schema, and customDict as i
         params: error.params
       })
     }
-    return payload
   }
+  return payload
 }
 
-validateYAML()
+//==================== Server ===================================
+
+const hostname = 'localhost'; // Specify the hostname
+const port = 3000; // Specify the port number
+
+const server = http.createServer((req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Specify the allowed HTTP methods
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Specify the allowed headers
+
+  if (req.method === 'OPTIONS') {
+    // Handle preflight OPTIONS request
+    res.statusCode = 204; // No content needed for preflight
+    res.end();
+    return;
+  }
+
+  if (req.url == '/validate' && req.method === 'POST') {
+    let requestBody = ''
+    req.on('data', (chunk) => {
+      requestBody += chunk
+    })
+    req.on('end', async () => {
+      try {
+        const jsonData = JSON.parse(requestBody)
+        var payload = await validateYAML(jsonData["doc"], jsonData["dictionary"])
+        if (payload.length == 0) { // successful yaml doc
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'text/html');
+          res.write("Successful!")
+          res.end();
+        }
+        else { // unsuccessful yaml doc
+          res.statusCode = 400;
+          res.setHeader('Content-Type', 'text/html');
+          res.write(JSON.stringify(payload))
+          res.end();
+        }
+      } catch (error) {
+        res.statusCode = 405;
+        res.end();
+      }
+    })
+  }
+  else {
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'text/plain');
+    res.write("404 Page Not Found")
+    res.end();
+  }
+  
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});

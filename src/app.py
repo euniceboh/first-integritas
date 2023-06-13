@@ -73,7 +73,6 @@ def checkPath(paths):
             return False
     return True
 
-# need to change to check response for each path
 def checkResponse(doc):
     if isinstance(doc, dict):
         if "responses" in doc:
@@ -363,16 +362,16 @@ def checkOAS():
 #         # Possible to use Schemas to check with PYYAML, but then it will be one error caught at a time
 #         # Thus, we manually check each field
 #         openapi = info = title = description = infoVersion = x_author = x_date = paths = None
-#         try:
-#             openapi = doc_json["openapi"]
-#             info = doc_json["info"]
-#             paths = list(doc_json["paths"])
+        # try:
+            # openapi = doc_json["openapi"]
+            # info = doc_json["info"]
+            # paths = list(doc_json["paths"])
 
-#             title = doc_json["info"]["title"]
-#             description = doc_json["info"]["description"]
-#             infoVersion = doc_json["info"]["version"]
-#             x_author = doc_json["info"]["x-author"]
-#             x_date = doc_json["info"]["x-date"]
+            # title = doc_json["info"]["title"]
+            # description = doc_json["info"]["description"]
+            # infoVersion = doc_json["info"]["version"]
+            # x_author = doc_json["info"]["x-author"]
+            # x_date = doc_json["info"]["x-date"]
 #         except (TypeError): # If the component is not found, it will be handled by the check functions
 #             pass
         

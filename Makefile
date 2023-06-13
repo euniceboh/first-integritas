@@ -17,18 +17,18 @@ venv: venv/Scripts/activate
 run: venv
 	$(PYTHON) src/app.py
 
-unit_test:
-	. ./venv/Scripts/activate; \
-	cd src; \
-	cd tests; \
-	pytest test_unit.py
+# unit_test:
+# 	. ./venv/Scripts/activate; \
+# 	cd src; \
+# 	cd tests; \
+# 	pytest test_unit.py
 
-# need to fix webdriverexception bug here
-integration_test:
-	. ./venv/Scripts/activate; \
-	cd src; \
-	cd tests; \
-	pytest test_integration.py
+# # need to fix webdriverexception bug here
+# integration_test:
+# 	. ./venv/Scripts/activate; \
+# 	cd src; \
+# 	cd tests; \
+# 	pytest test_integration.py
 
 clean:
 	rm -rf venv

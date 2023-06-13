@@ -262,7 +262,9 @@ pay
 now
 eligibility
 check
-age</textarea></grammarly-editor-plugin>
+age
+paynow
+electronicform</textarea></grammarly-editor-plugin>
     </div>
   </div>
 
@@ -330,6 +332,19 @@ age</textarea></grammarly-editor-plugin>
     </div>
   </div> -->
 
+  <div class="modal fade" id="oasPreview" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content" style="min-height:100%;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Preview</h5>
+          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="oasPreviewBody">
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/static/js/bootstrap.bundle.min.js.download"></script>
   <script src="/static/js/swagger-ui-bundle.js.download"></script>
   <script src="/static/js/js-yaml-3.13.1.min.js.download"></script>
@@ -338,6 +353,8 @@ age</textarea></grammarly-editor-plugin>
   <script src="https://cdn.jsdelivr.net/npm/@grammarly/editor-sdk?clientId=client_4CtRAfLPVnqc476pJ7F7xT"></script>
   <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/src-min-noconflict/ace.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/css/ace.min.css" rel="stylesheet">
+
+
 
   <script>
     var editor = ace.edit("editor");
@@ -397,7 +414,8 @@ age</textarea></grammarly-editor-plugin>
       }
     }
 
-    function addAccordionItem(id, errorLineNumber, errorText, errorInfo) {
+    function addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo) {
+      // TODO: handle additional information on error
       var newItemId =  'item' + id + Date.now();
 
       var newItem = document.createElement('div');
@@ -416,7 +434,7 @@ age</textarea></grammarly-editor-plugin>
       newItemButton.setAttribute('aria-expanded', "false");
       newItemButton.setAttribute('aria-controls', newItemId + '-collapse');
       newItemButton.setAttribute('style', 'margin-bottom: 0')
-      newItemButton.textContent = "Line " + errorLineNumber + " --- " + errorText;
+      newItemButton.textContent = "Line " + errorLine + " --- " + errorKeyword;
 
       var newItemCollapse = document.createElement('div');
       newItemCollapse.classList.add('accordion-collapse', 'collapse');
@@ -426,7 +444,7 @@ age</textarea></grammarly-editor-plugin>
 
       var newItemBody = document.createElement('div');
       newItemBody.classList.add('accordion-body');
-      newItemBody.textContent = 'Additional Information on Error'; // errorInfo
+      newItemBody.textContent = errorMessage; 
 
       // Append the elements to the accordion container
       newItemHeader.appendChild(newItemButton);
@@ -453,7 +471,25 @@ age</textarea></grammarly-editor-plugin>
       // accordionContainer.appendChild(newItem1);
       // accordionContainer.appendChild(newItem2);
       // accordionContainer.appendChild(newItem3);
+    }
 
+    function previewOAS() {
+      var swaggerUIOptions = {
+      dom_id: '#oasPreviewBody', // Determine what element to load swagger ui
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          // SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: 'BaseLayout',
+      }
+      var data = editor.getValue()
+      swaggerUIOptions.spec = jsyaml.load(data, {schema:jsyaml.JSON_SCHEMA})
+      SwaggerUIBundle(swaggerUIOptions)
+      var oasPreview = new bootstrap.Modal(document.getElementById("oasPreview"), {});
+      oasPreview.show();
     }
 
     // =========================================================================================================================
@@ -569,17 +605,18 @@ age</textarea></grammarly-editor-plugin>
           
           $('#loading').show();
 
-          
-          
           $.ajax({
-            data: {
+            data: JSON.stringify({
               doc: data,
-              dictionary: dictionary,
-            },
-            type: 'POST',
-            url: '/checkOAS',
+              dictionary: dictionaryWords,
+            }),
+            method: 'POST',
+            contentType: 'application/json',
+            url: 'http://localhost:3000/validate',
             success: function(response) {
               $('#loading').hide();
+              // TODO: Add Swagger preview
+
               // oasSuccessModal = $('#oasSuccess');
               // oasSuccessModal.find('.modal-body').html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>`);
               // oasSuccessModal.find('.modal-body').append("There are no additional errors found");
@@ -590,6 +627,8 @@ age</textarea></grammarly-editor-plugin>
               // var numLines = editor.session.getLength();
               // var emptyLines = "\n".repeat(numLines - 1);
               // errorTextArea.innerHTML = emptyLines;
+
+              previewOAS()
               
               refreshAccordion();
 
@@ -597,29 +636,52 @@ age</textarea></grammarly-editor-plugin>
             },
             error: function(response) {
               $('#loading').hide();
-              var listErrors = response["responseJSON"]["errors"];
-              var dictErrors = {};
+              var listErrors = JSON.parse(response["responseText"]) // list of dictionary objects
+              // var dictErrors = {};
               
               // oasErrorModal = $('#oasErrors');
               // oasErrorModal.find('.styled-table tbody').empty();
 
               refreshAccordion();
+
+              var formattedErrors = []
               for (let i = 0; i < listErrors.length; i++){
-                var id = i;
-                var errorText = listErrors[i][0];
-                var errorLine = listErrors[i][1];
-                var errorColumn = listErrors[i][2];
                 // oasErrorModal.find('.styled-table tbody').append(`<tr>
                 //                                             <td scope="row">`+(errorLine)+`</th>
                 //                                             <td>`+(errorText)+`</td>
                 //                                           </tr>
                 //                                         `);
-                dictErrors[errorLine] = [errorText, errorColumn];
+                // dictErrors[errorLine] = [errorText, errorColumn];
 
-                addAccordionItem(id, errorLine, errorText, errorColumn);
-
-                editorBorder.style.border = '2px solid #f00';
+                var id = i;
+                var errorLine = listErrors[i]["line_number"];
+                var errorKeyword = listErrors[i]["keyword"];
+                var errorMessage = listErrors[i]["error_message"];
+                var errorAdditionalInfo = listErrors[i]["params"]
+                formattedErrors.push({
+                  id: id,
+                  errorLine: errorLine,
+                  errorKeyword: errorKeyword,
+                  errorMessage: errorMessage,
+                  errorAdditionalInfo: errorAdditionalInfo
+                })
               }
+
+              formattedErrors.sort((a, b) => a.errorLine - b.errorLine);
+
+              for (var error of formattedErrors) {
+                id = error["id"]
+                errorLine = error["errorLine"];
+                errorKeyword = error["errorKeyword"];
+                errorMessage = error["errorMessage"];
+                errorAdditionalInfo = error["errorAdditionalInfo"];
+                addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
+              }
+              
+
+              editorBorder.style.border = '2px solid #f00';
+              
+
               // oasErrorModal.modal("show");
 
               // fill lines without errors with empty lines while those with with error description
