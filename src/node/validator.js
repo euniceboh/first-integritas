@@ -229,7 +229,8 @@ ajv.addKeyword({
     var subtiers = getSubtiers(path)
     for (var subtier of subtiers) {
       var words = _.words(subtier) // splits subtier into words using lodash based on camel casing
-      for (var word in words) {
+      for (var word of words) {
+        console.log(word)
         if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
           subtiersNotCamelCase.push(subtier)
           break
@@ -257,6 +258,7 @@ ajv.addKeyword({
   validate: function checkPathSpelling(schema, data, parentSchema, dataPath) {
     // Checks the spelling of all words in subtiers (because spelling-check does not apply to concatenated strings)
     // TODO: Compounds words not handled
+    // TODO: Return subtiers with words spelled wrongly
     // Will not send info on words to correct because behaviour of WordsNinja not stable; possible if it separates words better
     if (schema == false) {
       return true
