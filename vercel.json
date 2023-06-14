@@ -1,5 +1,10 @@
 {
+    "version" : 1,
     "builds": [
+        {
+            "src": "src/node/validator.js",
+            "use": "@vercel/node"
+        },
         {
             "src": "src/app.py",
             "use": "@vercel/python"
@@ -8,7 +13,17 @@
     "routes": [
         {
             "src": "/(.*)",
+            "dest": "src/node/validator.js"
+        },
+        {
+            "src": "/(.*)",
             "dest": "src/app.py"
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "src/app.py"
         }
     ]
 }
