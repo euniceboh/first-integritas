@@ -16,6 +16,7 @@ venv: venv/Scripts/activate
 
 node:
 	cd src; \
+	cd node; \
 	npm install; \
 	node validator.js
 
