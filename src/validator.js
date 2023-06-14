@@ -192,7 +192,7 @@ ajv.addKeyword({
       checkMatchingVersion.errors = [
         {
           keyword: "match-version",
-          message: "Missing version in <Info>",
+          message: "Missing version in [Info]",
           params: {
             matchVersion: false
           }
@@ -205,7 +205,7 @@ ajv.addKeyword({
       checkMatchingVersion.errors = [
         {
           keyword: "match-version",
-          message: "Version in path does not match with version in <Info>",
+          message: "Version in path does not match with version in [Info]",
           params: {
             matchVersion: false
           }
@@ -237,7 +237,7 @@ ajv.addKeyword({
       }
     }
     if (subtiersNotCamelCase.length != 0) {
-      const subtiersNotCamelCase_string = subtiersNotCamelCase.join(',')
+      const subtiersNotCamelCase_string = subtiersNotCamelCase.join(', ')
       checkCamelCasing.errors = [
         {
           keyword: "camel-casing",
@@ -316,7 +316,7 @@ ajv.addKeyword({
       const notVerbAndSubtiers_formatted = notVerbAndSubtiers.map(function (tuple) {
         return tuple[0] + " in " + tuple[1]
       })
-      const notVerbAndSubtiers_string = notVerbAndSubtiers_formatted.join(",") 
+      const notVerbAndSubtiers_string = notVerbAndSubtiers_formatted.join(", ") 
       checkSubtierVerb.errors = [
         {
           keyword: "subtier-verb",
@@ -348,7 +348,7 @@ ajv.addKeyword({
       }
     }
     if (propertiesNotPresent.length > 0) {
-      const propertiesNotPresent_string = propertiesNotPresent.join(",")
+      const propertiesNotPresent_string = propertiesNotPresent.join(", ")
       checkProperties.errors = [
         {
           keyword: "required-properties",
@@ -363,7 +363,7 @@ ajv.addKeyword({
     return true
   }
 })
-// TODO: Auto-seggestions for misspelled words
+// TODO: Auto-suggestions for misspelled words
 ajv.addKeyword({
   keyword: "spelling-check",
   validate: function checkSpelling(schema, data, parentSchema, dataPath) {
@@ -381,7 +381,7 @@ ajv.addKeyword({
       }
     }
     if (wordsSpelledWrong.size != 0) {
-      const wordsSpelledWrong_string = Array.from(wordsSpelledWrong).join(',')
+      const wordsSpelledWrong_string = Array.from(wordsSpelledWrong).join(', ')
       var errorMessage = `The following word(s) are spelled wrongly: ${wordsSpelledWrong_string}. Please consider adding the words into the custom dictionary or correcting them.`
       checkSpelling.errors = [
         {
@@ -398,7 +398,6 @@ ajv.addKeyword({
   }
 })
 
-// TODO: What will happen if the input is JSON?
 async function validateYAML(doc, dictionary) { 
   await WordsNinja.loadDictionary(); // forced async function by WordsNinja library
   customDict = dictionary; // global dictionary in this file
@@ -414,7 +413,13 @@ async function validateYAML(doc, dictionary) {
   }
 
   // const data_string = fs.readFileSync('template1.yaml', 'utf-8')
-  const data = yaml.load(doc)
+  var data = null
+  try {
+    data = yaml.load(doc)
+  } catch (error) {
+    return null
+  }
+  
 
   var payload = []
   if (!validate(data)) {
@@ -442,11 +447,10 @@ async function validateYAML(doc, dictionary) {
           // TODO: Handle error instead of just throwing
           return null
         })
-      // console.log(error)
       payload.push({
         line_number: line,
         keyword: error.keyword,
-        error_message: error.message,
+        error_message: error.message[0].charAt(0).toUpperCase() + error.message.slice(1) ,
         params: error.params
       })
     }
@@ -480,7 +484,13 @@ const server = http.createServer((req, res) => {
       try {
         const jsonData = JSON.parse(requestBody)
         var payload = await validateYAML(jsonData["doc"], jsonData["dictionary"])
-        if (payload.length == 0) { // successful yaml doc
+        if (payload == null) { // unexpected error
+          res.statusCode = 204;
+          res.setHeader('Content-Type', 'text/html');
+          res.write("Unexpected error!")
+          res.end();
+        }
+        else if (payload.length == 0) { // successful yaml doc
           res.statusCode = 200;
           res.setHeader('Content-Type', 'text/html');
           res.write("Successful!")

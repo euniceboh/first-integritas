@@ -9,13 +9,20 @@ venv/Scripts/activate: requirements.txt
 	python -m venv venv; \
 	. ./venv/Scripts/activate; \
 	$(PYTHON) -m pip install --upgrade pip; \
-	$(PIP) install -r requirements.txt
+	$(PIP) install -r requirements.txt; \
 
 venv: venv/Scripts/activate
 	. ./venv/Scripts/activate
 
-run: venv
+node:
+	cd src; \
+	npm install; \
+	node validator.js
+
+flask: venv
 	$(PYTHON) src/app.py
+
+run: node flask
 
 # unit_test:
 # 	. ./venv/Scripts/activate; \

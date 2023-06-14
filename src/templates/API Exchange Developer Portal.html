@@ -186,16 +186,6 @@
       z-index: 100;
     }
 
-    /* invisible scrollbar */
-    #errorTextArea::-webkit-scrollbar {
-      display: none;
-    }
-
-    #errorTextArea {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
     button:active {
       border: none;
     }
@@ -207,13 +197,15 @@
   <link href="static/css/highlight.min.css" rel="stylesheet" type="text/css">
   <link href="static/css/framework.min.css" rel="stylesheet" type="text/css">
   <link href="static/css/site.css" rel="stylesheet" type="text/css">
+  <link href="static/css/swagger-ui.css" rel="stylesheet" type="text/css">
+  <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/css/ace.min.css" rel="stylesheet">
 
 </head>
 
 <body>
     
   <header class="site-header">
-    <div class="container"  style="float: left; margin-left: 1cm">
+    <div class="container" style="float: left; margin-left: 1cm">
       <div class="row">
         <div class="four columns">
           <h1 class="brand"><a href="https://portal.axpuat.cpf.gov.sg/test_workspace_01"><img class="logo" src="/static/images/Logo.png" alt="API Exchange Developer Portal"></a></h1>
@@ -249,8 +241,7 @@
     <div>
       <!-- Dictionary Text Box -->
       <p wrap="on" style="margin-bottom: 2rem !important; margin-top: 1rem !important;">Paste dictionary word here (from least important to most important order):</p>
-      <grammarly-editor-plugin contenteditable="true">
-        <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 70%; height: 3cm;">
+      <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 70%; height: 3cm;">
 discretionary
 withdrawals
 update
@@ -264,25 +255,13 @@ eligibility
 check
 age
 paynow
-electronicform</textarea></grammarly-editor-plugin>
+electronicform</textarea>
     </div>
   </div>
 
   <!-- Error Panel -->
   <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 30%; padding-right: 1cm; ">
-    <!-- <textarea name="errorTextArea" id="errorTextArea" cols="30" rows="10" style="height: 10cm; border: none; outline: none; resize: none; padding-top: 0; font-size: 15px; line-height: 18px;" readonly></textarea> -->
     <div class="accordion" id="errorStack"></div>
-    <!-- <div>
-      <div class="card text-white bg-success mb-3" style="width: 100%; max-width: 15rem; margin-left: 1cm; margin-top: 0.5cm; display:inline-block">
-        <div class="card-body">
-          <p class="card-text" id="errorCount" style="text-align: center;">Valid</p>
-        </div>
-      </div>
-      <div style="display: inline-block">
-        <button id="errorScroller">Next Error</button>
-      </div>
-    </div> -->
-    
   </div>
 </div>
 
@@ -291,47 +270,6 @@ electronicform</textarea></grammarly-editor-plugin>
   </div>
 
   <!-- Modals -->
-  <link href="static/css/swagger-ui.css" rel="stylesheet" type="text/css">
-  <!-- <div class="modal fade" id="oasSuccess" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-      <div class="modal-content" style="min-height:100%;">
-        <div class="modal-header">
-          <h5 class="modal-title" id="staticSuccessBackdropLabel">OAS Checker</h5>
-          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body" id="oasSuccessBody">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="oasErrors" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-      <div class="modal-content" style="min-height:100%;">
-        <div class="modal-header">
-          <h5 class="modal-title" id="staticErrorsBackdropLabel">OAS Checker</h5>
-          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body"> 
-            <table class = "styled-table">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col" class="secondary-col">Errors</th>
-                  </tr>
-                </thead>
-                <tbody id="oasErrorsBody">
-                </tbody>
-            </table>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="">Save Changes</button>
-        </div>
-      </div>
-    </div>
-  </div> -->
-
   <div class="modal fade" id="oasPreview" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content" style="min-height:100%;">
@@ -349,12 +287,8 @@ electronicform</textarea></grammarly-editor-plugin>
   <script src="/static/js/swagger-ui-bundle.js.download"></script>
   <script src="/static/js/js-yaml-3.13.1.min.js.download"></script>
   <script src="/static/js/jquery.min.js.download"></script>
-  <!-- need to find a way to phase grammarly out or hide the api key -->
-  <script src="https://cdn.jsdelivr.net/npm/@grammarly/editor-sdk?clientId=client_4CtRAfLPVnqc476pJ7F7xT"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@grammarly/editor-sdk?clientId=client_4CtRAfLPVnqc476pJ7F7xT"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/src-min-noconflict/ace.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/css/ace.min.css" rel="stylesheet">
-
-
 
   <script>
     var editor = ace.edit("editor");
@@ -368,18 +302,7 @@ electronicform</textarea></grammarly-editor-plugin>
       enableSnippets: true,
       enableLiveAutocompletion: true
     });
-    // editor.session.setOption("useWorker", false); // disables syntax checking
     var errorCounterFlag = false;
-
-    // Sync Scrolling
-    // $('.ace_scrollbar-v').scroll(function () {
-    //   $("#errorTextArea").scrollTop($('.ace_scrollbar-v').scrollTop());
-    //   $("#errorTextArea").scrollLeft($('.ace_scrollbar-v').scrollLeft());
-    // });
-    // $("#errorTextArea").scroll(function () {
-    //   $(".ace_scrollbar-v").scrollTop($("#errorTextArea").scrollTop());
-    //   $(".ace_scrollbar-v").scrollLeft($("#errorTextArea").scrollLeft());
-    // })
 
     function uploadFile() {
       var file = document.getElementById("fileUpload").files[0];
@@ -415,8 +338,9 @@ electronicform</textarea></grammarly-editor-plugin>
     }
 
     function addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo) {
-      // TODO: handle additional information on error
       var newItemId =  'item' + id + Date.now();
+
+      const br = document.createElement("br");
 
       var newItem = document.createElement('div');
       newItem.classList.add('accordion-item');
@@ -433,7 +357,8 @@ electronicform</textarea></grammarly-editor-plugin>
       newItemButton.setAttribute('data-bs-target', '#' + newItemId + '-collapse');
       newItemButton.setAttribute('aria-expanded', "false");
       newItemButton.setAttribute('aria-controls', newItemId + '-collapse');
-      newItemButton.setAttribute('style', 'margin-bottom: 0')
+      newItemButton.setAttribute('style', 'margin-bottom: 0');
+      newItemButton.setAttribute('data-line', errorLine);
       newItemButton.textContent = "Line " + errorLine + " --- " + errorKeyword;
 
       var newItemCollapse = document.createElement('div');
@@ -444,7 +369,9 @@ electronicform</textarea></grammarly-editor-plugin>
 
       var newItemBody = document.createElement('div');
       newItemBody.classList.add('accordion-body');
-      newItemBody.textContent = errorMessage; 
+      newItemBody.innerHTML += errorAdditionalInfo[0] + ": " + errorAdditionalInfo[1];
+      newItemBody.appendChild(br);
+      newItemBody.innerHTML += errorMessage; 
 
       // Append the elements to the accordion container
       newItemHeader.appendChild(newItemButton);
@@ -462,15 +389,6 @@ electronicform</textarea></grammarly-editor-plugin>
 
       // Remove all existing accordion items
       accordionContainer.innerHTML = '';
-
-      // Create and add new accordion items
-      // var newItem1 = createAccordionItem('New Panel 1', 'Content of New Panel 1');
-      // var newItem2 = createAccordionItem('New Panel 2', 'Content of New Panel 2');
-      // var newItem3 = createAccordionItem('New Panel 3', 'Content of New Panel 3');
-
-      // accordionContainer.appendChild(newItem1);
-      // accordionContainer.appendChild(newItem2);
-      // accordionContainer.appendChild(newItem3);
     }
 
     function previewOAS() {
@@ -494,40 +412,16 @@ electronicform</textarea></grammarly-editor-plugin>
 
     // =========================================================================================================================
 
-    // Updates error counter
-    // function updateErrorCounter() {
-    //   var errorCount = 0;
-    //   var errorPanel = document.getElementById("errorTextArea").innerHTML;
-      
-    //   errorTextArea_array = errorPanel.split("\n");
-    //   for (let i = 0; i < errorTextArea_array.length; i++) {
-    //     if (errorTextArea_array[i] != "") {
-    //       errorCount += 1;
-    //     }
-    //   }
-
-    //   if (errorCount == 0) {
-    //     document.getElementById('errorCount').innerHTML = "Valid";
-    //   } else {
-    //     document.getElementById('errorCount').innerHTML = "No. of Errors: " + (errorCount);
-    //   }
-    // }
-
-    // Real-time side panel refresh by posting to backend
-    // Using debounce concept to buffer each post request
-    var debounce = null;
+    // Real-time side panel refresh after each validation response
+    // Using debounce to buffer each post request by DEBOUNCE_BUFFER
+    let debounce;
+    const DEBOUNCE_BUFFER = 1500;
     editor.getSession().on("change", function (e) {
       var editorBorder = document.querySelector('#editor');
       editorBorder.style.border = '2px solid #000';
 
       clearTimeout(debounce);
       debounce = setTimeout(function extractOAS () {
-          // $(document).ready(function() {
-          // $('#checkOASButton').unbind('click').on('click', function(e) {
-          
-          // e.preventDefault();
-          // e.stopImmediatePropagation();
-
           var data = editor.getValue();
           if (data.trim() == "" || data == undefined) {
             return;
@@ -535,7 +429,7 @@ electronicform</textarea></grammarly-editor-plugin>
 
           // Catches one indentation error at a time
           // Make sure user handles all indentation errors before checking OAS
-          // Shows and highlights rows with indentation errors in editor and side panel
+          // Shows and highlights row with indentation errors in editor
           var syntaxErrors = editor.getSession().getAnnotations();
           if (syntaxErrors.length != 0) {
             line = syntaxErrors[0]["row"];
@@ -615,18 +509,6 @@ electronicform</textarea></grammarly-editor-plugin>
             url: 'http://localhost:3000/validate',
             success: function(response) {
               $('#loading').hide();
-              // TODO: Add Swagger preview
-
-              // oasSuccessModal = $('#oasSuccess');
-              // oasSuccessModal.find('.modal-body').html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>`);
-              // oasSuccessModal.find('.modal-body').append("There are no additional errors found");
-              // oasSuccessModal.modal("show");
-
-              // fill with empty lines in error side panel
-              // var errorTextArea = document.getElementById("errorTextArea");
-              // var numLines = editor.session.getLength();
-              // var emptyLines = "\n".repeat(numLines - 1);
-              // errorTextArea.innerHTML = emptyLines;
 
               previewOAS()
               
@@ -637,26 +519,16 @@ electronicform</textarea></grammarly-editor-plugin>
             error: function(response) {
               $('#loading').hide();
               var listErrors = JSON.parse(response["responseText"]) // list of dictionary objects
-              // var dictErrors = {};
-              
-              // oasErrorModal = $('#oasErrors');
-              // oasErrorModal.find('.styled-table tbody').empty();
 
               refreshAccordion();
 
               var formattedErrors = []
               for (let i = 0; i < listErrors.length; i++){
-                // oasErrorModal.find('.styled-table tbody').append(`<tr>
-                //                                             <td scope="row">`+(errorLine)+`</th>
-                //                                             <td>`+(errorText)+`</td>
-                //                                           </tr>
-                //                                         `);
-                // dictErrors[errorLine] = [errorText, errorColumn];
-
                 var id = i;
                 var errorLine = listErrors[i]["line_number"];
                 var errorKeyword = listErrors[i]["keyword"];
                 var errorMessage = listErrors[i]["error_message"];
+                
                 var errorAdditionalInfo = listErrors[i]["params"]
                 formattedErrors.push({
                   id: id,
@@ -674,70 +546,29 @@ electronicform</textarea></grammarly-editor-plugin>
                 errorLine = error["errorLine"];
                 errorKeyword = error["errorKeyword"];
                 errorMessage = error["errorMessage"];
-                errorAdditionalInfo = error["errorAdditionalInfo"];
+                errorAdditionalInfo = Object.entries(error["errorAdditionalInfo"]);
+                errorAdditionalInfo = [errorAdditionalInfo[0][0], errorAdditionalInfo[0][1]]
                 addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
               }
               
-
               editorBorder.style.border = '2px solid #f00';
-              
-
-              // oasErrorModal.modal("show");
-
-              // fill lines without errors with empty lines while those with with error description
-              // var errorTextArea = document.getElementById("errorTextArea");
-              // var emptyLines = "";
-              // var numLines = editor.session.getLength();
-              // // TODO: Check for errors on the same line and combine the error description
-              // for (let i = 0; i < numLines; i++) {
-              //   if (dictErrors[i] != undefined) {
-              //     emptyLines += `${dictErrors[i][0]} @ line number ${i + 1}`;
-              //   } 
-              //   if (i == numLines - 1) {
-              //     break;
-              //   }
-              //   emptyLines += "\n";
-              // }
-              // errorTextArea.innerHTML = emptyLines;
-
-
             },
-            // complete: function() {
-            //   errorCounterFlag = false;
-            //   updateErrorCounter();
-            // }
+            complete: function() {
+              console.log("Done")
+            }
           });
-      }, 1500);
+      }, DEBOUNCE_BUFFER);
     });
 
-    // var errorLines_queue = [];
-    // $('#errorScroller').on('click', function () {
-    //   if (errorCounterFlag == false) { // error list newly updated
-    //     errorLines_queue = [];
-    //     var errorPanel = document.getElementById("errorTextArea").innerHTML;
-    //     errorTextArea_array = errorPanel.split("\n");
-    //     for (let i = 0; i < errorTextArea_array.length; i++) {
-    //       if (errorTextArea_array[i] != "") {
-    //         errorLines_queue.push(i + 1);
-    //       }
-    //     }
-    //     if (errorLines_queue.length == 0) {
-    //       return;
-    //     } else {
-    //       nextErrorLine = errorLines_queue.shift();
-    //       errorLines_queue.push(nextErrorLine);
-    //       errorCounterFlag = true;
-    //       editor.gotoLine(nextErrorLine);
-    //     }
-    //   } else { // same session
-    //     if (errorLines_queue.length == 0) {
-    //       return;
-    //     }
-    //     nextErrorLine = errorLines_queue.shift();
-    //     errorLines_queue.push(nextErrorLine);
-    //     editor.gotoLine(nextErrorLine);
-    //   }
-    // })
+
+    $('#errorStack').on('click', '.accordion-button:not(.collapsed)', function() {
+      var errorLine = parseInt($(this).data("line")) - 1 // ace editor treats first line as 0
+      editor.gotoLine(errorLine);
+      var highlightRange = new Range(errorLine, 0, errorLine, 300);
+      editor.selection.setRange(highlightRange);
+    })
+ 
+    
   </script>
     
 <script src="/static/js/kong.utils.js.download"></script>
