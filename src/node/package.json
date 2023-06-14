@@ -5,6 +5,7 @@
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
     "ajv-keywords": "^5.1.0",
+    "dotenv": "^16.1.4",
     "file-system": "^1.2.2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",

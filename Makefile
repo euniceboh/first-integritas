@@ -1,3 +1,5 @@
+# RUN WITH TAG -j2
+
 .ONESHELL:
 
 .DEFAULT_GOAL := run
