@@ -106,7 +106,13 @@ def getLineNumberFromPathArray(docJson, pathArray):
                     return key.lc.line + 1
         # Go down the JSON until the last key
         for i in range(numKeys - 1):
-            docJson = docJson[pathArray[i]]
+            key = pathArray[i]
+            try:
+                key = int(key)
+            except:
+                pass
+            docJson = docJson[key]
+            print(pathArray[i])
         for key in docJson.keys():
             if key == pathArray[-1]:
                 return key.lc.line + 1 # because the first line is 0 and the first line in the editor is 1

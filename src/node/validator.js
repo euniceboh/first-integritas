@@ -230,7 +230,6 @@ ajv.addKeyword({
     for (var subtier of subtiers) {
       var words = _.words(subtier) // splits subtier into words using lodash based on camel casing
       for (var word of words) {
-        console.log(word)
         if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
           subtiersNotCamelCase.push(subtier)
           break

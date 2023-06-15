@@ -190,6 +190,79 @@
       border: none;
     }
 
+    .navbar {
+      position: fixed !important;
+      top: 0;
+      width: 100%;
+      z-index: 2;
+    }
+    
+    .navbar .dropdown-item {
+      font-size: 16px; /* Adjust the font size as needed */
+      padding: 10px 20px; /* Adjust the padding values as needed */
+    }
+
+    .dropdown:hover .dropdown-menu {
+      display: block;
+    }
+
+    .dropdown-menu {
+      display: none;
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 3;
+    }
+
+    #errorPanel.active, #previewPanel.active {
+      display: block !important;
+    }
+
+    @media (max-width: 576px) {
+      .navbar {
+        padding: 5px;
+      }
+
+      .navbar .nav-link {
+        font-size: 5px;
+      }
+    }
+
+    /* Styles for medium screens */
+    @media (min-width: 576px) {
+      .navbar {
+        padding: 10px;
+      }
+
+      .navbar .nav-link {
+        font-size: 10px;
+      }
+    }
+
+    /* Styles for large screens */
+    @media (min-width: 992px) {
+      .navbar {
+        padding: 12px;
+      }
+
+      .navbar .nav-link {
+        font-size: 12px;
+      }
+    }
+
+    /* Styles for extra large screens */
+    @media (min-width: 1200px) {
+      .navbar {
+        padding: 16px;
+      }
+
+      .navbar .nav-link {
+        font-size: 16px;
+      }
+    }
 
   </style>
 
@@ -203,94 +276,102 @@
 </head>
 
 <body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light" style="height:60px; border-bottom: 1px solid #000;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="https://portal.axpuat.cpf.gov.sg/test_workspace_01">
+        <img class="logo" src="/static/images/Logo.png" alt="API Exchange Developer Portal" style="max-height: 32px; padding-right: 1cm;">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown" style="margin-bottom: 0; width: 75px">
+            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              File
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <li>
+                <a class="dropdown-item" onclick="pickFile()">Import File</a>
+              </li>
+              <li role="separator"></li>
+              <li><a class="dropdown-item" onclick="saveFile()">Save File</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown" style="margin-bottom: 0; width: 75px">
+            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Dictionary
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <li><a class="dropdown-item" onclick="editDictionary()">Edit Dictionary</a></li>
+              <li><a class="dropdown-item" onclick="uploadDictionary()">Upload Dictionary</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <span class="navbar-text">CPF OAS Validator Tool</span>
+    </div>
+  </nav>
     
-  <header class="site-header">
-    <div class="container" style="float: left; margin-left: 1cm">
-      <div class="row">
-        <div class="four columns">
-          <h1 class="brand"><a href="https://portal.axpuat.cpf.gov.sg/test_workspace_01"><img class="logo" src="/static/images/Logo.png" alt="API Exchange Developer Portal"></a></h1>
-        </div>
+  <div class="split-pane" style="display: flex; flex: 1 1 0%; height: 100%; position: absolute; outline: none; overflow: hidden; user-select: text; flex-direction: row; left: 0px; right: 0px; padding-top: 60px">
+    <!-- Ace Editor -->
+    <div class="pane-left" style="flex: 1 1 0%; position: relative;">
+      <div class="container-fluid">
+        <div id="editor" contenteditable="true" style="height: 100%;"></div>
       </div>
     </div>
-  </header>
 
-  <div style="padding-top: 3cm; padding-left: 1cm">
-    <h3 class="route-identifier">CPF OAS Validator Tool</h3>
-    <p style="margin-bottom: 2rem !important;">Paste the content of your OAS in the field below, and wait 2 seconds to check if there are any errors on the OAS format.</p>
-  </div>
+    <!-- TODO: Resizer -->
+    <div class="resizer" style="width: 5px; cursor: col-resize; background-color: #ccc"></div>
     
-
-  <div class="page" style="display:flex; flex-direction: row; padding-top: 0">
-    <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 70%; flex: 1; padding: 1cm">
-      <!-- OAS Text Box -->
-      <div style="position: relative">
-        <div id="editor" contenteditable="true" spellcheck="true" style="height: 10cm">
-          <textarea id="oasTextarea" class="form-control flex-fill" method="post" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem;height:100%; height: 100%;"></textarea>
+    <div class="pane-right" style="flex: 1 1 0%; overflow: auto;">
+      <div class="container-fluid">
+        <!-- Error Panel -->
+        <div class="accordion" id="errorPanel" style="display: none"></div>
+        <!-- Preview Panel -->
+        <div id="previewPanel" style="display: none">
+          <div id="oasPreviewBody"></div>
         </div>
       </div>
-      <div style="margin-top: 10.5cm; text-align: right;">
-        <!-- Upload Feature -->
-        <input class="my-0 align-self-start" id="fileUpload" type="file" style="margin-bottom: 3rem; padding-bottom: 1cm; float: left;", accept=".yml, .yaml, .json" onclick="this.value=null" onchange="uploadFile()"/>
-        <input type="hidden" id="fileNameInput">
-        <!-- <button class = "my-0 px-5 align-self-start" id="fileUploadButton" style="display: inline-block;" onclick=uploadFile()>Upload</button> -->
-        <!-- Save Text to File Feature -->
-        <button class = "my-0 px-5 align-self-start" id="savefile" style="display: inline-block" onclick="saveFile()">Save to File</button>
-        <!-- Check OAS -->
-        <!-- <button class="btn noBorder my-0 px-5 align-self-start" id="checkOASButton" style="background-color: rgb(10, 97, 96); color: white; font-size: 1em; text-transform: none; height: auto; padding: 8px 15px; border-radius: 5px; margin-bottom: 5rem;" onclick=extractOAS()>How is my OAS?</button> -->
-    </div>
-    <div>
-      <!-- Dictionary Text Box -->
-      <p wrap="on" style="margin-bottom: 2rem !important; margin-top: 1rem !important;">Paste dictionary word here (from least important to most important order):</p>
-      <textarea id="oasDictionaryArea" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; margin-bottom: 2rem; width: 70%; height: 3cm;">
-discretionary
-withdrawals
-update
-member
-credit
-status
-for
-pay
-now
-eligibility
-check
-age
-paynow
-electronicform</textarea>
+
     </div>
   </div>
 
-  <!-- Error Panel -->
-  <div class="container h-100 py-5 d-flex flex-column" style="margin: 0; width: 30%; padding-right: 1cm; ">
-    <div class="accordion" id="errorStack"></div>
-  </div>
-</div>
 
   <div id="spec-url" style="display: none">
     documentation/untitled
   </div>
 
   <!-- Modals -->
-  <div class="modal fade" id="oasPreview" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <!-- Custom Dictionary -->
+  <div class="modal fade" id="dictionaryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content" style="min-height:100%;">
         <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">Preview</h5>
-          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title">Custom Dictionary</h5>
+          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal" onclick="saveDictionary()"></button>
         </div>
-        <div class="modal-body" id="oasPreviewBody">
+        <div class="modal-body">
+          <p style="padding-bottom: 5px">English words in the US and UK dictionaries are automatically included.</p>
+          <textarea id="customDictionary" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; width: 100%; height: 10cm;">
+paynow
+electronicform</textarea>
+            <button type="button" class="btn" data-bs-dismiss="modal" onclick="saveDictionary()">Save</button>
         </div>
       </div>
     </div>
   </div>
 
   <script src="/static/js/bootstrap.bundle.min.js.download"></script>
-  <script src="/static/js/swagger-ui-bundle.js.download"></script>
+  <script src="/static/js/swagger-ui-bundle.js."></script>
+  <script src="/static/js/swagger-ui-standalone-preset.js"></script>
   <script src="/static/js/js-yaml-3.13.1.min.js.download"></script>
   <script src="/static/js/jquery.min.js.download"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/@grammarly/editor-sdk?clientId=client_4CtRAfLPVnqc476pJ7F7xT"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/src-min-noconflict/ace.min.js"></script>
 
   <script>
+    // TODO: Light and Dark mode
     var editor = ace.edit("editor");
     var Range = ace.require("ace/range").Range;
     editor.setTheme("ace/theme/kuroir");
@@ -302,11 +383,24 @@ electronicform</textarea>
       enableSnippets: true,
       enableLiveAutocompletion: true
     });
-    var errorCounterFlag = false;
+    const errorPanel = document.getElementById('errorPanel');
+    const previewPanel = document.getElementById('previewPanel');
 
-    function uploadFile() {
-      var file = document.getElementById("fileUpload").files[0];
-      if (file != undefined) {
+    function pickFile() {
+      const fileInput = document.createElement("input");
+      fileInput.id = "fileUpload";
+      fileInput.type = "file";
+      fileInput.accept = ".yml, .yaml, .json";
+      fileInput.onclick = "this.value=null";
+      fileInput.addEventListener("change", function(event) {
+        uploadFile(event)
+      })
+      fileInput.click();
+    }
+
+    function uploadFile(event) {
+      const file = event.target.files[0]
+      if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
         editor.setValue(e.target.result);
@@ -335,6 +429,15 @@ electronicform</textarea>
         }
         downloadLink.click();
       }
+    }
+
+    function editDictionary() {
+      var dictionaryModal = new bootstrap.Modal(document.getElementById("dictionaryModal"));
+      dictionaryModal.show();
+    }
+
+    function saveDictionary() {
+      editor.setValue("");
     }
 
     function addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo) {
@@ -373,42 +476,36 @@ electronicform</textarea>
       newItemBody.appendChild(br);
       newItemBody.innerHTML += errorMessage; 
 
-      // Append the elements to the accordion container
       newItemHeader.appendChild(newItemButton);
       newItemCollapse.appendChild(newItemBody);
       newItem.appendChild(newItemHeader);
       newItem.appendChild(newItemCollapse);
 
-      var accordionContainer = document.getElementById('errorStack');
+      var accordionContainer = document.getElementById('errorPanel');
       accordionContainer.appendChild(newItem); 
-
     }
 
     function refreshAccordion() {
-      var accordionContainer = document.getElementById('errorStack');
-
-      // Remove all existing accordion items
+      var accordionContainer = document.getElementById('errorPanel');
       accordionContainer.innerHTML = '';
     }
 
-    function previewOAS() {
+    function previewOAS(data) {
       var swaggerUIOptions = {
-      dom_id: '#oasPreviewBody', // Determine what element to load swagger ui
+        dom_id: '#oasPreviewBody', // Determine what element to load swagger ui
         presets: [
           SwaggerUIBundle.presets.apis,
-          // SwaggerUIStandalonePreset
+          SwaggerUIBundle.SwaggerUIStandalonePreset
         ],
         plugins: [
           SwaggerUIBundle.plugins.DownloadUrl
         ],
         layout: 'BaseLayout',
       }
-      var data = editor.getValue()
       swaggerUIOptions.spec = jsyaml.load(data, {schema:jsyaml.JSON_SCHEMA})
       SwaggerUIBundle(swaggerUIOptions)
-      var oasPreview = new bootstrap.Modal(document.getElementById("oasPreview"), {});
-      oasPreview.show();
     }
+
 
     // =========================================================================================================================
 
@@ -424,6 +521,8 @@ electronicform</textarea>
       debounce = setTimeout(function extractOAS () {
           var data = editor.getValue();
           if (data.trim() == "" || data == undefined) {
+            errorPanel.classList.remove('active');
+            previewPanel.classList.remove('active')
             return;
           }
 
@@ -493,10 +592,8 @@ electronicform</textarea>
           // gotoLine(line) --> Scrolls the screen down to line <line>
 
           
-          var dictionaryWords = $('#oasDictionaryArea').val().split(/\r?\n/);
-          var dictionaryWordsDictionary = {dictionary: dictionaryWords};
-          dictionary = JSON.stringify(dictionaryWordsDictionary);
-          
+          var dictionaryWords = $('#customDictionary').val().split(/\r?\n/);
+
           $('#loading').show();
 
           $.ajax({
@@ -510,10 +607,13 @@ electronicform</textarea>
             success: function(response) {
               $('#loading').hide();
 
-              previewOAS()
-              
               refreshAccordion();
 
+              previewOAS(data);
+
+              errorPanel.classList.remove('active');
+              previewPanel.classList.add('active')
+              
               editorBorder.style.border = '2px solid #20c997';
             },
             error: function(response) {
@@ -521,6 +621,9 @@ electronicform</textarea>
               var listErrors = JSON.parse(response["responseText"]) // list of dictionary objects
 
               refreshAccordion();
+
+              previewPanel.classList.remove('active');
+              errorPanel.classList.add('active')
 
               var formattedErrors = []
               for (let i = 0; i < listErrors.length; i++){
@@ -561,14 +664,13 @@ electronicform</textarea>
     });
 
 
-    $('#errorStack').on('click', '.accordion-button:not(.collapsed)', function() {
+    $('#errorPanel').on('click', '.accordion-button:not(.collapsed)', function() {
       var errorLine = parseInt($(this).data("line")) - 1 // ace editor treats first line as 0
       editor.gotoLine(errorLine);
       var highlightRange = new Range(errorLine, 0, errorLine, 300);
       editor.selection.setRange(highlightRange);
     })
  
-    
   </script>
     
 <script src="/static/js/kong.utils.js.download"></script>
