@@ -257,29 +257,34 @@ ajv.addKeyword({
   validate: function checkPathSpelling(schema, data, parentSchema, dataPath) {
     // Checks the spelling of all words in subtiers (because spelling-check does not apply to concatenated strings)
     // TODO: Compounds words not handled
-    // TODO: Return subtiers with words spelled wrongly
     // Will not send info on words to correct because behaviour of WordsNinja not stable; possible if it separates words better
     if (schema == false) {
       return true
     }
     const path = dataPath["parentDataProperty"]
     var subtiers = getSubtiers(path)
+    const subtiersSpelledWrongly = []
     for (var subtier of subtiers) {
       var words = WordsNinja.splitSentence(subtier) // split words using Wordsninja based on word identification
       for (var word of words) {
         if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
-          checkPathSpelling.errors = [
-            {
-              keyword: "path-spelling",
-              message: "Word(s) in subtier(s) spelled incorrectly",
-              params: {
-                pathSpelling: false
-              }
-            }
-          ]
-          return false
+          subtiersSpelledWrongly.push(subtier)
+          break
         }
       }
+    }
+    if (subtiersSpelledWrongly.length != 0) {
+      const subtiersSpelledWrongly_string = subtiersSpelledWrongly.join(", ")
+      checkPathSpelling.errors = [
+        {
+          keyword: "path-spelling",
+          message: `One or more words in the following subtier(s) are not spelled correctly: "${subtiersSpelledWrongly_string}"`,
+          params: {
+            pathSpelling: false
+          }
+        }
+      ]
+      return false
     }
     return true
   }
@@ -421,7 +426,6 @@ async function validateYAML(doc, dictionary) {
     return null
   }
   
-
   var payload = []
   if (!validate(data)) {
     for (var error of validate.errors) {
@@ -462,7 +466,7 @@ async function validateYAML(doc, dictionary) {
 //==================== Server ===================================
 
 const hostname = 'localhost'; 
-const port = 80; // we put the same port as the flask server to expose minimum number of ports, but make sure no routes are the same
+const port = 80; // we put the same port as the flask server to expose minimum number of ports, but make sure no routes are the same. best practice is to separate 
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
