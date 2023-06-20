@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS dictionaryDB;
+USE dictionaryDB;
+CREATE TABLE IF NOT EXISTS dictionary (custom_word VARCHAR(255) NOT NULL);

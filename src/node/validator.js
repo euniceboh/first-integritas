@@ -466,7 +466,7 @@ async function validateYAML(doc, dictionary) {
 //==================== Server ===================================
 
 const hostname = 'localhost'; 
-const port = 80; // we put the same port as the flask server to expose minimum number of ports, but make sure no routes are the same. best practice is to separate 
+const port = 5000; // we put the same port as the flask server to expose minimum number of ports, but make sure no routes are the same. best practice is to separate 
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin

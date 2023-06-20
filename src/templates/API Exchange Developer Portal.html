@@ -221,6 +221,10 @@
       display: block !important;
     }
 
+    .accordion-button:hover {
+      background-color: #86b7fe;
+    }
+
     @media (max-width: 576px) {
       .navbar {
         padding: 10px;
@@ -299,12 +303,12 @@
               <li><a class="dropdown-item" onclick="saveFile()">Save File</a></li>
             </ul>
           </li>
-          <li class="nav-item dropdown" style="margin-bottom: 0; width: 75px">
+          <li class="nav-item dropdown" style="margin-bottom: 0; width: 75px;">
             <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Dictionary
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <li><a class="dropdown-item" onclick="editDictionary()">Edit Dictionary</a></li>
+              <li><a class="dropdown-item" onclick="getDictionary()">Edit Dictionary</a></li>
               <li><a class="dropdown-item" onclick="uploadDictionary()">Upload Dictionary</a></li>
             </ul>
           </li>
@@ -314,7 +318,7 @@
     </div>
   </nav>
     
-  <div class="split-pane" style="display: flex; flex: 1 1 0%; height: 100%; position: absolute; outline: none; overflow: hidden; user-select: text; flex-direction: row; left: 0px; right: 0px; padding-top: 60px">
+  <div class="split-pane" style="display: flex; flex: 1 1 0%; height: 100%; position: fixed; outline: none; user-select: text; flex-direction: row; left: 0px; right: 0px; padding-top: 60px;">
     <!-- Ace Editor -->
     <div class="pane-left" style="flex: 1 1 0%; position: relative;">
       <div class="container-fluid">
@@ -354,10 +358,8 @@
         </div>
         <div class="modal-body">
           <p style="padding-bottom: 5px">English words in the US and UK dictionaries are automatically included.</p>
-          <textarea id="customDictionary" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; width: 100%; height: 10cm;">
-paynow
-electronicform</textarea>
-            <button type="button" class="btn" data-bs-dismiss="modal">Save</button>
+          <textarea id="customDictionary" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; width: 100%; height: 10cm;"></textarea>
+            <button type="button" class="btn" data-bs-dismiss="modal" onclick="saveDictionary()">Save</button>
         </div>
       </div>
     </div>
@@ -431,9 +433,31 @@ electronicform</textarea>
       }
     }
 
-    function editDictionary() {
+    function getDictionary() {
       var dictionaryModal = new bootstrap.Modal(document.getElementById("dictionaryModal"));
-      dictionaryModal.show();
+      var dictionaryTextArea = document.getElementById('customDictionary');
+      $.ajax({
+        type: "GET",
+        url: 'http://localhost:80/db/get',
+        success: function(response) {
+          const dictionaryArray = response["dictionaryArray"]
+          var newDictionaryTextArea = ""
+          for (var word of dictionaryArray) {
+            newDictionaryTextArea += (word + "\n")
+          }
+          dictionaryTextArea.innerHTML = newDictionaryTextArea
+          dictionaryModal.show();
+        },
+        error: function(response) {
+          alert("An unexpected error has occurred getting the dictionary.")
+        }
+      })
+
+      
+    }
+
+    function saveDictionary() {
+      
     }
 
     function addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo) {
@@ -443,20 +467,23 @@ electronicform</textarea>
 
       var newItem = document.createElement('div');
       newItem.classList.add('accordion-item');
-      newItem.setAttribute('style', 'margin-bottom: 10px');
+      newItem.setAttribute('style', 'margin-bottom: 10px; border-radius: 5px');
 
       var newItemHeader = document.createElement('div');
       newItemHeader.classList.add('accordion-header');
-      newItemHeader.id = newItemId + '-header';
 
+      newItemHeader.id = newItemId + '-header';
       var newItemButton = document.createElement('button');
       newItemButton.classList.add('accordion-button');
+      newItemButton.classList.add('collapsed');
       newItemButton.setAttribute('type', 'button');
       newItemButton.setAttribute('data-bs-toggle', 'collapse');
       newItemButton.setAttribute('data-bs-target', '#' + newItemId + '-collapse');
       newItemButton.setAttribute('aria-expanded', "false");
       newItemButton.setAttribute('aria-controls', newItemId + '-collapse');
-      newItemButton.setAttribute('style', 'margin-bottom: 0');
+      newItemButton.setAttribute('style', 'margin-bottom: 0; border: 1.5px solid #6f42c1; border-radius: 5px');
+      newItemButton.setAttribute('onmouseover', "this.classList.add('hovered')")
+      newItemButton.setAttribute('onmouseout', "this.classList.remove('hovered')")
       newItemButton.setAttribute('data-line', errorLine);
       newItemButton.textContent = "Line " + errorLine + " --- " + errorKeyword;
 
@@ -588,6 +615,9 @@ electronicform</textarea>
           // gotoLine(line) --> Scrolls the screen down to line <line>
 
           
+          // TODO: Get dictionary from database
+
+          
           var dictionaryWords = $('#customDictionary').val().split(/\r?\n/);
 
           $('#loading').show();
@@ -599,7 +629,7 @@ electronicform</textarea>
             }),
             method: 'POST',
             contentType: 'application/json',
-            url: 'http://localhost:80/validate',
+            url: 'http://localhost:5000/validate',
             success: function(response) {              
               $('#loading').hide();
 
