@@ -205,7 +205,7 @@ ajv.addKeyword({
       checkMatchingVersion.errors = [
         {
           keyword: "match-version",
-          message: "Version in path does not match with version in [Info]",
+          message: "Version in path does not match with version in [info]",
           params: {
             matchVersion: false
           }
@@ -314,7 +314,7 @@ ajv.addKeyword({
       var verb = words[0] // no need to catch index errors, if subtier is null, it words[0] will return null
       var taggedVerb = tagger.tag([verb]) // uses natural to do POS tagging
       var tag = taggedVerb.taggedWords[0].tag
-      if (tag != "VB") {
+      if (tag != "VB" && tag != "VBP" && tag != "VBN" && tag != "VBG") {
        notVerbAndSubtiers.push([verb, subtier])
       }
     }
