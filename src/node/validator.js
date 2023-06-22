@@ -17,12 +17,6 @@ const WordsNinja = new WordsNinjaPack();
 
 const natural = require('natural');
 const tokenizer = new natural.WordTokenizer();
-const language = "EN"
-const defaultCategory = 'N';
-const defaultCategoryCapitalized = 'NNP';
-var lexicon = new natural.Lexicon(language, defaultCategory, defaultCategoryCapitalized);
-var ruleSet = new natural.RuleSet('EN');
-var tagger = new natural.BrillPOSTagger(lexicon, ruleSet);
 
 const http = require('http');
 
@@ -65,7 +59,7 @@ function getSubtiers(path) {
 }
 
 
-// WordsNinja or Natural do not allow adding custom words during runtime or it is too expensive
+// WordsNinja do not allow adding custom words during runtime or it is too expensive
 // Faster (maybe) to check it with our own list
 // Even faster if pre-processing is doen to the list before searching
 function wordInCustomDict(word) {
@@ -85,6 +79,9 @@ const ajv = new Ajv({
 addFormats(ajv, ["uri-reference", "email", "regex", "uri"])
 AjvErrors(ajv) // add all ajv-errors keywords, significantly, errorMessage
 require("ajv-keywords")(ajv) // add all ajv-keywords keywords
+
+// ===================== Custom Validation Rules ====================================
+// Rules following CPFB API Standards v1.1.2
 
 // keywords should be delimited by "-" to avoid future name collisions
 ajv.addKeyword({
@@ -111,7 +108,8 @@ ajv.addKeyword({
       return true
     }
 })
-ajv.addKeyword({
+// TODO: Change API format checks according to API Standards file
+ajv.addKeyword({ 
     keyword: "path-length",
     validate: function checkPathLength(schema, data, parentSchema, dataPath) {
       // Checks if the path length is 5 or 6
@@ -120,7 +118,7 @@ ajv.addKeyword({
       }
       const path = dataPath["parentDataProperty"]
       const subtiers = path.split("/")
-      if (subtiers.length == 5 || subtiers.length == 6) {
+      if (subtiers.length == 4 || subtiers.length == 5 || subtiers.length == 6) {
         return true
       }
       checkPathLength.errors = [
@@ -289,7 +287,7 @@ ajv.addKeyword({
     return true
   }
 })
-ajv.addKeyword({
+ajv.addKeyword({ 
   keyword: "subtier-verb",
   validate: function checkSubtierVerb(schema, data, parentSchema, dataPath) {
     // Subtier verb only applies to subtiers after the version subtier
@@ -308,14 +306,13 @@ ajv.addKeyword({
     }
     subtiers = subtiers.slice(pathVersionAt + 1) // only right slice; always only 1 subtier but we expand for extensibility
 
+    var allowedVerbs = ["create", "get", "update", "delete", "compute", "transact", "check", "transfer"]
     var notVerbAndSubtiers = [] 
     for (var subtier of subtiers) {
       var words = _.words(subtier)
-      var verb = words[0] // no need to catch index errors, if subtier is null, it words[0] will return null
-      var taggedVerb = tagger.tag([verb]) // uses natural to do POS tagging
-      var tag = taggedVerb.taggedWords[0].tag
-      if (tag != "VB" && tag != "VBP" && tag != "VBN" && tag != "VBG") {
-       notVerbAndSubtiers.push([verb, subtier])
+      var verb = words[0] // no need to catch index errors, if subtier is null, words[0] will return null
+      if (!allowedVerbs.includes(verb)) {
+        notVerbAndSubtiers.push([verb, subtier])
       }
     }
     if (notVerbAndSubtiers.length != 0) {
@@ -326,7 +323,7 @@ ajv.addKeyword({
       checkSubtierVerb.errors = [
         {
           keyword: "subtier-verb",
-          message: `The following word(s) are not verbs: ${notVerbAndSubtiers_string}`,
+          message: `The following word(s) are not verbs allowed in the API Standards: ${notVerbAndSubtiers_string}`,
           params: {
             subtierVerb: false
           }

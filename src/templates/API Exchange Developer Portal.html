@@ -227,6 +227,18 @@
       background-color: #86b7fe;
     }
 
+    /* Resizer */
+    .gutter {
+      background-color: #eee;
+      background-repeat: no-repeat;
+      background-position: 50%;
+  }
+
+    .gutter.gutter-horizontal {
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+        cursor: col-resize;
+    }
+
     @media (max-width: 576px) {
       .navbar {
         padding: 14px;
@@ -305,7 +317,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <ul class="navbar-nav">
-          <li class="nav-item dropdown" style="margin-bottom: 0; width: 75px">
+          <li class="nav-item dropdown" style="margin-bottom: 0; width: 70px">
             <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               File
             </a>
@@ -317,33 +329,28 @@
               <li><a class="dropdown-item" onclick="saveFile()">Save File</a></li>
             </ul>
           </li>
-          <li class="nav-item dropdown" style="margin-bottom: 0; width: 75px;">
-            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Dictionary
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <li><a class="dropdown-item" onclick="getDictionary()">View Dictionary</a></li>
-              <!-- <li><a class="dropdown-item" onclick="uploadDictionary()">Upload Dictionary</a></li> -->
-            </ul>
+          <li class="nav-item" style="margin-bottom: 0; padding-right: 10px">
+            <a class="nav-link" onclick="new bootstrap.Modal(document.getElementById('dictionaryModal')).show()">View Dictionary</a>
           </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" onclick="new bootstrap.Modal(document.getElementById('configVariables')).show()">Settings</a>
+          </li> -->
         </ul>
       </div>
       <span class="navbar-text">CPF OAS Validator Tool</span>
     </div>
   </nav>
     
-  <div class="split-pane" style="display: flex; flex: 1 1 0%; height: 100%; position: fixed; outline: none; user-select: text; flex-direction: row; left: 0px; right: 0px; padding-top: 60px;">
+  <div class="split" style="display: flex; height: 100%; position: fixed; outline: none; user-select: text; flex-direction: row; left: 0px; right: 0px; padding-top: 60px;">
     <!-- Ace Editor -->
-    <div class="pane-left" style="flex: 1 1 0%; position: relative;">
+    <div class="pane-left" id="split-0" style="position: relative;">
       <div class="container-fluid">
         <div id="editor" contenteditable="true" style="height: 100%;"></div>
       </div>
     </div>
-
-    <!-- TODO: Resizer -->
-    <div class="resizer" style="width: 5px; cursor: col-resize; background-color: #ccc"></div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
-    <div class="pane-right" style="flex: 1 1 0%; overflow: auto;">
+    
+    <!-- Side Panel -->
+    <div class="pane-right" id="split-1" style="overflow: auto;">
       <div class="container-fluid">
         <!-- Error Panel -->
         <div class="accordion" id="errorPanel" style="display: none"></div>
@@ -372,20 +379,35 @@
         </div>
         <div class="modal-body">
           <p style="padding-bottom: 5px">English words in the US and UK dictionaries are automatically included.</p>
-          <textarea id="customDictionary" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; width: 100%; height: 100%;" onkeyup="textAreaAdjust(this)"></textarea>
-          <!-- <button type="button" class="btn" data-bs-dismiss="modal" onclick="saveDictionary()">Save</button> -->
-        
+          <textarea id="customDictionary" class="form-control flex-fill" wrap="off" style="font-size:1.5rem; width: 100%; height: 12cm;"></textarea> 
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Config Variables
+  <div class="modal fade" id="configVariables" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content" style="min-height:100%;">
+        <div class="modal-header">
+          <h5 class="modal-title">Settings</h5>
+          <button type="button" class="btn-close noBorder" style="padding:1rem 2rem;" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+      </div>
+    </div>
+  </div> -->
 
   <script src="/static/js/bootstrap.bundle.min.js.download"></script>
   <script src="/static/js/swagger-ui-bundle.js"></script>
   <script src="/static/js/swagger-ui-standalone-preset.js"></script>
   <script src="/static/js/js-yaml-3.13.1.min.js.download"></script>
   <script src="/static/js/jquery.min.js.download"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/src-min-noconflict/ace.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.19.0/src-min-noconflict/ace.min.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.2/split.min.js"></script>
 
   <script>
     // TODO: Light and Dark mode
@@ -403,14 +425,9 @@
     const errorPanel = document.getElementById('errorPanel');
     const previewPanel = document.getElementById('previewPanel');
 
-    $(document).ready(function() {
-      getDictionary(start=true);
-    })
+    loadDictionary();
 
-    function textAreaAdjust(element) {
-      element.style.height = "1px";
-      element.style.height = (25+element.scrollHeight)+"px";
-    }
+    Split(['#split-0', '#split-1'])
 
     function pickFile() {
       const fileInput = document.createElement("input");
@@ -457,64 +474,42 @@
       }
     }
 
-    function getDictionary(start) {
-      // var dictionaryModal = new bootstrap.Modal(document.getElementById("dictionaryModal"));
-      // var dictionaryTextArea = document.getElementById('customDictionary');
-      // $.ajax({
-      //   type: "GET",
-      //   url: 'http://localhost:80/db/get',
-      //   success: function(response) {
-      //     const dictionaryArray = response["dictionaryArray"]
-      //     var newDictionaryTextArea = dictionaryArray.join("\n")
-      //     dictionaryTextArea.value = newDictionaryTextArea
-      //     if (start != true) {
-      //       dictionaryModal.show();
-      //     }
-          
-      //   },
-      //   error: function(response) {
-      //     alert("An unexpected error has occurred getting the dictionary.")
-      //   }
-      // })
-
+    function loadDictionary() {
       var dictionaryModal = new bootstrap.Modal(document.getElementById("dictionaryModal"));
       var dictionaryTextArea = document.getElementById('customDictionary');
-      const file = "static/dictionary/customDictionary.txt"
-      fetch(file)
-        .then(response => response.text())
-        .then(text => {
-          dictionaryTextArea.value = text;
-          if (start != true) {
-            dictionaryModal.show();
-          }
-        })
-        .catch(error => {
-          console.log("Error in reading dictionary file")
-        })
-    }
-
-    function saveDictionary() {
-      var dictionaryTextArea = document.getElementById('customDictionary');
-      var dictionaryArray = dictionaryTextArea.value.split("\n")
-      $.ajax({
-        data: JSON.stringify({
-              dictionaryArray: dictionaryArray,
-            }),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        type: "POST",
-        url: 'http://localhost:80/db/edit',
-        success: function(response) {
-          alert("Dictionary successfully saved")
-          // force change on editor to invoke validate
-          const dummy = editor.getSession().getValue()
-          editor.getSession().setValue(dummy)
-        },
-        error: function(response) {
-          alert("An unexpected error has occurred saving the dictionary.")
+      const file = "static/dictionary/customDictionary.txt" // somehow fetch only works with files in the static folder
+      const extension = file.split('.').pop().toLowerCase()
+      const allowedExtensions = ['txt', 'csv', 'xlsx']
+      if (allowedExtensions.includes(extension)) {
+        if (extension == 'txt' || extension == 'csv') {
+          fetch(file)
+            .then(response => response.text())
+            .then(text => {
+              dictionaryTextArea.value = text;
+            })
+            .catch(error => {
+              alert("Error in reading .txt/.csv dictionary file")
+            })
+        } else {
+          fetch(file)
+            .then(response => response.arrayBuffer())
+            .then(buffer => {
+              const data = new Uint8Array(buffer)
+              const workbook = XLSX.read(data, { type: 'array' });
+              const sheetName = workbook.SheetNames[0];
+              const worksheet = workbook.Sheets[sheetName];
+              const wordsArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+              
+              const formattedText = wordsArray.join("\n")
+              dictionaryTextArea.value = formattedText
+            })
+            .catch(error => {
+              alert("Error in reading .xlsx dictionary file")
+            })
         }
-      })
+      } else {
+        alert("Wrong dictionary file format. Please try another file.")
+      }
     }
 
     function addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo) {
@@ -738,7 +733,6 @@
               editorBorder.style.border = '2px solid #f00';
             },
             complete: function() {
-              console.log("Done")
             }
           });
       }, DEBOUNCE_BUFFER);
