@@ -42,22 +42,24 @@ async function fetchLineNumber(doc, pathArray) {
     .then(response => response.json())
 }
 
-function getSubtiers(path) {
-  var subtiers = path.split("/")
+function getPathSegments(path) {
+  var pathSegments = path.split("/")
   var pathVersionAt = -1
-  if (subtiers.length == 5) {
+  if (pathSegments.length == 4) {
+    pathVersionAt = 2
+  }
+  else if (pathSegments.length == 5) {
     pathVersionAt = 3
   }
-  else if (subtiers.length == 6) {
+  else if (pathSegments.length == 6) {
     pathVersionAt = 4
   }
-  const leftSlice = subtiers.slice(1, pathVersionAt)
-  const rightSlice = subtiers.slice(pathVersionAt + 1)
-  subtiers = [...leftSlice, ...rightSlice]
+  const leftSlice = pathSegments.slice(1, pathVersionAt)
+  const rightSlice = pathSegments.slice(pathVersionAt + 1)
+  pathSegments = [...leftSlice, ...rightSlice]
 
-  return subtiers
+  return pathSegments
 }
-
 
 // WordsNinja do not allow adding custom words during runtime or it is too expensive
 // Faster (maybe) to check it with our own list
@@ -108,23 +110,25 @@ ajv.addKeyword({
       return true
     }
 })
-// TODO: Change API format checks according to API Standards file
+// Internal API Route format: /<API Product>/<Subtier 1>/<Subtier 2>/<VersionNum>/<Verb>
+// Subtiers are optional
+// TODO: Check camelCase of properties
 ajv.addKeyword({ 
     keyword: "path-length",
     validate: function checkPathLength(schema, data, parentSchema, dataPath) {
-      // Checks if the path length is 5 or 6
+      // Checks if the path length is 4, 5, or 6
       if (schema == false) {
         return true
       }
       const path = dataPath["parentDataProperty"]
-      const subtiers = path.split("/")
-      if (subtiers.length == 4 || subtiers.length == 5 || subtiers.length == 6) {
+      const pathSegments = path.split("/")
+      if (pathSegments.length == 4 || pathSegments.length == 5 || pathSegments.length == 6) {
         return true
       }
       checkPathLength.errors = [
         {
           keyword: "path-length",
-          message: "Invalid path length. Only 4 or 5 subtiers allowed",
+          message: "Invalid path length.",
           params: {
             pathLength: false
           }
@@ -134,6 +138,43 @@ ajv.addKeyword({
     }
 })
 ajv.addKeyword({
+  keyword: "api-product",
+  validate: function checkAPIProduct(schema, data, parentSchema, dataPath) {
+    if (schema == false) {
+      return true
+    }
+    const path = dataPath["parentDataProperty"]
+    const pathSegments = path.split("/")
+    const apiProduct = pathSegments[1]
+    const allowedAPIProducts = [ // hardcoded here, would be better if there is a central repository with this information to extract at runtime
+                                "accountClosure", "adjustment", "agencyCommon", "agencyPortal", "ariseCommon", 
+                                "businessProcessAutomation", "careshieldCustomerService", "careshieldEService", "corporateServices", "cpfLife",
+                                "customerEngagement", "dataServices", "digitalServices", "discretionaryWithdrawals", "matrimonialAssetDivision",
+                                "education", "employerContribution", "employerEnforcement", "employerEServices", "familyProtection",
+                                "finance", "healthcareCommon", "healthcareGrants", "housing", "housingMonetisation",
+                                "humanResources", "idAccessManagement", "investment", "assetManagement", "resourceManagement",
+                                "longTermCareInsurance", "matchedRetirementSavings", "medicalInsurance", "medisave", "mediasaveCare",
+                                "memberAccounts", "memberRecords", "memberSystemsCommon", "niceCustomerManagement", "nomination",
+                                "procurement", "receiptAndPayment", "retirementTopUp", "retirement", "selfEmployedContribution",
+                                "selfEmployedEnforcement", "silverSupport", "surplusSupport", "voluntaryContribution", "corporateDesktop",
+                                "wordfare"
+                              ]
+    if (!allowedAPIProducts.includes(apiProduct)) { 
+      checkAPIProduct.errors = [
+        {
+          keyword: "api-product",
+          message: "Invalid API Product.",
+          params: {
+            apiProduct: false
+          }
+        }
+      ]
+      return false
+    }
+    return true
+  }
+})
+ajv.addKeyword({
   keyword: "path-version",
   validate: function checkPathVersion(schema, data, parentSchema, dataPath) {
     // Checks for path version in path
@@ -141,13 +182,16 @@ ajv.addKeyword({
       return true
     }
     const path = dataPath["parentDataProperty"]
+    const pathSegments = path.split("/")
     var pathVersion = null
-    const subtiers = path.split("/")
-    if (subtiers.length == 5) {
-      pathVersion = subtiers[3]
+    if (pathSegments.length == 4) {
+      pathVersion = pathSegments[2]
     }
-    else if (subtiers.length == 6) {
-      pathVersion = subtiers[4]
+    else if (pathSegments.length == 5) {
+      pathVersion = pathSegments[3]
+    }
+    else if (pathSegments.length == 6) {
+      pathVersion = pathSegments[4]
     }
     const regex = /^[vV]\d+$/
     if (pathVersion == "" || pathVersion == null || !regex.test(pathVersion)) {
@@ -173,13 +217,16 @@ ajv.addKeyword({
       return true
     }
     const path = dataPath["parentDataProperty"]
+    const pathSegments = path.split("/")
     var pathVersion = null
-    const subtiers = path.split("/")
-    if (subtiers.length == 5) {
-      pathVersion = subtiers[3]
+    if (pathSegments.length == 4) {
+      pathVersion = pathSegments[2]
     }
-    else if (subtiers.length == 6) {
-      pathVersion = subtiers[4]
+    else if (pathSegments.length == 5) {
+      pathVersion = pathSegments[3]
+    }
+    else if (pathSegments.length == 6) {
+      pathVersion = pathSegments[4]
     }
     const pathVersionNum = parseInt(pathVersion.substring(1))
   
@@ -217,29 +264,29 @@ ajv.addKeyword({
 ajv.addKeyword({
   keyword: "camel-casing",
   validate: function checkCamelCasing(schema, data, parentSchema, dataPath) {
-    // Checks if the subtier is in camel casing format
-    // TODO: Compound words not handled
+    // Checks if the path segment is in camel casing format
+    // Warning: Compound words not handled
     if (schema == false) {
       return true
     }
-    const subtiersNotCamelCase = []
+    const pathSegmentsNotCamelCase = []
     const path = dataPath["parentDataProperty"]
-    var subtiers = getSubtiers(path)
-    for (var subtier of subtiers) {
-      var words = _.words(subtier) // splits subtier into words using lodash based on camel casing
+    var pathSegments = getPathSegments(path)
+    for (var segment of pathSegments) {
+      var words = _.words(segment) // splits subtier into words using lodash based on camel casing
       for (var word of words) {
         if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
-          subtiersNotCamelCase.push(subtier)
+          subtiersNotCamelCase.push(segment)
           break
         }
       }
     }
-    if (subtiersNotCamelCase.length != 0) {
-      const subtiersNotCamelCase_string = subtiersNotCamelCase.join(', ')
+    if (pathSegmentsNotCamelCase.length != 0) {
+      const pathSegmentsNotCamelCase_string = pathSegmentsNotCamelCase.join(', ')
       checkCamelCasing.errors = [
         {
           keyword: "camel-casing",
-          message: `The following subtier(s) are not in camel case format: "${subtiersNotCamelCase_string}"`,
+          message: `The following segments(s) are not in camel case format: "${pathSegmentsNotCamelCase_string}"`,
           params: {
             camelCasing: false
           }
@@ -253,30 +300,30 @@ ajv.addKeyword({
 ajv.addKeyword({
   keyword: "path-spelling",
   validate: function checkPathSpelling(schema, data, parentSchema, dataPath) {
-    // Checks the spelling of all words in subtiers (because spelling-check does not apply to concatenated strings)
-    // TODO: Compounds words not handled
+    // Checks the spelling of all words in segments (because spelling-check does not apply to concatenated strings)
+    // Warning: Compounds words not handled
     // Will not send info on words to correct because behaviour of WordsNinja not stable; possible if it separates words better
     if (schema == false) {
       return true
     }
     const path = dataPath["parentDataProperty"]
-    var subtiers = getSubtiers(path)
-    const subtiersSpelledWrongly = []
-    for (var subtier of subtiers) {
-      var words = WordsNinja.splitSentence(subtier) // split words using Wordsninja based on word identification
+    var pathSegments = getPathSegments(path)
+    const segmentsSpelledWrongly = []
+    for (var segment of pathSegments) {
+      var words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
       for (var word of words) {
         if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
-          subtiersSpelledWrongly.push(subtier)
+          subtiersSpelledWrongly.push(segment)
           break
         }
       }
     }
-    if (subtiersSpelledWrongly.length != 0) {
-      const subtiersSpelledWrongly_string = subtiersSpelledWrongly.join(", ")
+    if (segmentsSpelledWrongly.length != 0) {
+      const segmentsSpelledWrongly_string = segmentsSpelledWrongly.join(", ")
       checkPathSpelling.errors = [
         {
           keyword: "path-spelling",
-          message: `One or more words in the following subtier(s) are not spelled correctly: "${subtiersSpelledWrongly_string}"`,
+          message: `One or more words in the following subtier(s) are not spelled correctly: "${segmentsSpelledWrongly_string}"`,
           params: {
             pathSpelling: false
           }
@@ -288,42 +335,25 @@ ajv.addKeyword({
   }
 })
 ajv.addKeyword({ 
-  keyword: "subtier-verb",
-  validate: function checkSubtierVerb(schema, data, parentSchema, dataPath) {
-    // Subtier verb only applies to subtiers after the version subtier
-    // Checks if the first word of the subtier is a verb
+  keyword: "path-verb",
+  validate: function checkVerb(schema, data, parentSchema, dataPath) {
+    // Checks if the first word of the Verb is a verb
     if (schema == false) {
       return true
     }
     const path = dataPath["parentDataProperty"]
-    var subtiers = path.split("/")
-    var pathVersionAt = -1
-    if (subtiers.length == 5) {
-      pathVersionAt = 3
-    }
-    else if (subtiers.length == 6) {
-      pathVersionAt = 4
-    }
-    subtiers = subtiers.slice(pathVersionAt + 1) // only right slice; always only 1 subtier but we expand for extensibility
+    var pathSegments = path.split("/")
+    const pathVerb = pathSegments[pathSegments.length - 1]
 
-    var allowedVerbs = ["create", "get", "update", "delete", "compute", "transact", "check", "transfer"]
-    var notVerbAndSubtiers = [] 
-    for (var subtier of subtiers) {
-      var words = _.words(subtier)
-      var verb = words[0] // no need to catch index errors, if subtier is null, words[0] will return null
-      if (!allowedVerbs.includes(verb)) {
-        notVerbAndSubtiers.push([verb, subtier])
-      }
-    }
-    if (notVerbAndSubtiers.length != 0) {
-      const notVerbAndSubtiers_formatted = notVerbAndSubtiers.map(function (tuple) {
-        return tuple[0] + " in " + tuple[1]
-      })
-      const notVerbAndSubtiers_string = notVerbAndSubtiers_formatted.join(", ") 
-      checkSubtierVerb.errors = [
+    const allowedVerbs = ["create", "get", "update", "delete", "compute", "transact", "check", "transfer"]
+
+    var words = _.words(pathVerb)
+    var verb = words[0]
+    if (!allowedVerbs.includes(verb)) {
+      checkVerb.errors = [
         {
-          keyword: "subtier-verb",
-          message: `The following word(s) are not verbs allowed in the API Standards: ${notVerbAndSubtiers_string}`,
+          keyword: "path-verb",
+          message: `The word "${verb}" in "${pathVerb}" is not a valid verb in the API Standards.`,
           params: {
             subtierVerb: false
           }
@@ -366,7 +396,6 @@ ajv.addKeyword({
     return true
   }
 })
-// TODO: Auto-suggestions for misspelled words
 ajv.addKeyword({
   keyword: "spelling-check",
   validate: function checkSpelling(schema, data, parentSchema, dataPath) {
@@ -384,8 +413,9 @@ ajv.addKeyword({
       }
     }
     if (wordsSpelledWrong.size != 0) {
-      const wordsSpelledWrong_string = Array.from(wordsSpelledWrong).join(', ')
-      var errorMessage = `The following word(s) are spelled wrongly: ${wordsSpelledWrong_string}. Please consider adding the words into the custom dictionary or correcting them.`
+      var formattedWordsSpelledWrong = ''
+      wordsSpelledWrong.forEach(word => {formattedWordsSpelledWrong += `- ${word} ==> ${SpellChecker.getCorrectionsForMisspelling(word).join(", ")}<br>`})
+      var errorMessage = 'The following word(s) are spelled incorrectly in this field:' + '<br>' + formattedWordsSpelledWrong
       checkSpelling.errors = [
         {
           keyword: 'spelling-check',
@@ -415,7 +445,7 @@ async function validateYAML(doc, dictionary) {
     return null
   }
 
-  // const data_string = fs.readFileSync('template1.yaml', 'utf-8')
+  // const data_string = fs.readFileSync('examples/example1.yaml', 'utf-8')
   var data = null
   try {
     data = yaml.load(doc)
@@ -446,7 +476,6 @@ async function validateYAML(doc, dictionary) {
           line = data["lineNumber"]
         })
         .catch((error) => {
-          // TODO: Handle error instead of just throwing
           return null
         })
       payload.push({
@@ -463,7 +492,7 @@ async function validateYAML(doc, dictionary) {
 //==================== Server ===================================
 
 const hostname = 'localhost'; 
-const port = 5000; // we put the same port as the flask server to expose minimum number of ports, but make sure no routes are the same. best practice is to separate 
+const port = 80; // same port as the flask server to expose minimum number of ports
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin

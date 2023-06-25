@@ -376,7 +376,6 @@ definitions:
           else:
             type: boolean
             errorMessage: "should be a Reference Object, Schema Object, or boolean value"
-
       description:
         type: string
         spelling-check: true
@@ -587,23 +586,27 @@ definitions:
           if:
             path-length: true
           then:
-            path-version: true
+            api-product: true
             if:
-              path-version: true
+              api-product: true
             then:
-              match-version: true
+              path-version: true
               if:
-                match-version: true
+                path-version: true
               then:
-                path-spelling: true
+                match-version: true
                 if:
-                  path-spelling: true
+                  match-version: true
                 then:
-                  camel-casing: true
+                  path-spelling: true
                   if:
-                    camel-casing: true
+                    path-spelling: true
                   then:
-                    subtier-verb: true
+                    camel-casing: true
+                    if:
+                      camel-casing: true
+                    then:
+                      path-verb: true
       "^x-": {}
     additionalProperties: false
     errorMessage: 

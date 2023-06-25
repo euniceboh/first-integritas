@@ -667,7 +667,6 @@
           // gotoLine(line) --> Scrolls the screen down to line <line>
 
           
-          // TODO: Get dictionary from database
 
           
           var dictionaryWords = $('#customDictionary').val().split(/\r?\n/);
@@ -681,14 +680,14 @@
             }),
             method: 'POST',
             contentType: 'application/json',
-            url: 'http://localhost:5000/validate',
+            url: 'http://localhost:80/validate',
             success: function(response) {              
               $('#loading').hide();
 
               previewOAS(data);
 
-              errorPanel.classList.remove('active');
-              previewPanel.classList.add('active')
+              errorPanel.classList.toggle('active');
+              previewPanel.classList.toggle('active')
               
               editorBorder.style.border = '2px solid #20c997';
             },
@@ -697,9 +696,6 @@
               var listErrors = JSON.parse(response["responseText"]) // list of dictionary objects
 
               refreshAccordion();
-
-              previewPanel.classList.remove('active');
-              errorPanel.classList.add('active')
 
               var formattedErrors = []
               for (let i = 0; i < listErrors.length; i++){
@@ -729,6 +725,9 @@
                 errorAdditionalInfo = [errorAdditionalInfo[0][0], errorAdditionalInfo[0][1]]
                 addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
               }
+
+              previewPanel.classList.toggle('active');
+              errorPanel.classList.toggle('active')
               
               editorBorder.style.border = '2px solid #f00';
             },
