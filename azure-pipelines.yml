@@ -72,20 +72,13 @@ stages:
   - job: Deploy
     displayName: Deploy
     steps:
-    # - task: AzureWebAppContainer@1
-    #   displayName: 'Azure Web App on Container Deploy'
-    #   inputs:
-    #     azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-    #     appName: $(applicationName)
-    #     imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal:latest
-    - task: DockerCompose@0
+    - task: AzureWebAppContainer@1
+      displayName: 'Azure Web App on Container Deploy'
       inputs:
-        containerregistrytype: 'Azure Container Registry'
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
-        dockerComposeFile: $(dockercomposefilePath)
-        action: 'Run services'
-        buildImages: false
+        appName: $(applicationName)
+        imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest, cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest
+
 
 
 # Integration Test
