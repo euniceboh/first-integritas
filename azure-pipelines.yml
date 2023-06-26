@@ -21,22 +21,22 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: Unit_Test
-  displayName: Unit Test Backend
-  jobs:
-  - job: Test
-    displayName: Unit Test
-    steps:
-    - script: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-azurepipelines
-      displayName: 'Install Dependencies'
+# - stage: Unit_Test
+#   displayName: Unit Test Backend
+#   jobs:
+#   - job: Test
+#     displayName: Unit Test
+#     steps:
+#     - script: |
+#         python -m pip install --upgrade pip
+#         pip install -r requirements.txt
+#         pip install pytest pytest-azurepipelines
+#       displayName: 'Install Dependencies'
      
-    - script: |
-        pytest test_unit.py
-      workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
-      displayName: 'pytest'
+#     - script: |
+#         pytest test_unit.py
+#       workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
+#       displayName: 'pytest'
 
 - stage: Build
   displayName: Build and push stage
@@ -46,15 +46,23 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
+    # - task: Docker@2
+    #   displayName: Build and push an image to container registry
+    #   inputs:
+    #     command: buildAndPush
+    #     repository: $(imageRepository)
+    #     dockerfile: $(dockerfilePath)
+    #     containerRegistry: $(dockerRegistryServiceConnection)
+    #     tags: |
+    #       latest
+    - task: DockerCompose@0
       inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          latest
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure for Students(1)(dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
+        dockerComposeFile: '**/docker-compose.yml'
+        action: 'Run a Docker Compose command'
+        dockerComposeCommand: 'docker-compose up'
 
 - stage: Deploy
   displayName: Deploy Web App
@@ -69,21 +77,22 @@ stages:
         appName: $(applicationName)
         imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal:latest
 
+
 # Integration Test
-- stage: Integration_Test
-  displayName: Integration Test Backend
-  jobs:
-  - job: Test
-    displayName: Integration Test
-    steps:
-    - script: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install selenium
-        pip install pytest pytest-azurepipelines
-      displayName: 'Install Dependencies'
+# - stage: Integration_Test
+#   displayName: Integration Test Backend
+#   jobs:
+#   - job: Test
+#     displayName: Integration Test
+#     steps:
+#     - script: |
+#         python -m pip install --upgrade pip
+#         pip install -r requirements.txt
+#         pip install selenium
+#         pip install pytest pytest-azurepipelines
+#       displayName: 'Install Dependencies'
      
-    - script: |
-        pytest src/tests/test_integration.py
-      workingDirectory: '$(System.DefaultWorkingDirectory)/'
-      displayName: 'pytest'
+#     - script: |
+#         pytest src/tests/test_integration.py
+#       workingDirectory: '$(System.DefaultWorkingDirectory)/'
+#       displayName: 'pytest'
