@@ -680,14 +680,14 @@
             }),
             method: 'POST',
             contentType: 'application/json',
-            url: 'http://localhost:80/validate',
+            url: 'http://localhost:5000/validate',
             success: function(response) {              
               $('#loading').hide();
 
               previewOAS(data);
 
-              errorPanel.classList.toggle('active');
-              previewPanel.classList.toggle('active')
+              errorPanel.classList.remove('active');
+              previewPanel.classList.add('active')
               
               editorBorder.style.border = '2px solid #20c997';
             },
@@ -726,8 +726,8 @@
                 addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
               }
 
-              previewPanel.classList.toggle('active');
-              errorPanel.classList.toggle('active')
+              previewPanel.classList.remove('active');
+              errorPanel.classList.add('active')
               
               editorBorder.style.border = '2px solid #f00';
             },
@@ -752,7 +752,7 @@
 </body>
 
 <div id="loading">
-  <img id="loading-image" src="/static/images/ajax-loader.gif" alt="Loading..." />
+  <img id="loading-image" src="/static/images/Ajax-loader.gif" alt="Loading..." />
 </div>
 
 </html>

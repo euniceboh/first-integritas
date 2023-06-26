@@ -7,11 +7,11 @@
 PYTHON = ./venv/Scripts/python
 PIP = ./venv/Scripts/pip
 
-venv/Scripts/activate: requirements.txt
+venv/Scripts/activate: src/requirements.txt
 	python -m venv venv; \
 	. ./venv/Scripts/activate; \
 	$(PYTHON) -m pip install --upgrade pip; \
-	$(PIP) install -r requirements.txt; \
+	$(PIP) install -r src/requirements.txt; \
 
 venv: venv/Scripts/activate
 	. ./venv/Scripts/activate
@@ -41,9 +41,10 @@ run: node flask
 # 	pytest test_integration.py
 
 clean:
-	rm -rf venv
-	cd src; rm -rf __pycache__
-	cd tests; rm -rf __pycache__
+	rm -rf venv; \
+	cd src; rm -rf __pycache__; \
+	cd tests; rm -rf __pycache__; \
+	cd ..; cd node; rm -rf node_modules
 
 .PHONY: run clean
 

@@ -29,7 +29,7 @@ async function fetchLineNumber(doc, pathArray) {
   // Uses Fetch API to call our function from Flask server to get line number based on ruamel.yaml number line mapping
   // To simplify line number mapping. If there's a simpler way to do this on JS, this can be deprecated
   // WARNING: Fetch API in experimental-mode 
-  return fetch('http://127.0.0.1/getLineNumber', {
+  return fetch("http://flask:3000/getLineNumber", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -491,8 +491,8 @@ async function validateYAML(doc, dictionary) {
 
 //==================== Server ===================================
 
-const hostname = 'localhost'; 
-const port = 80; // same port as the flask server to expose minimum number of ports
+const hostname = '0.0.0.0'; 
+const port = 5000; // same port as the flask server to expose minimum number of ports
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin

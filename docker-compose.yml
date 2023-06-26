@@ -1,0 +1,17 @@
+# docker-compose up
+# docker-compose down --rmi all
+version: '3'
+services:
+  flask:
+    build:
+      context: ./src
+    ports:
+      - '3000:3000'
+    depends_on:
+      - node
+  node:
+    build:
+      context: ./src/node
+    ports:
+      - '5000:5000'
+  

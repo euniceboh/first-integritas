@@ -5,3 +5,13 @@ xxxxxxx
 returncode
 cpf
 medisave
+WDL
+API
+OCBC
+GUID
+55A
+CCYY
+Birthdate
+55EligibilityTag
+55AEligibilityTag
+agecheckfor55wdl
