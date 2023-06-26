@@ -41,8 +41,8 @@ stages:
 - stage: BuildAndPush
   displayName: Build and push stage
   jobs:
-  - job: Build
-    displayName: Build
+  - job: BuildAndPush
+    displayName: BuildAndPush
     pool:
       vmImage: $(vmImageName)
     steps:
@@ -55,11 +55,6 @@ stages:
         action: 'Build services'
         additionalImageTags: '$(Build.BuildId)'
         includeLatestTag: true
-  - job: Push
-    displayName: Push
-    pool:
-      vmImage: $(vmImageName)
-    steps:
     - task: DockerCompose@0
       inputs:
         containerregistrytype: 'Azure Container Registry'
