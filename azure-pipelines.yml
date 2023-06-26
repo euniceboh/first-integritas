@@ -53,6 +53,8 @@ stages:
         azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
         dockerComposeFile: $(dockercomposefilePath)
         action: 'Build services'
+        additionalImageTags: '$(Build.BuildId)'
+        includeLatestTag: true
   - job: Push
     displayName: Push
     pool:
@@ -65,6 +67,8 @@ stages:
         azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
         dockerComposeFile: $(dockercomposefilePath)
         action: 'Push services'
+        additionalImageTags: '$(Build.BuildId)'
+        includeLatestTag: true
 
 
 - stage: Deploy
