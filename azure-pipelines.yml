@@ -14,7 +14,7 @@ variables:
   dockerRegistryServiceConnection: 'a3b968c1-9a21-4d22-b80e-d4b6241e3bb4'
   imageRepository: 'danielxdantecpfdevportal'
   containerRegistry: 'cpfdevportal.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  dockercomposefilePath: '$(Build.SourcesDirectory)/docker-compose.yml'
   tag: '$(Build.BuildId)'
 
   # Agent VM image name
@@ -38,7 +38,7 @@ stages:
 #       workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
 #       displayName: 'pytest'
 
-- stage: Build
+- stage: BuildAndPush
   displayName: Build and push stage
   jobs:
   - job: Build
@@ -46,23 +46,26 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    # - task: Docker@2
-    #   displayName: Build and push an image to container registry
-    #   inputs:
-    #     command: buildAndPush
-    #     repository: $(imageRepository)
-    #     dockerfile: $(dockerfilePath)
-    #     containerRegistry: $(dockerRegistryServiceConnection)
-    #     tags: |
-    #       latest
     - task: DockerCompose@0
       inputs:
         containerregistrytype: 'Azure Container Registry'
-        azureSubscription: 'Azure for Students(1)(dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
-        dockerComposeFile: '**/docker-compose.yml'
-        action: 'Run a Docker Compose command'
-        dockerComposeCommand: 'up -d'
+        dockerComposeFile: $(dockercomposefilePath)
+        action: 'Build services'
+  - job: Push
+    displayName: Push
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: DockerCompose@0
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
+        dockerComposeFile: $(dockercomposefilePath)
+        action: 'Push services'
+
 
 - stage: Deploy
   displayName: Deploy Web App
@@ -70,12 +73,20 @@ stages:
   - job: Deploy
     displayName: Deploy
     steps:
-    - task: AzureWebAppContainer@1
-      displayName: 'Azure Web App on Container Deploy'
+    # - task: AzureWebAppContainer@1
+    #   displayName: 'Azure Web App on Container Deploy'
+    #   inputs:
+    #     azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+    #     appName: $(applicationName)
+    #     imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal:latest
+    - task: DockerCompose@0
       inputs:
+        containerregistrytype: 'Azure Container Registry'
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        appName: $(applicationName)
-        imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal:latest
+        azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
+        dockerComposeFile: $(dockercomposefilePath)
+        action: 'Run services'
+        buildImages: false
 
 
 # Integration Test
