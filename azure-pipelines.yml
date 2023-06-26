@@ -73,18 +73,17 @@ stages:
     displayName: Deploy
     steps:
     - task: AzureWebAppContainer@1
-      displayName: 'Azure Web App on Container Deploy (Node)'
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        appName: $(applicationName)
-        imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest
-    - task: AzureWebAppContainer@1
       displayName: 'Azure Web App on Container Deploy (Flask)'
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: $(applicationName)
         imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest    
-
+    - task: AzureWebAppContainer@1
+      displayName: 'Azure Web App on Container Deploy (Node)'
+      inputs:
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        appName: $(applicationName)
+        imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest
 
 
 # Integration Test
