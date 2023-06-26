@@ -62,7 +62,7 @@ stages:
         azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
         dockerComposeFile: '**/docker-compose.yml'
         action: 'Run a Docker Compose command'
-        dockerComposeCommand: 'docker-compose up'
+        dockerComposeCommand: 'up -d'
 
 - stage: Deploy
   displayName: Deploy Web App
