@@ -12,7 +12,7 @@ variables:
   # Container registry service connection established during pipeline creation
   applicationName: 'cpfdevportal'
   dockerRegistryServiceConnection: 'a3b968c1-9a21-4d22-b80e-d4b6241e3bb4'
-  imageRepository: 'danielxdantecpfdevportal'
+  # imageRepository: 'danielxdantecpfdevportal'
   containerRegistry: 'cpfdevportal.azurecr.io'
   dockercomposefilePath: '$(Build.SourcesDirectory)/docker-compose.yml'
   tag: '$(Build.BuildId)'
