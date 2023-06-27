@@ -1,4 +1,6 @@
 # RUN WITH TAG -j2
+# npm 9.6.7
+# node 18.12.1
 
 .ONESHELL:
 
