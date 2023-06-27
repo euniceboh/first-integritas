@@ -32,7 +32,7 @@ async function fetchLineNumber(doc, pathArray) {
   // WARNING: Fetch API in experimental-mode 
   try {
     // const response = await fetch("http://127.0.0.1:80/getLineNumber", {
-    const response = await fetch("http://flask/getLineNumber", {
+    const response = await fetch("http://flask:80/getLineNumber", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -504,7 +504,7 @@ async function validateYAML(doc, dictionary) {
 //==================== Server ===================================
 
 const hostname = '0.0.0.0'; 
-const port = 8080; // same port as the flask server to expose minimum number of ports
+const port = 8080; 
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
