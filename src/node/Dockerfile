@@ -6,5 +6,5 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . ./
-EXPOSE 80
+EXPOSE 8080
 CMD ["node", "validator.js"]
