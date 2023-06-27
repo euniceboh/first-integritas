@@ -3,16 +3,24 @@
 # note that only ports 80 and 8080 are accessible in Azure
 version: '3'
 services:
-  flask:
-    build:
-      context: ./src
-    ports:
-      - '80:80'
-    depends_on:
-      - node
   node:
     build:
       context: ./src/node
     ports:
-      - '8080:8080'
+      - '80:80'
+    container_name: node
+    networks:
+      - local
+  flask:
+    build:
+      context: ./src
+    ports:
+      - '443:443'
+    container_name: flask
+    depends_on:
+      - node
+    networks:
+      - local
+networks:
+  local:
   

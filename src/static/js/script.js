@@ -1,5 +1,7 @@
-var editor = ace.edit("editor");
-var Range = ace.require("ace/range").Range;
+Split(['#split-0', '#split-1'])
+
+let editor = ace.edit("editor");
+let Range = ace.require("ace/range").Range;
 editor.setTheme("ace/theme/kuroir");
 editor.getSession().setMode("ace/mode/yaml");
 document.getElementById('editor').style.fontSize='15px';
@@ -9,13 +11,14 @@ editor.setOption({
     enableSnippets: true,
     enableLiveAutocompletion: true
 });
-const errorPanel = document.getElementById('errorPanel');
-const previewPanel = document.getElementById('previewPanel');
 
-loadDictionary();
-
-Split(['#split-0', '#split-1'])
-
+/**
+ * Invoke file input for .yml, .yaml, and .json files
+ * If file is input, invoke uploadFile() function
+ * 
+ * @function
+ * @fires uploadFile(event)
+ */
 function pickFile() {
     const fileInput = document.createElement("input");
     fileInput.id = "fileUpload";
@@ -23,19 +26,25 @@ function pickFile() {
     fileInput.accept = ".yml, .yaml, .json";
     fileInput.onclick = "this.value=null";
     fileInput.addEventListener("change", function(event) {
-    uploadFile(event)
+        uploadFile(event)
     })
     fileInput.click();
 }
 
+/**
+ * Copies content in .yml, .yaml, or .json file into editor
+ * 
+ * @function
+ * @param {Event} event 
+ */
 function uploadFile(event) {
     const file = event.target.files[0]
     if (file) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-    editor.setValue(e.target.result);
-    }
-    reader.readAsText(file);
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            editor.setValue(e.target.result);
+        }
+        reader.readAsText(file);
     }
 }
 
@@ -267,7 +276,8 @@ editor.getSession().on("change", function (e) {
         }),
         method: 'POST',
         contentType: 'application/json',
-        url: 'http://localhost:8080/validate',
+        // url: 'http://localhost:80/validate', // the browser is unable to resolve service names into IP so if used locally, you can use localhost
+        url: 'http://cpfdevportal.azurewebsites.net/validate',
         success: function(response) {              
             $('#loading').hide();
 
@@ -331,3 +341,10 @@ $('#errorPanel').on('click', '.accordion-button:not(.collapsed)', function() {
     var highlightRange = new Range(errorLine, 0, errorLine, 300);
     editor.selection.setRange(highlightRange);
 })
+
+const errorPanel = document.getElementById('errorPanel');
+const previewPanel = document.getElementById('previewPanel');
+
+loadDictionary();
+
+
