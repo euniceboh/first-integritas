@@ -46,44 +46,54 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: DockerCompose@0
+    # - task: DockerCompose@0
+    #   inputs:
+    #     containerregistrytype: 'Azure Container Registry'
+    #     azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+    #     azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
+    #     dockerComposeFile: $(dockercomposefilePath)
+    #     action: 'Build services'
+    #     additionalImageTags: '$(Build.BuildId)'
+    #     includeLatestTag: true
+    # - task: DockerCompose@0
+    #   inputs:
+    #     containerregistrytype: 'Azure Container Registry'
+    #     azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+    #     azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
+    #     dockerComposeFile: $(dockercomposefilePath)
+    #     action: 'Push services'
+    #     additionalImageTags: '$(Build.BuildId)'
+    #     includeLatestTag: true
+    - task: Docker@2
       inputs:
-        containerregistrytype: 'Azure Container Registry'
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
-        dockerComposeFile: $(dockercomposefilePath)
-        action: 'Build services'
-        additionalImageTags: '$(Build.BuildId)'
-        includeLatestTag: true
-    - task: DockerCompose@0
+        containerRegistry: 'cpfdevportal'
+        command: 'buildAndPush'
+        Dockerfile: 'src/node/Dockerfile'
+    - task: Docker@2
       inputs:
-        containerregistrytype: 'Azure Container Registry'
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        azureContainerRegistry: '{"loginServer":"cpfdevportal.azurecr.io", "id" : "/subscriptions/dcdbed32-b8b2-4d69-8521-ba8b9056add8/resourceGroups/cpfdevportal-rg/providers/Microsoft.ContainerRegistry/registries/cpfdevportal"}'
-        dockerComposeFile: $(dockercomposefilePath)
-        action: 'Push services'
-        additionalImageTags: '$(Build.BuildId)'
-        includeLatestTag: true
+        containerRegistry: 'cpfdevportal'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
 
 
-- stage: Deploy
-  displayName: Deploy Web App
-  jobs:
-  - job: Deploy
-    displayName: Deploy
-    steps:
-    - task: AzureWebAppContainer@1
-      displayName: 'Azure Web App on Container Deploy (Flask)'
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        appName: $(applicationName)
-        imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest    
-    - task: AzureWebAppContainer@1
-      displayName: 'Azure Web App on Container Deploy (Node)'
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        appName: $(applicationName)
-        imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest
+# - stage: Deploy
+#   displayName: Deploy Web App
+#   jobs:
+#   - job: Deploy
+#     displayName: Deploy
+#     steps:
+#     - task: AzureWebAppContainer@1
+#       displayName: 'Azure Web App on Container Deploy (Flask)'
+#       inputs:
+#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+#         appName: $(applicationName)
+#         imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest    
+#     - task: AzureWebAppContainer@1
+#       displayName: 'Azure Web App on Container Deploy (Node)'
+#       inputs:
+#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+#         appName: $(applicationName)
+#         imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest
 
 
 # Integration Test
