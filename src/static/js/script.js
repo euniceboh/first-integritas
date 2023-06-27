@@ -1,3 +1,5 @@
+console.log(document.location.hostname)
+
 Split(['#split-0', '#split-1'])
 
 let editor = ace.edit("editor");
@@ -269,6 +271,8 @@ editor.getSession().on("change", function (e) {
 
         $('#loading').show();
 
+        var url = document.location.protocol + "//" + document.location.hostname + ":8080/validate"
+
         $.ajax({
         data: JSON.stringify({
             doc: data,
@@ -276,8 +280,8 @@ editor.getSession().on("change", function (e) {
         }),
         method: 'POST',
         contentType: 'application/json',
-        // url: 'http://localhost:80/validate', // the browser is unable to resolve service names into IP so if used locally, you can use localhost
-        url: 'http://localhost:8080/validate',
+        url: url, // the browser is unable to resolve service names into IP so if used locally, you can use localhost
+        // url: 'http://node:8080/validate',
         success: function(response) {              
             $('#loading').hide();
 
