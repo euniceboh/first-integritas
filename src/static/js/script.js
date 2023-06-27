@@ -277,7 +277,7 @@ editor.getSession().on("change", function (e) {
         method: 'POST',
         contentType: 'application/json',
         // url: 'http://localhost:80/validate', // the browser is unable to resolve service names into IP so if used locally, you can use localhost
-        url: 'https://20.43.132.133:8080/validate',
+        url: 'http://localhost:8080/validate',
         success: function(response) {              
             $('#loading').hide();
 
