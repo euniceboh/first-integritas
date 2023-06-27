@@ -19,6 +19,7 @@ const natural = require('natural');
 const tokenizer = new natural.WordTokenizer();
 
 const http = require('http');
+const path = require("path");
 
 //======================= Utils =================================================
 
@@ -29,17 +30,28 @@ async function fetchLineNumber(doc, pathArray) {
   // Uses Fetch API to call our function from Flask server to get line number based on ruamel.yaml number line mapping
   // To simplify line number mapping. If there's a simpler way to do this on JS, this can be deprecated
   // WARNING: Fetch API in experimental-mode 
-  return fetch("http://flask:8080/getLineNumber", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      docString: doc,
-      pathArray: pathArray
-    })
-  })
-    .then(response => response.json())
+  try {
+    // const response = await fetch("http://127.0.0.1:80/getLineNumber", {
+    const response = await fetch("http://flask/getLineNumber", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        docString: doc,
+        pathArray: pathArray
+      })
+    });
+
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error('Request failed with status ' + response.status);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
 }
 
 function getPathSegments(path) {
