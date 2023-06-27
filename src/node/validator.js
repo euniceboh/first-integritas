@@ -504,7 +504,7 @@ async function validateYAML(doc, dictionary) {
 //==================== Server ===================================
 
 const hostname = '0.0.0.0'; 
-const port = 8080; 
+const port = 80; 
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
