@@ -67,13 +67,16 @@ stages:
     - task: Docker@2
       inputs:
         containerRegistry: 'cpfdevportal'
+        repository: 'danielxdantecpfdevportal_node'
         command: 'buildAndPush'
         Dockerfile: 'src/node/Dockerfile'
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'cpfdevportal'
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
+        tags: |
+          latest
+    # - task: Docker@2
+    #   inputs:
+    #     containerRegistry: 'cpfdevportal'
+    #     command: 'buildAndPush'
+    #     Dockerfile: '**/Dockerfile'
 
 
 # - stage: Deploy
