@@ -577,7 +577,6 @@ definitions:
     patternProperties:
       "^\\/": 
         $ref: "#/definitions/PathItem"
-        # split by camel case/word --> check spelling of each supposed word --> check camelCase --> check verb
         path-characters: true
         if:
           path-characters: true

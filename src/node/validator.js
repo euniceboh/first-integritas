@@ -1,4 +1,6 @@
-//======================= Dependencies =================================================
+//============================================================================================
+//                                    Dependencies
+//============================================================================================
 const Ajv = require("ajv");
 const AjvErrors = require("ajv-errors");
 const AjvKeywords = require("ajv-keywords");
@@ -22,25 +24,137 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
 
-//======================= Utils =================================================
+//============================================================================================
+//                                    Routes
+//============================================================================================
 
-// customDict is an array of words specific to the CPF context
-var customDict = []
+const app = express()
+app.use(cors())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
-async function fetchLineNumber(doc, pathArray) {
-  // Uses Fetch API to call our function from Flask server to get line number based on ruamel.yaml number line mapping
-  // To simplify line number mapping. If there's a simpler way to do this on JS, this can be deprecated
-  // WARNING: Fetch API in experimental-mode 
+const port = 80
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the backend server of CPF OAS Validator Tool!")
+})
+
+app.post("/validate", async (req, res) => {
   try {
-    const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", {
-    // const response = await fetch("http://flask:80/getLineNumber", {
+    // let data = JSON.parse(req.body)
+    let docString = req.body.doc
+    let dictionaryArray = req.body.dictionary
+    let payload = await validateYAML(docString, dictionaryArray)
+    if (payload == null) { // error with validation logic
+      res.status(204).json({msg: "Validation logic error"})
+    }
+    else if (payload.length == 0) { // valid yaml doc
+      res.status(200).json({msg: "Successful!"})
+    }
+    else { // invalid yaml doc
+      res.status(400).json(payload)
+    }
+  } catch (error) {
+    res.status(500).json({msg: "Unexpected error"})
+  }
+})
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
+//============================================================================================
+//                                    Utils
+//============================================================================================
+
+let customDict = []
+
+/**
+ * Invokes Ajv schema validation with custom validation rules
+ * Calls function to get line number of each error from Flask server
+ * Returns a list of formatted error objects
+ * 
+ * @function
+ * @param {string} docString 
+ * @param {Array} dictionaryArray 
+ */
+async function validateYAML(docString, dictionaryArray) { 
+  await WordsNinja.loadDictionary(); // forced async load by WordsNinja library
+  customDict = dictionaryArray;
+
+  let validate = false
+  try {
+    const schemaString = fs.readFileSync('oas3.0_schema.yaml', 'utf-8')
+    const schema = yaml.load(schemaString)
+    validate = ajv.compile(schema)
+  }
+  catch {
+    return null
+  }
+
+  let doc = null
+  try {
+    doc = yaml.load(docString)
+  } catch {
+    return null
+  }
+  
+  let payload = []
+  if (!validate(doc)) {
+    for (let error of validate.errors) {
+      if (["if", "then", "else"].includes(error["keyword"])) { // if/then/else errors are ignored and replaced by more useful error messages
+        continue;
+      }
+      let path = error["instancePath"]
+      let pathArray = path.split("/").slice(1,)
+      
+      for (let j = 0; j < pathArray.length; j++) { // change back "/" that are converted from Ajv
+        if (pathArray[j]) {
+          pathArray[j] = pathArray[j].replace(/~1/g, "/")
+        }
+      }
+
+      let line = -1;
+      await fetchLineNumber(docString, pathArray)
+        .then((data) => {
+          line = data["lineNumber"]
+        })
+        .catch(() => {
+          return null
+        })
+
+      payload.push({
+        line_number: line,
+        keyword: error.keyword,
+        error_message: error.message[0].charAt(0).toUpperCase() + error.message.slice(1) ,
+        params: error.params
+      })
+    }
+  }
+  return payload
+}
+
+/**
+ * Uses Fetch API to call our function from Flask server to get line number based on ruamel.yaml number line mapping
+ * Returns line number of error
+ * If there's a simpler way to do this on JS, this can be deprecated
+ * WARNING: Fetch API in experimental-mode 
+ * 
+ * @function
+ * @param {string} docString
+ * @param {Array} pathArray 
+ */
+async function fetchLineNumber(docString, pathArray) {
+  try {
+    // const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", {
+    const response = await fetch("http://127.0.0.1/getLineNumber", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        docString: doc,
-        pathArray: pathArray
+        doc: docString,
+        path: pathArray
       })
     });
 
@@ -55,9 +169,16 @@ async function fetchLineNumber(doc, pathArray) {
   }
 }
 
+/**
+ * Slices path depending on number of segments, excluding the version number segment
+ * Returns the path segments as an array of strings
+ * 
+ * @function
+ * @param {string} path 
+ */
 function getPathSegments(path) {
-  var pathSegments = path.split("/")
-  var pathVersionAt = -1
+  let pathSegments = path.split("/")
+  let pathVersionAt = -1
   if (pathSegments.length == 4) {
     pathVersionAt = 2
   }
@@ -73,12 +194,15 @@ function getPathSegments(path) {
 
   return pathSegments
 }
-
-// WordsNinja do not allow adding custom words during runtime or it is too expensive
-// Faster (maybe) to check it with our own list
-// Even faster if pre-processing is doen to the list before searching
+/**
+ * Checks if the word passed as parameter is in the custom dictionary
+ * Returns true if it is, false if not
+ * 
+ * @function
+ * @param {string} word 
+ */
 function wordInCustomDict(word) {
-  for (var customWord of customDict) {
+  for (let customWord of customDict) {
     if (word.toLowerCase() == customWord.toLowerCase()) {
       return true
     }
@@ -86,7 +210,9 @@ function wordInCustomDict(word) {
   return false
 }
 
-//======================= Ajv Setup =================================================
+//======================================================================================================
+//                     Ajv Custom Validation Rules (CPFB API Standards v1.1.2)
+//======================================================================================================
 const ajv = new Ajv({
   schemaId: "id",
   allErrors: true,
@@ -95,15 +221,13 @@ addFormats(ajv, ["uri-reference", "email", "regex", "uri"])
 AjvErrors(ajv) // add all ajv-errors keywords, significantly, errorMessage
 require("ajv-keywords")(ajv) // add all ajv-keywords keywords
 
-// ===================== Custom Validation Rules ====================================
-// Rules following CPFB API Standards v1.1.2
-
-// keywords should be delimited by "-" to avoid future name collisions
+/**
+ * Checks for special characters in path, except for "/"
+ */
 ajv.addKeyword({
     keyword: "path-characters", 
     validate: function checkPathCharacters(schema, data, parentSchema, dataPath)  {
-      // Checks for special characters in path, except for "/"
-      if (schema == false) {
+      if (!schema) {
         return true
       }
       const path = dataPath["parentDataProperty"]
@@ -123,14 +247,16 @@ ajv.addKeyword({
       return true
     }
 })
-// Internal API Route format: /<API Product>/<Subtier 1>/<Subtier 2>/<VersionNum>/<Verb>
-// Subtiers are optional
-// TODO: Check camelCase of properties
+/**
+ * Checks if the path length is valid (4, 5, or 6)
+ * Internal API Route format: /<API Product>/<Subtier 1>/<Subtier 2>/<VersionNum>/<Verb>
+ * Subtiers are optional
+ * TODO: Check camelCase of properties
+ */
 ajv.addKeyword({ 
     keyword: "path-length",
     validate: function checkPathLength(schema, data, parentSchema, dataPath) {
-      // Checks if the path length is 4, 5, or 6
-      if (schema == false) {
+      if (!schema) {
         return true
       }
       const path = dataPath["parentDataProperty"]
@@ -150,16 +276,20 @@ ajv.addKeyword({
       return false
     }
 })
+/**
+ * Checks for valid API Product
+ * WARNING: Hardcoded API Product array
+ */
 ajv.addKeyword({
   keyword: "api-product",
   validate: function checkAPIProduct(schema, data, parentSchema, dataPath) {
-    if (schema == false) {
+    if (!schema) {
       return true
     }
     const path = dataPath["parentDataProperty"]
     const pathSegments = path.split("/")
     const apiProduct = pathSegments[1]
-    const allowedAPIProducts = [ // hardcoded here, would be better if there is a central repository with this information to extract at runtime
+    const allowedAPIProducts = [ 
                                 "accountClosure", "adjustment", "agencyCommon", "agencyPortal", "ariseCommon", 
                                 "businessProcessAutomation", "careshieldCustomerService", "careshieldEService", "corporateServices", "cpfLife",
                                 "customerEngagement", "dataServices", "digitalServices", "discretionaryWithdrawals", "matrimonialAssetDivision",
@@ -187,16 +317,18 @@ ajv.addKeyword({
     return true
   }
 })
+/**
+ * Checks if path version segment exists in path
+ */
 ajv.addKeyword({
   keyword: "path-version",
   validate: function checkPathVersion(schema, data, parentSchema, dataPath) {
-    // Checks for path version in path
-    if (schema == false) {
+    if (!schema) {
       return true
     }
     const path = dataPath["parentDataProperty"]
     const pathSegments = path.split("/")
-    var pathVersion = null
+    let pathVersion = null
     if (pathSegments.length == 4) {
       pathVersion = pathSegments[2]
     }
@@ -222,16 +354,18 @@ ajv.addKeyword({
     return true
   }
 })
+/**
+ * Checks if the version in path matches the version in <info>
+ */
 ajv.addKeyword({
   keyword: "match-version",
   validate: function checkMatchingVersion(schema, data, parentSchema, dataPath) {
-    // Check if the version in path matches the version in <Info>
-    if (schema == false) {
+    if (!schema) {
       return true
     }
     const path = dataPath["parentDataProperty"]
     const pathSegments = path.split("/")
-    var pathVersion = null
+    let pathVersion = null
     if (pathSegments.length == 4) {
       pathVersion = pathSegments[2]
     }
@@ -243,7 +377,7 @@ ajv.addKeyword({
     }
     const pathVersionNum = parseInt(pathVersion.substring(1))
   
-    var infoVersionNum = -1
+    let infoVersionNum = -1
     try {
       infoVersionNum = dataPath["rootData"]["info"]["version"][0] 
     } catch (error) {
@@ -258,7 +392,6 @@ ajv.addKeyword({
       ]
       return false
     }
-  
     if (pathVersionNum != infoVersionNum) {
       checkMatchingVersion.errors = [
         {
@@ -274,20 +407,22 @@ ajv.addKeyword({
     return true
   }
 })
+/**
+ * Checks if the path segment is in camel casing format
+ * WARNING: Compound words are not handled
+ */
 ajv.addKeyword({
   keyword: "camel-casing",
   validate: function checkCamelCasing(schema, data, parentSchema, dataPath) {
-    // Checks if the path segment is in camel casing format
-    // Warning: Compound words not handled
-    if (schema == false) {
+    if (!schema) {
       return true
     }
     const pathSegmentsNotCamelCase = []
     const path = dataPath["parentDataProperty"]
-    var pathSegments = getPathSegments(path)
-    for (var segment of pathSegments) {
-      var words = _.words(segment) // splits subtier into words using lodash based on camel casing
-      for (var word of words) {
+    let pathSegments = getPathSegments(path)
+    for (let segment of pathSegments) {
+      let words = _.words(segment) // splits subtier into words using lodash based on camel casing
+      for (let word of words) {
         if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
           subtiersNotCamelCase.push(segment)
           break
@@ -310,21 +445,25 @@ ajv.addKeyword({
     return true
   }
 })
+/**
+ * Checks the spelling of all words in segments (because spelling-check does not apply to concatenated strings)
+ * Not advised to send info on words to correct because behaviour of WordsNinja not stable; possible if it separates words better
+ * WARNING: Compound words are not handled
+ */
 ajv.addKeyword({
   keyword: "path-spelling",
   validate: function checkPathSpelling(schema, data, parentSchema, dataPath) {
-    // Checks the spelling of all words in segments (because spelling-check does not apply to concatenated strings)
-    // Warning: Compounds words not handled
-    // Will not send info on words to correct because behaviour of WordsNinja not stable; possible if it separates words better
-    if (schema == false) {
+    if (!schema) {
       return true
     }
     const path = dataPath["parentDataProperty"]
-    var pathSegments = getPathSegments(path)
+    let pathSegments = getPathSegments(path)
     const segmentsSpelledWrongly = []
-    for (var segment of pathSegments) {
-      var words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
-      for (var word of words) {
+    for (let segment of pathSegments) { // error with the segment: "mediShieldLife"
+      let words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
+      console.log(words)
+      for (let word of words) {
+        console.log(SpellChecker.isMisspelled("medi"))
         if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
           subtiersSpelledWrongly.push(segment)
           break
@@ -347,21 +486,24 @@ ajv.addKeyword({
     return true
   }
 })
+/**
+ * Checks if <Verb> in path is an allowed verb
+ */
 ajv.addKeyword({ 
   keyword: "path-verb",
   validate: function checkVerb(schema, data, parentSchema, dataPath) {
-    // Checks if the first word of the Verb is a verb
-    if (schema == false) {
+    if (!schema) {
       return true
     }
+
     const path = dataPath["parentDataProperty"]
-    var pathSegments = path.split("/")
+    let pathSegments = path.split("/")
     const pathVerb = pathSegments[pathSegments.length - 1]
+    let words = _.words(pathVerb)
+    let verb = words[0]
 
     const allowedVerbs = ["create", "get", "update", "delete", "compute", "transact", "check", "transfer"]
 
-    var words = _.words(pathVerb)
-    var verb = words[0]
     if (!allowedVerbs.includes(verb)) {
       checkVerb.errors = [
         {
@@ -377,18 +519,20 @@ ajv.addKeyword({
     return true
   }
 })
+/**
+ * Checks if elements in <required> are present in <properties>
+ */
 ajv.addKeyword({
   keyword: "required-properties",
-  validate: function checkProperties(schema, data, parentSchema, dataPath) {
-    // Checks if elements in <required> are present in <properties>
-    if (schema == false) {
+  validate: function checkProperties(schema, data, parentSchema, dataPath) { 
+    if (!schema) {
       return true
     }
-    const propertiesNotPresent = [] // duplicate properties already handled in schema
+    const propertiesNotPresent = []                                                                                                                                                                                                                                                                                          
     const parentData = dataPath["parentData"]
     const propertiesList = Object.keys(parentData["properties"])
     const requiredList = parentData["required"]
-    for (var requiredProperty of requiredList) {
+    for (let requiredProperty of requiredList) {
       if (!propertiesList.includes(requiredProperty)) {
         propertiesNotPresent.push(requiredProperty)
       }
@@ -409,26 +553,27 @@ ajv.addKeyword({
     return true
   }
 })
+/**
+ * Spelling checks sentences
+ * Mainly used on description and titles and excludes extensions (e.g., x-author)
+ */
 ajv.addKeyword({
   keyword: "spelling-check",
   validate: function checkSpelling(schema, data, parentSchema, dataPath) {
-    // Spelling checking feature
-    // Mainly used on descriptions and titles and excludes extensions (e.g., x-author)
-    // Open for improvement
-    if (schema == false) {
+    if (!schema) {
       return true
     }
     const words = tokenizer.tokenize(data)
-    var wordsSpelledWrong = new Set()
-    for (var word of words) {
+    let wordsSpelledWrong = new Set()
+    for (let word of words) {
       if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
         wordsSpelledWrong.add(word)
       }
     }
     if (wordsSpelledWrong.size != 0) {
-      var formattedWordsSpelledWrong = ''
+      let formattedWordsSpelledWrong = ''
       wordsSpelledWrong.forEach(word => {formattedWordsSpelledWrong += `- ${word} ==> ${SpellChecker.getCorrectionsForMisspelling(word).join(", ")}<br>`})
-      var errorMessage = 'The following word(s) are spelled incorrectly in this field:' + '<br>' + formattedWordsSpelledWrong
+      let errorMessage = 'The following word(s) are spelled incorrectly in this field:' + '<br>' + formattedWordsSpelledWrong
       checkSpelling.errors = [
         {
           keyword: 'spelling-check',
@@ -443,101 +588,3 @@ ajv.addKeyword({
     return true
   }
 })
-
-async function validateYAML(doc, dictionary) { 
-  await WordsNinja.loadDictionary(); // forced async function by WordsNinja library
-  customDict = dictionary; // global dictionary in this file
-
-  var validate = false
-  try {
-    const schema_string = fs.readFileSync('oas3.0_schema.yaml', 'utf-8')
-    const schema = yaml.load(schema_string)
-    validate = ajv.compile(schema)
-  }
-  catch {
-    return null
-  }
-
-  // const data_string = fs.readFileSync('examples/example1.yaml', 'utf-8')
-  var data = null
-  try {
-    data = yaml.load(doc)
-  } catch (error) {
-    return null
-  }
-  
-  var payload = []
-  if (!validate(data)) {
-    for (var error of validate.errors) {
-      // ignore if/then/else errors because we created more useful error messages
-      if (["if", "then", "else"].includes(error["keyword"])) {
-        continue;
-      }
-      var path = error["instancePath"]
-      var pathArray = path.split("/").slice(1,)
-      // change back "/" that are converted from ajv
-      for (var j = 0; j < pathArray.length; j++) {
-        if (pathArray[j]) {
-          pathArray[j] = pathArray[j].replace(/~1/g, "/")
-        }
-      }
-      var line = -1;
-      
-      // get line number, error message, instance path, and schema path
-      await fetchLineNumber(doc, pathArray)
-        .then((data) => {
-          line = data["lineNumber"]
-        })
-        .catch((error) => {
-          return null
-        })
-      payload.push({
-        line_number: line,
-        keyword: error.keyword,
-        error_message: error.message[0].charAt(0).toUpperCase() + error.message.slice(1) ,
-        params: error.params
-      })
-    }
-  }
-  return payload
-}
-
-//==================== Server ===================================
-
-const app = express()
-app.use(cors())
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-
-const port = 80
-
-// Preflight handling of OPTIONS is default in Express
-
-app.get("/", (req, res) => {
-  res.send("Welcome to the backend server of CPF OAS Validator Tool!")
-})
-
-app.post("/validate", async (req, res) => {
-  try {
-    // let data = JSON.parse(req.body)
-    let doc = req.body.doc
-    let dictionary = req.body.dictionary
-    let payload = await validateYAML(doc, dictionary)
-    if (payload == null) { // error with validation logic
-      res.status(204).json({msg: "Validation logic error"})
-    }
-    else if (payload.length == 0) { // valid yaml doc
-      res.status(200).json({msg: "Successful!"})
-    }
-    else { // invalid yaml doc
-      res.status(400).json(payload)
-    }
-  } catch (error) {
-    console.log(error)
-    res.status(500).json({msg: "Unexpected error"})
-  }
-})
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});

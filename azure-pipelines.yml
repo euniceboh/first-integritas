@@ -80,11 +80,6 @@ stages:
         Dockerfile: 'src/Dockerfile'
         tags: |
           latest
-    # - task: Docker@2
-    #   inputs:
-    #     containerRegistry: 'cpfdevportal'
-    #     command: 'buildAndPush'
-    #     Dockerfile: '**/Dockerfile'
 
 
 # - stage: Deploy

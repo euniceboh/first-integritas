@@ -1,20 +1,29 @@
-Split(['#split-0', '#split-1'])
+/**
+ * Startup
+ */
+$(document).ready(function() {
+    // Init for SplitJS
+    Split(['#split-0', '#split-1'])
 
-let editor = ace.edit("editor");
-let Range = ace.require("ace/range").Range;
-editor.setTheme("ace/theme/kuroir");
-editor.getSession().setMode("ace/mode/yaml");
-document.getElementById('editor').style.fontSize='15px';
-editor.setOption({
-    enableBasicAutocompletion: true,
-    fontFamily: "tahoma",
-    enableSnippets: true,
-    enableLiveAutocompletion: true
-});
+    // Ace Editor Configs
+    let editor = ace.edit("editor");
+    editor.setTheme("ace/theme/kuroir");
+    editor.getSession().setMode("ace/mode/yaml"); 
+    document.getElementById('editor').style.fontSize='15px';
+    editor.setOption({
+        enableBasicAutocompletion: true,
+        fontFamily: "tahoma",
+        enableSnippets: true,
+        enableLiveAutocompletion: true
+    })
+
+    loadDictionary();
+})
 
 /**
- * Invoke file input for .yml, .yaml, and .json files
+ * Invoke file input for YAML/JSON files
  * If file is input, invoke uploadFile() function
+ * YAML/JSON file formats allowed: .yml, .yaml, .json
  * 
  * @function
  * @fires uploadFile(event)
@@ -32,7 +41,7 @@ function pickFile() {
 }
 
 /**
- * Copies content in .yml, .yaml, or .json file into editor
+ * Copies content in selected file into editor
  * 
  * @function
  * @param {Event} event 
@@ -48,80 +57,103 @@ function uploadFile(event) {
     }
 }
 
+/**
+ *  Prompts the user for a file name and saves the contents of the editor to a file
+ *  File is downloaded locally
+ * 
+ * @function 
+ */
 function saveFile() {
-    var textArea = editor.getValue();
+    let textArea = editor.getValue();
     if (textArea == "") {
-    alert("Please input an OAS before saving to file!");
-    return;
-    } else if (fileName = prompt("Save file as", "")) {
-    var textBlob = new Blob([textArea], {type:"text/plain"});
-    var downloadLink = document.createElement("a");
-    downloadLink.download = fileName;
-    downloadLink.innerHTML = textBlob;
-    if (window.webkitURL != null) { // Chrome
-        downloadLink.href = window.webkitURL.createObjectURL(textBlob);
-    } else { // Firefox
-        downloadLink.href = window.URL.createObjectURL(textBlob);
-        downloadLink.onclick = destroyClickedElement;
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-    }
-    downloadLink.click();
+        alert("Please input an OAS before saving to file!");
+    } else {
+        let fileName = prompt("Save file as", "")
+        if (fileName) {
+            let textBlob = new Blob([textArea], {type:"text/plain"});
+            let downloadLink = document.createElement("a");
+            downloadLink.download = fileName;
+            downloadLink.innerHTML = textBlob;
+            if (window.webkitURL != null) { // Chrome
+                downloadLink.href = window.webkitURL.createObjectURL(textBlob);
+            } else { // Firefox
+                downloadLink.href = window.URL.createObjectURL(textBlob);
+                downloadLink.onclick = destroyClickedElement;
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+            }
+            downloadLink.click();
+        }
     }
 }
 
+/**
+ * Loads the dictionary file from path specified into dictionary textarea element
+ * Dictionary file formats allowed: .txt, .csv, .xlsx
+ * 
+ * @function
+ */
 function loadDictionary() {
-    var dictionaryModal = new bootstrap.Modal(document.getElementById("dictionaryModal"));
-    var dictionaryTextArea = document.getElementById('customDictionary');
-    const file = "static/dictionary/customDictionary.txt" // somehow fetch only works with files in the static folder
+    let dictionaryTextArea = document.getElementById('customDictionary');
+    const file = "static/dictionary/customDictionary.txt" // HARDCODED
     const extension = file.split('.').pop().toLowerCase()
     const allowedExtensions = ['txt', 'csv', 'xlsx']
     if (allowedExtensions.includes(extension)) {
-    if (extension == 'txt' || extension == 'csv') {
-        fetch(file)
-        .then(response => response.text())
-        .then(text => {
-            dictionaryTextArea.value = text;
-        })
-        .catch(error => {
-            alert("Error in reading .txt/.csv dictionary file")
-        })
+        if (extension == 'txt' || extension == 'csv') {
+            fetch(file)
+                .then(response => response.text())
+                .then(text => {
+                    dictionaryTextArea.value = text;
+                })
+                .catch(error => {
+                    alert("Error in reading .txt/.csv dictionary file")
+                })
+        } else {
+            fetch(file)
+                .then(response => response.arrayBuffer())
+                .then(buffer => {
+                    const data = new Uint8Array(buffer)
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const wordsArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    const formattedText = wordsArray.join("\n")
+                    dictionaryTextArea.value = formattedText
+                })
+                .catch(error => {
+                    alert("Error in reading .xlsx dictionary file")
+                })
+        }
     } else {
-        fetch(file)
-        .then(response => response.arrayBuffer())
-        .then(buffer => {
-            const data = new Uint8Array(buffer)
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const wordsArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            
-            const formattedText = wordsArray.join("\n")
-            dictionaryTextArea.value = formattedText
-        })
-        .catch(error => {
-            alert("Error in reading .xlsx dictionary file")
-        })
-    }
-    } else {
-    alert("Wrong dictionary file format. Please try another file.")
+        alert("Wrong dictionary file format. Please try another file.")
     }
 }
 
+/**
+ * Adds accordion item per error detected into error panel
+ * 
+ * @function
+ * @param {number} id 
+ * @param {string} errorLine 
+ * @param {string} errorKeyword 
+ * @param {string} errorMessage 
+ * @param {List} errorAdditionalInfo
+ */
 function addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo) {
-    var newItemId =  'item' + id + Date.now();
+    let newItemId =  'item' + id + Date.now();
 
     const br = document.createElement("br");
 
-    var newItem = document.createElement('div');
+    let newItem = document.createElement('div');
     newItem.classList.add('accordion-item');
     newItem.setAttribute('style', 'margin-bottom: 10px; border-radius: 5px');
 
-    var newItemHeader = document.createElement('div');
+    let newItemHeader = document.createElement('div');
     newItemHeader.classList.add('accordion-header');
 
     newItemHeader.id = newItemId + '-header';
-    var newItemButton = document.createElement('button');
+    let newItemButton = document.createElement('button');
     newItemButton.classList.add('accordion-button');
     newItemButton.classList.add('collapsed');
     newItemButton.setAttribute('type', 'button');
@@ -135,13 +167,13 @@ function addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditi
     newItemButton.setAttribute('data-line', errorLine);
     newItemButton.textContent = "Line " + errorLine + " --- " + errorKeyword;
 
-    var newItemCollapse = document.createElement('div');
+    let newItemCollapse = document.createElement('div');
     newItemCollapse.classList.add('accordion-collapse', 'collapse');
     newItemCollapse.setAttribute('id', newItemId + '-collapse');
     newItemCollapse.setAttribute('aria-labelledby', newItemId + '-header');
     newItemCollapse.setAttribute('data-bs-parent', '#accordion');
 
-    var newItemBody = document.createElement('div');
+    let newItemBody = document.createElement('div');
     newItemBody.classList.add('accordion-body');
     newItemBody.innerHTML += errorAdditionalInfo[0] + ": " + errorAdditionalInfo[1];
     newItemBody.appendChild(br);
@@ -152,17 +184,29 @@ function addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditi
     newItem.appendChild(newItemHeader);
     newItem.appendChild(newItemCollapse);
 
-    var accordionContainer = document.getElementById('errorPanel');
+    let accordionContainer = document.getElementById('errorPanel');
     accordionContainer.appendChild(newItem); 
 }
 
+/**
+ * Erases all accordions
+ * 
+ * @function
+ */
 function refreshAccordion() {
-    var accordionContainer = document.getElementById('errorPanel');
+    let accordionContainer = document.getElementById('errorPanel');
     accordionContainer.innerHTML = '';
 }
 
+
+/**
+ * Uses SwaggerHub OAS Preview plugin to display API preview of YAML/JSON document
+ * 
+ * @function
+ * @param {string} data 
+ */
 function previewOAS(data) {
-    var swaggerUIOptions = {
+    let swaggerUIOptions = {
     dom_id: '#oasPreviewBody', // Determine what element to load swagger ui
     presets: [
         SwaggerUIBundle.presets.apis,
@@ -177,176 +221,126 @@ function previewOAS(data) {
     SwaggerUIBundle(swaggerUIOptions)
 }
 
-
-// =========================================================================================================================
-
-// Real-time side panel refresh after each validation response
-// Using debounce to buffer each post request by DEBOUNCE_BUFFER
-let debounce;
+let debounce
 const DEBOUNCE_BUFFER = 1500;
+const editor = ace.edit("editor");
 editor.getSession().on("change", function (e) {
-    var editorBorder = document.querySelector('#editor');
+    // Editor border changes colour to black while the user is editing
+    let editorBorder = document.querySelector('#editor');
     editorBorder.style.border = '2px solid #000';
 
+    // Real-time error & preview panel refresh after each validation response
+    // Using debounce to buffer each post request by DEBOUNCE_BUFFER
     clearTimeout(debounce);
     debounce = setTimeout(function extractOAS () {
-        var data = editor.getValue();
-        if (data.trim() == "" || data == undefined) {
-        errorPanel.classList.remove('active');
-        previewPanel.classList.remove('active')
-        return;
+        let docString = editor.getValue();
+        if (docString.trim() == "" || docString == undefined) { // empty error/preview panel if editor empty
+            errorPanel.classList.remove('active');
+            previewPanel.classList.remove('active')
+            return;
         }
 
-        // Catches one indentation error at a time
-        // Make sure user handles all indentation errors before checking OAS
-        // Shows and highlights row with indentation errors in editor
-        var syntaxErrors = editor.getSession().getAnnotations();
+        // Editor checks for syntax error in YAML/JSON document before validation
+        let syntaxErrors = editor.getSession().getAnnotations();
+        let Range = ace.require("ace/range").Range;
         if (syntaxErrors.length != 0) {
-        line = syntaxErrors[0]["row"];
-        errorText = syntaxErrors[0]["text"];
-        errorType = syntaxErrors[0]["type"];
-        editor.gotoLine(line); // thinking about how to improve this
-        var highlightRange = new Range(line, 0, line, 300);
-        editor.selection.setRange(highlightRange);
-        editor.session.addMarker(highlightRange, "error", "text");
-        // var customAnnotations = [
-        // {
-        //   row: line + 5,
-        //   column: 0,
-        //   text: "test", // or the json reply from the parser
-        //   type: "error" // also "warning" and "information"
-        // },
-        // {
-        //   row: line + 10,
-        //   column: 0,
-        //   text: "test", // or the json reply from the parser
-        //   type: "error" // also "warning" and "information"
-        // }]
-        // editor.getSession().setAnnotations(syntaxErrors.concat(customAnnotations))
-        return;
+            let line = syntaxErrors[0]["row"];
+            let errorText = syntaxErrors[0]["text"];
+            let errorType = syntaxErrors[0]["type"];
+            editor.gotoLine(line);
+            let highlightRange = new Range(line, 0, line, 300);
+            editor.selection.setRange(highlightRange);
+            editor.session.addMarker(highlightRange, "error", "text");
+            return;
         }
-
-        // console.log(editor.getSession().getAnnotations())
-        // editor.session.setOption("useWorker", false) # use when the annotations disappear
-        // editor.getSession().setAnnotations([{
-        //   row: 1,
-        //   column: 0,
-        //   text: "test", // or the json reply from the parser
-        //   type: "error" // also "warning" and "information"
-        // }])
-
-        // editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), className, type: ["text", "fullLine", "screenLine"], inFront (opt))
-
-        // var highlightRange = new Range(10, 0, 10, 300);
-        // editor.selection.setRange(highlightRange);
-        // editor.session.addMarker(highlightRange, "error", "text");
-
-        // editor.getSession().setAnnotations([{
-        //     row: 3,
-        //     column: 0,
-        //     text: "test",
-        //     type: "error"
-        // }, {
-        //     row: 5,
-        //     column: 5,
-        //     text: "test2",
-        //     type: "error"
-        // }])
-
-        // console.log(editor.getSession().getAnnotations())
-
-
-        // console.log(editor.getSession().getValue());
-        // session.getLength() --> Gets total number of lines of the yaml file
-        // session.getLine(line) --> Gets the string value of the line at line <line>
-        // session.getLines(line1, line2) --> Gets the string values of line 1 and line 2 
-        // gotoLine(line) --> Scrolls the screen down to line <line>
-
         
-
-        
-        var dictionaryWords = $('#customDictionary').val().split(/\r?\n/);
+        // Prepare custom dictionary words into array
+        let dictionaryArray = $('#customDictionary').val().split(/\r?\n/);
 
         $('#loading').show();
 
-        var url = document.location.protocol + "//" + document.location.hostname + ":80/validate"
-
+        // Invoke validation logic
         $.ajax({
-        data: JSON.stringify({
-            doc: data,
-            dictionary: dictionaryWords,
-        }),
-        method: 'POST',
-        contentType: 'application/json',
-        url: "https://cpfoasvalidatornode.azurewebsites.net/validate",
-        // url: 'http://node:8080/validate',
-        success: function(response) {              
-            $('#loading').hide();
+            data: JSON.stringify({
+                doc: docString,
+                dictionary: dictionaryArray,
+            }),
+            method: 'POST',
+            contentType: 'application/json',
+            url: 'http://localhost:80/validate',
+            // url: "https://cpfoasvalidatornode.azurewebsites.net/validate",
+            /**
+             * Shows preview panel if there are no errors with YAML/JSON document
+             */
+            success: function() {            
+                previewOAS(docString);
 
-            previewOAS(data);
+                errorPanel.classList.remove('active');
+                previewPanel.classList.add('active')
+                
+                // Editor border turns green if no errors
+                editorBorder.style.border = '2px solid #20c997';
+            },
+            /**
+             * Shows error panel if there are errors with YAML/JSON document
+             * Due to async nature of validation logic, errors identified by validation logic are sorted before inserted into accordion
+             * 
+             * @param {Response} response 
+             */
+            error: function(response) {
+                let listErrors = JSON.parse(response["responseText"])
 
-            errorPanel.classList.remove('active');
-            previewPanel.classList.add('active')
-            
-            editorBorder.style.border = '2px solid #20c997';
-        },
-        error: function(response) {
-            $('#loading').hide();
-            var listErrors = JSON.parse(response["responseText"]) // list of dictionary objects
+                refreshAccordion();
 
-            refreshAccordion();
+                let formattedErrors = []
+                for (let i = 0; i < listErrors.length; i++){
+                    let id = i;
+                    let errorLine = listErrors[i]["line_number"];
+                    let errorKeyword = listErrors[i]["keyword"];
+                    let errorMessage = listErrors[i]["error_message"];
+                    
+                    let errorAdditionalInfo = listErrors[i]["params"]
+                    formattedErrors.push({
+                        id: id,
+                        errorLine: errorLine,
+                        errorKeyword: errorKeyword,
+                        errorMessage: errorMessage,
+                        errorAdditionalInfo: errorAdditionalInfo
+                    })
+                }
 
-            var formattedErrors = []
-            for (let i = 0; i < listErrors.length; i++){
-            var id = i;
-            var errorLine = listErrors[i]["line_number"];
-            var errorKeyword = listErrors[i]["keyword"];
-            var errorMessage = listErrors[i]["error_message"];
-            
-            var errorAdditionalInfo = listErrors[i]["params"]
-            formattedErrors.push({
-                id: id,
-                errorLine: errorLine,
-                errorKeyword: errorKeyword,
-                errorMessage: errorMessage,
-                errorAdditionalInfo: errorAdditionalInfo
-            })
+                formattedErrors.sort((a, b) => a.errorLine - b.errorLine);
+
+                for (let error of formattedErrors) {
+                    let id = error["id"]
+                    let errorLine = error["errorLine"];
+                    let errorKeyword = error["errorKeyword"];
+                    let errorMessage = error["errorMessage"];
+                    let errorAdditionalInfo = Object.entries(error["errorAdditionalInfo"]);
+                    errorAdditionalInfo = [errorAdditionalInfo[0][0], errorAdditionalInfo[0][1]]
+                    addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
+                }
+
+                previewPanel.classList.remove('active');
+                errorPanel.classList.add('active')
+                
+                // Editor border turns red if there are errors
+                editorBorder.style.border = '2px solid #f00';
+            },
+            complete: function() {
+                $('#loading').hide();
             }
-
-            formattedErrors.sort((a, b) => a.errorLine - b.errorLine);
-
-            for (var error of formattedErrors) {
-            id = error["id"]
-            errorLine = error["errorLine"];
-            errorKeyword = error["errorKeyword"];
-            errorMessage = error["errorMessage"];
-            errorAdditionalInfo = Object.entries(error["errorAdditionalInfo"]);
-            errorAdditionalInfo = [errorAdditionalInfo[0][0], errorAdditionalInfo[0][1]]
-            addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
-            }
-
-            previewPanel.classList.remove('active');
-            errorPanel.classList.add('active')
-            
-            editorBorder.style.border = '2px solid #f00';
-        },
-        complete: function() {
-        }
         });
     }, DEBOUNCE_BUFFER);
 });
 
-
+/**
+ * Accordion Item onclick event
+ */
 $('#errorPanel').on('click', '.accordion-button:not(.collapsed)', function() {
-    var errorLine = parseInt($(this).data("line")) - 1 // ace editor treats first line as 0
+    const Range = ace.require("ace/range").Range;
+    let errorLine = parseInt($(this).data("line")) - 1
     editor.gotoLine(errorLine);
-    var highlightRange = new Range(errorLine, 0, errorLine, 300);
+    let highlightRange = new Range(errorLine, 0, errorLine, 300);
     editor.selection.setRange(highlightRange);
 })
-
-const errorPanel = document.getElementById('errorPanel');
-const previewPanel = document.getElementById('previewPanel');
-
-loadDictionary();
-
-

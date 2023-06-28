@@ -1,8 +1,16 @@
+#========================================================================================================
+#                                               Dependencies
+#========================================================================================================
+
 import re
 import json
 import ruamel.yaml
 from flask_cors import CORS
 from flask import Flask, render_template, request, jsonify, make_response
+
+#========================================================================================================
+#                                               Routes
+#========================================================================================================
 
 app = Flask(__name__)
 CORS(app)
@@ -11,14 +19,44 @@ CORS(app)
 def oasChecker():
     return render_template('API Exchange Developer Portal.html')
 
-# @app.errorhandler(404)
 @app.route('/', defaults={'my_path': ''})
 @app.route('/<path:my_path>')
 def errorPage(my_path):
     return render_template('404.html')
 
-# Line number mapping on fields
+@app.route('/getLineNumber', methods=['POST', 'GET'])
+def getLineNumber():
+    '''
+    Receives the YAML/JSON document and maps line numbers onto each key value pair - docString
+    Receives the path to error identified by Ajv - pathArray
+    Calls utility function getLineNumberFromPathArray(docString, pathArray)
+    Returns a JSON response with the line number
+    '''
+    data = request.get_json()
+    docString = data.get("doc")
+    pathArray = data.get("path")
+    yaml = ruamel.yaml.YAML()
+    yaml.Constructor = MyConstructor
+    try:
+        docJson = yaml.load(docString)
+    except (ruamel.yaml.parser.ParserError):
+        payload = {"message": "Syntax error!"}
+        return jsonify(payload)
+
+    lineNumber = getLineNumberFromPathArray(docJson, pathArray)
+
+    payload = {"lineNumber": lineNumber}
+    return jsonify(payload)
+
+#========================================================================================================
+#                                               Utils
+#========================================================================================================
+
+# Modifying subclasses in ruamel.yaml library to map line numbers to each string
 class Str(ruamel.yaml.scalarstring.ScalarString):
+    '''
+    Wrapper around ScalarString constructor overriding __new__ method to create a custom instance of Str
+    '''
     __slots__ = ('lc')
 
     style = ""
@@ -27,22 +65,39 @@ class Str(ruamel.yaml.scalarstring.ScalarString):
         return ruamel.yaml.scalarstring.ScalarString.__new__(cls, value)
 
 class MyPreservedScalarString(ruamel.yaml.scalarstring.PreservedScalarString):
+    '''
+    Custom subclass of PreservedScalarString to represent a YAML scalar string should preserve line breaks and formatting
+    '''
     __slots__ = ('lc')
 
 class MyDoubleQuotedScalarString(ruamel.yaml.scalarstring.DoubleQuotedScalarString):
+    '''
+    Custom subclass of DoubleQuotedScalarString to represent a YAML scalar string that should be enclosed in double quotes
+    '''
     __slots__ = ('lc')
 
 class MySingleQuotedScalarString(ruamel.yaml.scalarstring.SingleQuotedScalarString):
+    '''
+    Custom subclass of SingleQuotedScalarString to represent a YAML scalar string that should be enclosed in single quotes
+    '''
     __slots__ = ('lc')
 
 class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
+    '''
+    Wrapper around RoundTripConstructor overriding construct_yaml_omap() and construct_scalar()
+    '''
     def construct_yaml_omap(self, node):
+        '''
+        Constructs a CommentedOrderedMap based on given YAML for ruamel.yaml to parse
+        '''
         omap = ruamel.yaml.comments.CommentedOrderedMap()
         self.construct_mapping(node, omap)
         return omap
 
     def construct_scalar(self, node):
-        # type: (Any) -> Any
+        '''
+        Maps line numbers on top of the constructed CommentedOrderedMap based on the type of strings they are
+        '''
         if not isinstance(node, ruamel.yaml.nodes.ScalarNode):
             raise ruamel.yaml.constructor.ConstructorError(
                 None, None,
@@ -65,30 +120,13 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
         ret_val.lc.col = node.start_mark.column
         return ret_val
 
-# Called from NodeJS server to get line number
-@app.route('/getLineNumber', methods=['POST', 'GET'])
-def getLineNumber():
-    data = request.get_json()
-    docString = data.get("docString")
-    pathArray = data.get("pathArray")
-    yaml = ruamel.yaml.YAML()
-    yaml.Constructor = MyConstructor
-    try:
-        docJson = yaml.load(docString)
-    except (ruamel.yaml.parser.ParserError) as e:
-        payload = {"message": "Syntax error!"}
-        return jsonify(payload)
 
-    lineNumber = getLineNumberFromPathArray(docJson, pathArray)
-
-    payload = {"lineNumber": lineNumber}
-    return jsonify(payload)
-    
-# Utils
-
-# For each key, iterate through the nested doc
-# Edge case if number of keys is 0 or 1
 def getLineNumberFromPathArray(docJson, pathArray):
+    '''
+    Iterates mapped JSON document based on pathArray
+    Returns line number
+    
+    '''
     numKeys = len(pathArray)
     if numKeys == 0:
         return 0
@@ -97,19 +135,18 @@ def getLineNumberFromPathArray(docJson, pathArray):
             for key in docJson.keys():
                 if key == pathArray[-1]:
                     return key.lc.line + 1
-        # Go down the JSON until the last key
         for i in range(numKeys - 1):
             key = pathArray[i]
             try: 
                 docJson = docJson[key]    
-            except:
+            except Exception:
                 key = float(key) # handle integers or decimals as keys
                 docJson = docJson[key]
         for key in docJson.keys():
             if key == pathArray[-1]:
-                return key.lc.line + 1 # because the first line is 0 and the first line in the editor is 1
-    except:
-        return -1 # path error somewhere that should not have happened
+                return key.lc.line + 1
+    except Exception:
+        return -1 # unexpected error
     
 
 if __name__ == "__main__":
