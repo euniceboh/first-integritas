@@ -278,7 +278,7 @@ editor.getSession().on("change", function (e) {
         }),
         method: 'POST',
         contentType: 'application/json',
-        url: "http://cpfdevportal.azurewebsites.net/validate",
+        url: "https://cpfdevportal.azurewebsites.net/validate",
         // url: 'http://node:8080/validate',
         success: function(response) {              
             $('#loading').hide();
