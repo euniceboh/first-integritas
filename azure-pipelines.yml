@@ -72,6 +72,14 @@ stages:
         Dockerfile: 'src/node/Dockerfile'
         tags: |
           latest
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'cpfdevportal'
+        repository: 'danielxdantecpfdevportal_flask'
+        command: 'buildAndPush'
+        Dockerfile: 'src/Dockerfile'
+        tags: |
+          latest
     # - task: Docker@2
     #   inputs:
     #     containerRegistry: 'cpfdevportal'
