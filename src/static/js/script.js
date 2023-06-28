@@ -269,7 +269,7 @@ editor.getSession().on("change", function (e) {
 
         $('#loading').show();
 
-        var url = document.location.protocol + "//" + document.location.hostname + ":8080/validate"
+        var url = document.location.protocol + "//" + document.location.hostname + ":80/validate"
 
         $.ajax({
         data: JSON.stringify({
@@ -278,7 +278,7 @@ editor.getSession().on("change", function (e) {
         }),
         method: 'POST',
         contentType: 'application/json',
-        url: url, // the browser is unable to resolve service names into IP so if used locally, you can use localhost
+        url: "http://cpfdevportal.azurewebsites.net/validate",
         // url: 'http://node:8080/validate',
         success: function(response) {              
             $('#loading').hide();

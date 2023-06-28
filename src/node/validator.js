@@ -21,6 +21,10 @@ const tokenizer = new natural.WordTokenizer();
 const http = require('http');
 const path = require("path");
 
+const express = require("express")
+const bodyParser = require("body-parser")
+const cors = require("cors")
+
 //======================= Utils =================================================
 
 // customDict is an array of words specific to the CPF context
@@ -31,8 +35,8 @@ async function fetchLineNumber(doc, pathArray) {
   // To simplify line number mapping. If there's a simpler way to do this on JS, this can be deprecated
   // WARNING: Fetch API in experimental-mode 
   try {
-    // const response = await fetch("http://127.0.0.1:80/getLineNumber", {
-    const response = await fetch("http://flask:80/getLineNumber", {
+    const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", {
+    // const response = await fetch("http://flask:80/getLineNumber", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -503,63 +507,40 @@ async function validateYAML(doc, dictionary) {
 
 //==================== Server ===================================
 
-const hostname = '0.0.0.0'; 
-const port = 80; 
+const app = express()
+app.use(cors())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
-const server = http.createServer((req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Specify the allowed HTTP methods
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Specify the allowed headers
+const port = 80
 
-  if (req.method === 'OPTIONS') {
-    // Handle preflight OPTIONS request
-    res.statusCode = 204; // No content needed for preflight
-    res.end();
-    return;
+// Preflight handling of OPTIONS is default in Express
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the backend server of CPF OAS Validator Tool!")
+})
+
+app.post("/validate", async (req, res) => {
+  try {
+    // let data = JSON.parse(req.body)
+    let doc = req.body.doc
+    let dictionary = req.body.dictionary
+    let payload = await validateYAML(doc, dictionary)
+    if (payload == null) { // error with validation logic
+      res.status(204).json({msg: "Validation logic error"})
+    }
+    else if (payload.length == 0) { // valid yaml doc
+      res.status(200).json({msg: "Successful!"})
+    }
+    else { // invalid yaml doc
+      res.status(400).json(payload)
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({msg: "Unexpected error"})
   }
+})
 
-  if (req.url == '/validate' && req.method === 'POST') {
-    let requestBody = ''
-    req.on('data', (chunk) => {
-      requestBody += chunk
-    })
-    req.on('end', async () => {
-      try {
-        const jsonData = JSON.parse(requestBody)
-        var payload = await validateYAML(jsonData["doc"], jsonData["dictionary"])
-        if (payload == null) { // unexpected error
-          res.statusCode = 204;
-          res.setHeader('Content-Type', 'text/html');
-          res.write("Unexpected error!")
-          res.end();
-        }
-        else if (payload.length == 0) { // successful yaml doc
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'text/html');
-          res.write("Successful!")
-          res.end();
-        }
-        else { // unsuccessful yaml doc
-          res.statusCode = 400;
-          res.setHeader('Content-Type', 'text/html');
-          res.write(JSON.stringify(payload))
-          res.end();
-        }
-      } catch (error) {
-        res.statusCode = 405;
-        res.end();
-      }
-    })
-  }
-  else {
-    res.statusCode = 404;
-    res.setHeader('Content-Type', 'text/plain');
-    res.write("404 Page Not Found")
-    res.end();
-  }
-  
-});
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
