@@ -3,6 +3,7 @@
 # syntax=docker/dockerfile:1
 FROM node:18
 WORKDIR /app
+RUN npm -g install npm@latest
 COPY package*.json ./
 RUN npm ci
 COPY . ./
