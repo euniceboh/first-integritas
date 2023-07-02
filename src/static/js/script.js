@@ -243,7 +243,7 @@ editor.getSession().on("change", function (e) {
         // Editor checks for syntax error in YAML/JSON document before validation
         let syntaxErrors = editor.getSession().getAnnotations();
         let Range = ace.require("ace/range").Range;
-        if (syntaxErrors.length != 0) {
+        if (syntaxErrors != undefined && syntaxErrors.length != 0) {
             let line = syntaxErrors[0]["row"];
             let errorText = syntaxErrors[0]["text"];
             let errorType = syntaxErrors[0]["type"];
@@ -259,78 +259,83 @@ editor.getSession().on("change", function (e) {
 
         $('#loading').show();
 
-        // Invoke validation logic
-        $.ajax({
-            data: JSON.stringify({
-                doc: docString,
-                dictionary: dictionaryArray,
-            }),
-            method: 'POST',
-            contentType: 'application/json',
-            url: 'http://localhost:80/validate',
-            // url: "https://cpfoasvalidatornode.azurewebsites.net/validate",
-            /**
-             * Shows preview panel if there are no errors with YAML/JSON document
-             */
-            success: function() {            
-                previewOAS(docString);
+        try {
+            // Invoke validation logic
+            // fetch('http://localhost:3000/validate', {
+            fetch('http://cpfoasvalidatornode.azurewebsites.net/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    doc: docString,
+                    dictionary: dictionaryArray
+                })
+            })
+                .then(async response => {
+                    if (response.status === 204) { // successful YAML/JSON document
+                        previewOAS(docString);
 
-                errorPanel.classList.remove('active');
-                previewPanel.classList.add('active')
-                
-                // Editor border turns green if no errors
-                editorBorder.style.border = '2px solid #20c997';
-            },
-            /**
-             * Shows error panel if there are errors with YAML/JSON document
-             * Due to async nature of validation logic, errors identified by validation logic are sorted before inserted into accordion
-             * 
-             * @param {Response} response 
-             */
-            error: function(response) {
-                let listErrors = JSON.parse(response["responseText"])
+                        errorPanel.classList.remove('active');
+                        previewPanel.classList.add('active')
+                        
+                        // Editor border turns green if no errors
+                        editorBorder.style.border = '2px solid #20c997';
 
-                refreshAccordion();
+                        $('#loading').hide();
+                    } else if (response.status === 200) { // unsuccessful YAML/JSON document
+                        let listErrors = await response.json()
 
-                let formattedErrors = []
-                for (let i = 0; i < listErrors.length; i++){
-                    let id = i;
-                    let errorLine = listErrors[i]["line_number"];
-                    let errorKeyword = listErrors[i]["keyword"];
-                    let errorMessage = listErrors[i]["error_message"];
-                    
-                    let errorAdditionalInfo = listErrors[i]["params"]
-                    formattedErrors.push({
-                        id: id,
-                        errorLine: errorLine,
-                        errorKeyword: errorKeyword,
-                        errorMessage: errorMessage,
-                        errorAdditionalInfo: errorAdditionalInfo
-                    })
-                }
+                        refreshAccordion();
 
-                formattedErrors.sort((a, b) => a.errorLine - b.errorLine);
+                        let formattedErrors = []
+                        for (let i = 0; i < listErrors.length; i++){
+                            let id = i;
+                            let errorLine = listErrors[i]["line_number"];
+                            let errorKeyword = listErrors[i]["keyword"];
+                            let errorMessage = listErrors[i]["error_message"];
+                            
+                            let errorAdditionalInfo = listErrors[i]["params"]
+                            formattedErrors.push({
+                                id: id,
+                                errorLine: errorLine,
+                                errorKeyword: errorKeyword,
+                                errorMessage: errorMessage,
+                                errorAdditionalInfo: errorAdditionalInfo
+                            })
+                        }
 
-                for (let error of formattedErrors) {
-                    let id = error["id"]
-                    let errorLine = error["errorLine"];
-                    let errorKeyword = error["errorKeyword"];
-                    let errorMessage = error["errorMessage"];
-                    let errorAdditionalInfo = Object.entries(error["errorAdditionalInfo"]);
-                    errorAdditionalInfo = [errorAdditionalInfo[0][0], errorAdditionalInfo[0][1]]
-                    addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
-                }
+                        formattedErrors.sort((a, b) => a.errorLine - b.errorLine);
 
-                previewPanel.classList.remove('active');
-                errorPanel.classList.add('active')
-                
-                // Editor border turns red if there are errors
-                editorBorder.style.border = '2px solid #f00';
-            },
-            complete: function() {
-                $('#loading').hide();
-            }
-        });
+                        for (let error of formattedErrors) {
+                            let id = error["id"]
+                            let errorLine = error["errorLine"];
+                            let errorKeyword = error["errorKeyword"];
+                            let errorMessage = error["errorMessage"];
+                            let errorAdditionalInfo = Object.entries(error["errorAdditionalInfo"]);
+                            errorAdditionalInfo = [errorAdditionalInfo[0][0], errorAdditionalInfo[0][1]]
+                            addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
+                        }
+
+                        previewPanel.classList.remove('active');
+                        errorPanel.classList.add('active')
+                        
+                        // Editor border turns red if there are errors
+                        editorBorder.style.border = '2px solid #f00';
+
+                        $('#loading').hide();
+                    } else if (response.status === 500) { // unexpected error with logic
+                        throw new Error(response.json().msg)
+                    } else {
+                        throw new Error("Unexpected status code: " + response.status)
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:" + error)
+                })
+        } catch { // cannot call server
+            alert("An error has occurred communicating with the server")
+        }
     }, DEBOUNCE_BUFFER);
 });
 

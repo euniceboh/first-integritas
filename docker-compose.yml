@@ -7,20 +7,11 @@ services:
     build:
       context: ./src/node
     ports:
-      - '8080:8080'
-    container_name: node
-    networks:
-      - local
+      - '80:80'
   flask:
     build:
       context: ./src
     ports:
       - '80:80'
-    container_name: flask
     depends_on:
       - node
-    networks:
-      - local
-networks:
-  local:
-  

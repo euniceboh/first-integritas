@@ -33,6 +33,7 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
+// toggle port 3000 when releasing locally and 80 when releasing to azure
 const port = 80
 
 app.get("/", (req, res) => {
@@ -46,20 +47,20 @@ app.post("/validate", async (req, res) => {
     let dictionaryArray = req.body.dictionary
     let payload = await validateYAML(docString, dictionaryArray)
     if (payload == null) { // error with validation logic
-      res.status(204).json({msg: "Validation logic error"})
+      res.status(500).json({msg: "Validation logic error"})
     }
     else if (payload.length == 0) { // valid yaml doc
-      res.status(200).json({msg: "Successful!"})
+      res.status(204).json({msg: "Successful!"})
     }
     else { // invalid yaml doc
-      res.status(400).json(payload)
+      res.status(200).json(payload)
     }
-  } catch (error) {
+  } catch (error) { // unexpected error
     res.status(500).json({msg: "Unexpected error"})
   }
 })
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
 });
 
@@ -137,8 +138,7 @@ async function validateYAML(docString, dictionaryArray) {
 /**
  * Uses Fetch API to call our function from Flask server to get line number based on ruamel.yaml number line mapping
  * Returns line number of error
- * If there's a simpler way to do this on JS, this can be deprecated
- * WARNING: Fetch API in experimental-mode 
+ * If there's a simpler way to do this on JS, this can be deprecated 
  * 
  * @function
  * @param {string} docString
@@ -146,8 +146,8 @@ async function validateYAML(docString, dictionaryArray) {
  */
 async function fetchLineNumber(docString, pathArray) {
   try {
-    // const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", {
-    const response = await fetch("http://127.0.0.1/getLineNumber", {
+    // const response = await fetch("http://flask/getLineNumber", {
+    const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -221,6 +221,8 @@ addFormats(ajv, ["uri-reference", "email", "regex", "uri"])
 AjvErrors(ajv) // add all ajv-errors keywords, significantly, errorMessage
 require("ajv-keywords")(ajv) // add all ajv-keywords keywords
 
+// TODO: Check camelCase of properties
+// TODO: Add catch unexpected function failure for all keywords
 /**
  * Checks for special characters in path, except for "/"
  */
@@ -230,13 +232,27 @@ ajv.addKeyword({
       if (!schema) {
         return true
       }
-      const path = dataPath["parentDataProperty"]
-      const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>? ]/
-      if (regex.test(path)) {
+      try {
+        const path = dataPath["parentDataProperty"]
+        const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>? ]/
+        if (regex.test(path)) {
+          checkPathCharacters.errors = [
+            {
+              keyword: "path-characters",
+              message: "Special characters in path not allowed",
+              params: {
+                pathCharacters: false
+              }
+            }
+          ]
+          return false
+        }
+        return true
+      } catch {
         checkPathCharacters.errors = [
           {
             keyword: "path-characters",
-            message: "Special characters in path not allowed",
+            message: "Unexpected error in validation function",
             params: {
               pathCharacters: false
             }
@@ -244,14 +260,12 @@ ajv.addKeyword({
         ]
         return false
       }
-      return true
     }
 })
 /**
  * Checks if the path length is valid (4, 5, or 6)
  * Internal API Route format: /<API Product>/<Subtier 1>/<Subtier 2>/<VersionNum>/<Verb>
  * Subtiers are optional
- * TODO: Check camelCase of properties
  */
 ajv.addKeyword({ 
     keyword: "path-length",
@@ -259,21 +273,34 @@ ajv.addKeyword({
       if (!schema) {
         return true
       }
-      const path = dataPath["parentDataProperty"]
-      const pathSegments = path.split("/")
-      if (pathSegments.length == 4 || pathSegments.length == 5 || pathSegments.length == 6) {
-        return true
-      }
-      checkPathLength.errors = [
-        {
-          keyword: "path-length",
-          message: "Invalid path length.",
-          params: {
-            pathLength: false
-          }
+      try {
+        const path = dataPath["parentDataProperty"]
+        const pathSegments = path.split("/")
+        if (pathSegments.length == 4 || pathSegments.length == 5 || pathSegments.length == 6) {
+          return true
         }
-      ]
-      return false
+        checkPathLength.errors = [
+          {
+            keyword: "path-length",
+            message: "Invalid path length.",
+            params: {
+              pathLength: false
+            }
+          }
+        ]
+        return false
+      } catch {
+        checkPathLength.errors = [
+          {
+            keyword: "path-length",
+            message: "Unexpected error in validation function",
+            params: {
+              pathLength: false
+            }
+          }
+        ]
+        return false
+      }
     }
 })
 /**
@@ -286,27 +313,41 @@ ajv.addKeyword({
     if (!schema) {
       return true
     }
-    const path = dataPath["parentDataProperty"]
-    const pathSegments = path.split("/")
-    const apiProduct = pathSegments[1]
-    const allowedAPIProducts = [ 
-                                "accountClosure", "adjustment", "agencyCommon", "agencyPortal", "ariseCommon", 
-                                "businessProcessAutomation", "careshieldCustomerService", "careshieldEService", "corporateServices", "cpfLife",
-                                "customerEngagement", "dataServices", "digitalServices", "discretionaryWithdrawals", "matrimonialAssetDivision",
-                                "education", "employerContribution", "employerEnforcement", "employerEServices", "familyProtection",
-                                "finance", "healthcareCommon", "healthcareGrants", "housing", "housingMonetisation",
-                                "humanResources", "idAccessManagement", "investment", "assetManagement", "resourceManagement",
-                                "longTermCareInsurance", "matchedRetirementSavings", "medicalInsurance", "medisave", "mediasaveCare",
-                                "memberAccounts", "memberRecords", "memberSystemsCommon", "niceCustomerManagement", "nomination",
-                                "procurement", "receiptAndPayment", "retirementTopUp", "retirement", "selfEmployedContribution",
-                                "selfEmployedEnforcement", "silverSupport", "surplusSupport", "voluntaryContribution", "corporateDesktop",
-                                "wordfare"
-                              ]
-    if (!allowedAPIProducts.includes(apiProduct)) { 
+    try {
+      const path = dataPath["parentDataProperty"]
+      const pathSegments = path.split("/")
+      const apiProduct = pathSegments[1]
+      const allowedAPIProducts = [ 
+                                  "accountClosure", "adjustment", "agencyCommon", "agencyPortal", "ariseCommon", 
+                                  "businessProcessAutomation", "careshieldCustomerService", "careshieldEService", "corporateServices", "cpfLife",
+                                  "customerEngagement", "dataServices", "digitalServices", "discretionaryWithdrawals", "matrimonialAssetDivision",
+                                  "education", "employerContribution", "employerEnforcement", "employerEServices", "familyProtection",
+                                  "finance", "healthcareCommon", "healthcareGrants", "housing", "housingMonetisation",
+                                  "humanResources", "idAccessManagement", "investment", "assetManagement", "resourceManagement",
+                                  "longTermCareInsurance", "matchedRetirementSavings", "medicalInsurance", "medisave", "mediasaveCare",
+                                  "memberAccounts", "memberRecords", "memberSystemsCommon", "niceCustomerManagement", "nomination",
+                                  "procurement", "receiptAndPayment", "retirementTopUp", "retirement", "selfEmployedContribution",
+                                  "selfEmployedEnforcement", "silverSupport", "surplusSupport", "voluntaryContribution", "corporateDesktop",
+                                  "wordfare"
+                                ]
+      if (!allowedAPIProducts.includes(apiProduct)) { 
+        checkAPIProduct.errors = [
+          {
+            keyword: "api-product",
+            message: "Invalid API Product",
+            params: {
+              apiProduct: false
+            }
+          }
+        ]
+        return false
+      }
+      return true
+    } catch {
       checkAPIProduct.errors = [
         {
           keyword: "api-product",
-          message: "Invalid API Product.",
+          message: "Unexpected error in validation function",
           params: {
             apiProduct: false
           }
@@ -314,7 +355,6 @@ ajv.addKeyword({
       ]
       return false
     }
-    return true
   }
 })
 /**
@@ -326,24 +366,38 @@ ajv.addKeyword({
     if (!schema) {
       return true
     }
-    const path = dataPath["parentDataProperty"]
-    const pathSegments = path.split("/")
-    let pathVersion = null
-    if (pathSegments.length == 4) {
-      pathVersion = pathSegments[2]
-    }
-    else if (pathSegments.length == 5) {
-      pathVersion = pathSegments[3]
-    }
-    else if (pathSegments.length == 6) {
-      pathVersion = pathSegments[4]
-    }
-    const regex = /^[vV]\d+$/
-    if (pathVersion == "" || pathVersion == null || !regex.test(pathVersion)) {
+    try {
+      const path = dataPath["parentDataProperty"]
+      const pathSegments = path.split("/")
+      let pathVersion = null
+      if (pathSegments.length == 4) {
+        pathVersion = pathSegments[2]
+      }
+      else if (pathSegments.length == 5) {
+        pathVersion = pathSegments[3]
+      }
+      else if (pathSegments.length == 6) {
+        pathVersion = pathSegments[4]
+      }
+      const regex = /^[vV]\d+$/
+      if (pathVersion == "" || pathVersion == null || !regex.test(pathVersion)) {
+        checkPathVersion.errors = [
+          {
+            keyword: "path-version",
+            message: "Invalid or missing path version",
+            params: {
+              pathVersion: false
+            }
+          }
+        ]
+        return false
+      }
+      return true
+    } catch {
       checkPathVersion.errors = [
         {
           keyword: "path-version",
-          message: "Invalid or missing path version",
+          message: "Unexpected error in validation function",
           params: {
             pathVersion: false
           }
@@ -351,7 +405,6 @@ ajv.addKeyword({
       ]
       return false
     }
-    return true
   }
 })
 /**
@@ -363,28 +416,54 @@ ajv.addKeyword({
     if (!schema) {
       return true
     }
-    const path = dataPath["parentDataProperty"]
-    const pathSegments = path.split("/")
-    let pathVersion = null
-    if (pathSegments.length == 4) {
-      pathVersion = pathSegments[2]
-    }
-    else if (pathSegments.length == 5) {
-      pathVersion = pathSegments[3]
-    }
-    else if (pathSegments.length == 6) {
-      pathVersion = pathSegments[4]
-    }
-    const pathVersionNum = parseInt(pathVersion.substring(1))
-  
-    let infoVersionNum = -1
     try {
-      infoVersionNum = dataPath["rootData"]["info"]["version"][0] 
-    } catch (error) {
+      const path = dataPath["parentDataProperty"]
+      const pathSegments = path.split("/")
+      let pathVersion = null
+      if (pathSegments.length == 4) {
+        pathVersion = pathSegments[2]
+      }
+      else if (pathSegments.length == 5) {
+        pathVersion = pathSegments[3]
+      }
+      else if (pathSegments.length == 6) {
+        pathVersion = pathSegments[4]
+      }
+      const pathVersionNum = parseInt(pathVersion.substring(1))
+    
+      let infoVersionNum = -1
+      try {
+        infoVersionNum = dataPath["rootData"]["info"]["version"][0] 
+      } catch (error) {
+        checkMatchingVersion.errors = [
+          {
+            keyword: "match-version",
+            message: "Missing version in [Info]",
+            params: {
+              matchVersion: false
+            }
+          }
+        ]
+        return false
+      }
+      if (pathVersionNum != infoVersionNum) {
+        checkMatchingVersion.errors = [
+          {
+            keyword: "match-version",
+            message: "Version in path does not match with version in [info]",
+            params: {
+              matchVersion: false
+            }
+          }
+        ]
+        return false
+      }
+      return true
+    } catch {
       checkMatchingVersion.errors = [
         {
           keyword: "match-version",
-          message: "Missing version in [Info]",
+          message: "Unexpected error in validation function",
           params: {
             matchVersion: false
           }
@@ -392,19 +471,6 @@ ajv.addKeyword({
       ]
       return false
     }
-    if (pathVersionNum != infoVersionNum) {
-      checkMatchingVersion.errors = [
-        {
-          keyword: "match-version",
-          message: "Version in path does not match with version in [info]",
-          params: {
-            matchVersion: false
-          }
-        }
-      ]
-      return false
-    }
-    return true
   }
 })
 /**
@@ -417,24 +483,38 @@ ajv.addKeyword({
     if (!schema) {
       return true
     }
-    const pathSegmentsNotCamelCase = []
-    const path = dataPath["parentDataProperty"]
-    let pathSegments = getPathSegments(path)
-    for (let segment of pathSegments) {
-      let words = _.words(segment) // splits subtier into words using lodash based on camel casing
-      for (let word of words) {
-        if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
-          subtiersNotCamelCase.push(segment)
-          break
+    try {
+      const pathSegmentsNotCamelCase = []
+      const path = dataPath["parentDataProperty"]
+      let pathSegments = getPathSegments(path)
+      for (let segment of pathSegments) {
+        let words = _.words(segment) // splits subtier into words using lodash based on camel casing
+        for (let word of words) {
+          if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
+            pathSegmentsNotCamelCase.push(segment)
+            break
+          }
         }
       }
-    }
-    if (pathSegmentsNotCamelCase.length != 0) {
-      const pathSegmentsNotCamelCase_string = pathSegmentsNotCamelCase.join(', ')
+      if (pathSegmentsNotCamelCase.length != 0) {
+        const pathSegmentsNotCamelCase_string = pathSegmentsNotCamelCase.join(', ')
+        checkCamelCasing.errors = [
+          {
+            keyword: "camel-casing",
+            message: `The following segments(s) are not in camel case format: "${pathSegmentsNotCamelCase_string}"`,
+            params: {
+              camelCasing: false
+            }
+          }
+        ]
+        return false
+      }
+      return true
+    } catch {
       checkCamelCasing.errors = [
         {
           keyword: "camel-casing",
-          message: `The following segments(s) are not in camel case format: "${pathSegmentsNotCamelCase_string}"`,
+          message: "Unexpected error in validation function",
           params: {
             camelCasing: false
           }
@@ -442,7 +522,6 @@ ajv.addKeyword({
       ]
       return false
     }
-    return true
   }
 })
 /**
@@ -456,26 +535,38 @@ ajv.addKeyword({
     if (!schema) {
       return true
     }
-    const path = dataPath["parentDataProperty"]
-    let pathSegments = getPathSegments(path)
-    const segmentsSpelledWrongly = []
-    for (let segment of pathSegments) { // error with the segment: "mediShieldLife"
-      let words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
-      console.log(words)
-      for (let word of words) {
-        console.log(SpellChecker.isMisspelled("medi"))
-        if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
-          subtiersSpelledWrongly.push(segment)
-          break
+    try {
+      const segmentsSpelledWrongly = []
+      const path = dataPath["parentDataProperty"]
+      let pathSegments = getPathSegments(path)
+      for (let segment of pathSegments) {
+        let words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
+        for (let word of words) {
+          if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
+            segmentsSpelledWrongly.push(segment)
+            break
+          }
         }
       }
-    }
-    if (segmentsSpelledWrongly.length != 0) {
-      const segmentsSpelledWrongly_string = segmentsSpelledWrongly.join(", ")
+      if (segmentsSpelledWrongly.length != 0) {
+        const segmentsSpelledWrongly_string = segmentsSpelledWrongly.join(", ")
+        checkPathSpelling.errors = [
+          {
+            keyword: "path-spelling",
+            message: `One or more words in the following subtier(s) are not spelled correctly: "${segmentsSpelledWrongly_string}"`,
+            params: {
+              pathSpelling: false
+            }
+          }
+        ]
+        return false
+      }
+      return true
+    } catch {
       checkPathSpelling.errors = [
         {
           keyword: "path-spelling",
-          message: `One or more words in the following subtier(s) are not spelled correctly: "${segmentsSpelledWrongly_string}"`,
+          message: "Unexpected error in validation function",
           params: {
             pathSpelling: false
           }
@@ -483,7 +574,6 @@ ajv.addKeyword({
       ]
       return false
     }
-    return true
   }
 })
 /**
@@ -495,20 +585,33 @@ ajv.addKeyword({
     if (!schema) {
       return true
     }
-
-    const path = dataPath["parentDataProperty"]
-    let pathSegments = path.split("/")
-    const pathVerb = pathSegments[pathSegments.length - 1]
-    let words = _.words(pathVerb)
-    let verb = words[0]
-
-    const allowedVerbs = ["create", "get", "update", "delete", "compute", "transact", "check", "transfer"]
-
-    if (!allowedVerbs.includes(verb)) {
+    try {
+      const path = dataPath["parentDataProperty"]
+      let pathSegments = path.split("/")
+      const pathVerb = pathSegments[pathSegments.length - 1]
+      let words = _.words(pathVerb)
+      let verb = words[0]
+  
+      const allowedVerbs = ["create", "get", "update", "delete", "compute", "transact", "check", "transfer"]
+  
+      if (!allowedVerbs.includes(verb)) {
+        checkVerb.errors = [
+          {
+            keyword: "path-verb",
+            message: `The word "${verb}" in "${pathVerb}" is not a valid verb in the API Standards.`,
+            params: {
+              subtierVerb: false
+            }
+          }
+        ]
+        return false
+      }
+      return true
+    } catch {
       checkVerb.errors = [
         {
           keyword: "path-verb",
-          message: `The word "${verb}" in "${pathVerb}" is not a valid verb in the API Standards.`,
+          message: "Unexpected error in validation function",
           params: {
             subtierVerb: false
           }
@@ -516,7 +619,6 @@ ajv.addKeyword({
       ]
       return false
     }
-    return true
   }
 })
 /**
@@ -528,21 +630,35 @@ ajv.addKeyword({
     if (!schema) {
       return true
     }
-    const propertiesNotPresent = []                                                                                                                                                                                                                                                                                          
-    const parentData = dataPath["parentData"]
-    const propertiesList = Object.keys(parentData["properties"])
-    const requiredList = parentData["required"]
-    for (let requiredProperty of requiredList) {
-      if (!propertiesList.includes(requiredProperty)) {
-        propertiesNotPresent.push(requiredProperty)
+    try {
+      const propertiesNotPresent = []                                                                                                                                                                                                                                                                                          
+      const parentData = dataPath["parentData"]
+      const propertiesList = Object.keys(parentData["properties"])
+      const requiredList = parentData["required"]
+      for (let requiredProperty of requiredList) {
+        if (!propertiesList.includes(requiredProperty)) {
+          propertiesNotPresent.push(requiredProperty)
+        }
       }
-    }
-    if (propertiesNotPresent.length > 0) {
-      const propertiesNotPresent_string = propertiesNotPresent.join(", ")
+      if (propertiesNotPresent.length > 0) {
+        const propertiesNotPresent_string = propertiesNotPresent.join(", ")
+        checkProperties.errors = [
+          {
+            keyword: "required-properties",
+            message: `The following properties are not present: ${propertiesNotPresent_string}`,
+            params: {
+              requiredProperties: false
+            }
+          }
+        ]
+        return false
+      }
+      return true
+    } catch {
       checkProperties.errors = [
         {
           keyword: "required-properties",
-          message: `The following properties are not present: ${propertiesNotPresent_string} `,
+          message: "Unexpected error in validation function",
           params: {
             requiredProperties: false
           }
@@ -550,7 +666,6 @@ ajv.addKeyword({
       ]
       return false
     }
-    return true
   }
 })
 /**
@@ -563,28 +678,40 @@ ajv.addKeyword({
     if (!schema) {
       return true
     }
-    const words = tokenizer.tokenize(data)
-    let wordsSpelledWrong = new Set()
-    for (let word of words) {
-      if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
-        wordsSpelledWrong.add(word)
+    try {
+      const words = tokenizer.tokenize(data)
+      let wordsSpelledWrong = new Set()
+      for (let word of words) {
+        if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
+          wordsSpelledWrong.add(word)
+        }
       }
-    }
-    if (wordsSpelledWrong.size != 0) {
-      let formattedWordsSpelledWrong = ''
-      wordsSpelledWrong.forEach(word => {formattedWordsSpelledWrong += `- ${word} ==> ${SpellChecker.getCorrectionsForMisspelling(word).join(", ")}<br>`})
-      let errorMessage = 'The following word(s) are spelled incorrectly in this field:' + '<br>' + formattedWordsSpelledWrong
+      if (wordsSpelledWrong.size != 0) {
+        let formattedWordsSpelledWrong = ''
+        wordsSpelledWrong.forEach(word => {formattedWordsSpelledWrong += `- ${word} ==> ${SpellChecker.getCorrectionsForMisspelling(word).join(", ")}<br>`})
+        let errorMessage = 'The following word(s) are spelled incorrectly in this field:' + '<br>' + formattedWordsSpelledWrong
+        checkSpelling.errors = [
+          {
+            keyword: 'spelling-check',
+            message: errorMessage,
+            params: {
+              checkSpelling: false
+            }
+          }
+        ]
+        return false
+      }
+      return true
+    } catch {
       checkSpelling.errors = [
         {
           keyword: 'spelling-check',
-          message: errorMessage,
+          message: "Unexpected error in validation function",
           params: {
             checkSpelling: false
           }
         }
       ]
-      return false
     }
-    return true
   }
 })
