@@ -221,8 +221,6 @@ addFormats(ajv, ["uri-reference", "email", "regex", "uri"])
 AjvErrors(ajv) // add all ajv-errors keywords, significantly, errorMessage
 require("ajv-keywords")(ajv) // add all ajv-keywords keywords
 
-// TODO: Check camelCase of properties
-// TODO: Add catch unexpected function failure for all keywords
 /**
  * Checks for special characters in path, except for "/"
  */
@@ -476,6 +474,7 @@ ajv.addKeyword({
 /**
  * Checks if the path segment is in camel casing format
  * WARNING: Compound words are not handled
+ * WARNING: Words in the UK dictionary are not handled
  */
 ajv.addKeyword({
   keyword: "camel-casing",
@@ -528,6 +527,7 @@ ajv.addKeyword({
  * Checks the spelling of all words in segments (because spelling-check does not apply to concatenated strings)
  * Not advised to send info on words to correct because behaviour of WordsNinja not stable; possible if it separates words better
  * WARNING: Compound words are not handled
+ * WARNING: Words in the UK dictionary are not handled
  */
 ajv.addKeyword({
   keyword: "path-spelling",
@@ -671,6 +671,7 @@ ajv.addKeyword({
 /**
  * Spelling checks sentences
  * Mainly used on description and titles and excludes extensions (e.g., x-author)
+ * WARNING: Words in the UK dictionary are not handled
  */
 ajv.addKeyword({
   keyword: "spelling-check",

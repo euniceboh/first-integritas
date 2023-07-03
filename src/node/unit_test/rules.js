@@ -1,3 +1,9 @@
+//=======================================================================================================
+//                                             Dependencies
+//=======================================================================================================
+
+const fs = require('fs');
+
 const _ = require("lodash");
 
 const SpellChecker = require('spellchecker');
@@ -8,15 +14,11 @@ const WordsNinja = new WordsNinjaPack();
 const natural = require('natural');
 const tokenizer = new natural.WordTokenizer();
 
-// Path Format: /<API Product>/<Subtier 1>/<Subtier 2>/<VersionNum>/<Verb>
-// const path = "/discretionaryWithdrawals/55Withdrawals/v1/updateMemberCreditStatusForPayNow"
-// const path = '/discretionaryWithdrawals/55Withdrawals/v2/checkMemberAgeEligibility'
-const path = "/medicalInsurance/mediShieldLife/v1/getPatientCoverageInfo"
+//======================================================================================================
+//                                             Utils
+//======================================================================================================
 
-
-//============================================================================
-
-const customDict = []
+const customDict = ["medisave", "dependants", "utilisation"]
 
 function getPathSegments(path) {
     let pathSegments = path.split("/")
@@ -46,7 +48,9 @@ function getPathSegments(path) {
     return false
   }
 
-//============================================================================
+//======================================================================================================
+//                     Ajv Custom Validation Rules (CPFB API Standards v1.1.2)
+//======================================================================================================
 
 function checkPathCharacters(path) {
     try {
@@ -128,21 +132,7 @@ function checkMatchingVersion(path) {
       }
       const pathVersionNum = parseInt(pathVersion.substring(1))
     
-      let infoVersionNum = 1
-      // try {
-      //   infoVersionNum = dataPath["rootData"]["info"]["version"][0] 
-      // } catch (error) {
-      //   checkMatchingVersion.errors = [
-      //     {
-      //       keyword: "match-version",
-      //       message: "Missing version in [Info]",
-      //       params: {
-      //         matchVersion: false
-      //       }
-      //     }
-      //   ]
-      //   return false
-      // }
+      let infoVersionNum = 1 // hardcoded due to lack of full YAML doc examples in tests
 
       return (pathVersionNum == infoVersionNum)
     } catch (err) {
@@ -159,7 +149,7 @@ function checkCamelCasing(path) {
         let words = _.words(segment)
         for (let word of words) {
           if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
-            subtiersNotCamelCase.push(segment)
+            pathSegmentsNotCamelCase.push(segment)
             break
           }
         }
@@ -176,17 +166,17 @@ function checkCamelCasing(path) {
     }
 }
 
-function checkPathSpelling(path) {
+async function checkPathSpelling(path) {
+    await WordsNinja.loadDictionary()
     try {
       let pathSegments = getPathSegments(path)
       const segmentsSpelledWrongly = []
       for (let segment of pathSegments) {
-        console.log(segment)
         let words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
-        console.log(words)
         for (let word of words) {
           if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
-            subtiersSpelledWrongly.push(segment)
+            console.log(word)
+            segmentsSpelledWrongly.push(segment)
             break
           }
         }
@@ -231,42 +221,15 @@ function checkVerb(path) {
     }
 }
 
-// test('checkPathCharacters', () => {
-//   expect(checkPathCharacters(path)).toBe(true);
-// });
-// test('checkPathLength', () => {
-//   expect(checkPathLength(path)).toBe(true);
-// });
-// test('checkAPIProduct', () => {
-//   expect(checkAPIProduct(path)).toBe(true);
-// });
-// test('checkPathVersion', () => {
-//   expect(checkPathVersion(path)).toBe(true);
-// });
-// test('checkMatchingVersion', () => {
-//   expect(checkMatchingVersion(path)).toBe(true);
-// });
-// test('checkCamelCasing', () => {
-//   expect(checkCamelCasing(path)).toBe(true);
-// });
-// test('checkPathSpelling', () => {
-//   expect(checkPathSpelling(path)).toBe(true);
-// });
-// test('checkVerb', () => {
-//   expect(checkVerb(path)).toBe(true);
-// });
+//================================================================
 
-async function main() {
-  await WordsNinja.loadDictionary()
-
-  console.log(checkPathCharacters(path))
-  console.log(checkPathLength(path))
-  console.log(checkAPIProduct(path))
-  console.log(checkPathVersion(path))
-  console.log(checkMatchingVersion(path))
-  console.log(checkCamelCasing(path))
-  console.log(checkPathSpelling(path))
-  console.log(checkVerb(path))
+module.exports = {
+  checkPathCharacters,
+  checkPathLength,
+  checkAPIProduct,
+  checkPathVersion,
+  checkMatchingVersion,
+  checkCamelCasing,
+  checkPathSpelling,
+  checkVerb
 }
-
-main()
