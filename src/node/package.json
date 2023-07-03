@@ -21,7 +21,7 @@
     "spellchecker": "^3.7.1",
     "wordsninja": "^1.0.0"
   },
-  "resolutions": {
-    "semver": "7.5.2"
+  "overrides": { 
+    "semver": "^7.5.3" 
   }
 }
