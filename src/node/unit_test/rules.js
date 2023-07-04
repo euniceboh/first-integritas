@@ -18,7 +18,7 @@ const tokenizer = new natural.WordTokenizer();
 //                                             Utils
 //======================================================================================================
 
-const customDict = ["medisave", "dependants", "utilisation"]
+const customDict = ["medi", "medisave", "dependants", "utilisation"]
 
 function getPathSegments(path) {
     let pathSegments = path.split("/")
