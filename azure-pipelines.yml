@@ -37,8 +37,10 @@ stages:
     #   workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
     #   displayName: 'pytest'
     - script: |
+        cd src/node
         npm ci
         npm test
+      displayName: 'Change working directory and install dependencies'
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: 'Cobertura'
