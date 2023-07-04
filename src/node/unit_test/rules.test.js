@@ -2,7 +2,7 @@ const rules = require('./rules');
 
 const paths = rules.paths
 
-console.log(paths[5])
+console.log(paths)
 
 // for (const path of paths) {
     let path = "/medicalInsurance/mediShieldLife/v1/getMemberDependants"
