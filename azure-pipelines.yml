@@ -12,7 +12,6 @@ variables:
   # Container registry service connection established during pipeline creation
   applicationName: 'cpfdevportal'
   dockerRegistryServiceConnection: 'a3b968c1-9a21-4d22-b80e-d4b6241e3bb4'
-  # imageRepository: 'danielxdantecpfdevportal'
   containerRegistry: 'cpfdevportal.azurecr.io'
   dockercomposefilePath: '$(Build.SourcesDirectory)/docker-compose.yml'
   tag: '$(Build.BuildId)'
@@ -82,25 +81,22 @@ stages:
           latest
 
 
-# - stage: Deploy
-#   displayName: Deploy Web App
-#   jobs:
-#   - job: Deploy
-#     displayName: Deploy
-#     steps:
-#     - task: AzureWebAppContainer@1
-#       displayName: 'Azure Web App on Container Deploy (Flask)'
-#       inputs:
-#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-#         appName: $(applicationName)
-#         imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest    
-#     - task: AzureWebAppContainer@1
-#       displayName: 'Azure Web App on Container Deploy (Node)'
-#       inputs:
-#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-#         appName: $(applicationName)
-#         imageName: cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest
-
+- stage: Deploy
+  displayName: Deploy Web App
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    steps:
+    - task: AzureWebAppContainer@1
+      inputs:
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        appName: 'cpfdevportal-node'
+        containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest'
+    - task: AzureWebAppContainer@1
+      inputs:
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        appName: 'cpfdevportal'
+        containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest'
 
 # Integration Test
 # - stage: Integration_Test
