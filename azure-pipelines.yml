@@ -20,22 +20,31 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-# - stage: Unit_Test
-#   displayName: Unit Test Backend
-#   jobs:
-#   - job: Test
-#     displayName: Unit Test
-#     steps:
-#     - script: |
-#         python -m pip install --upgrade pip
-#         pip install -r requirements.txt
-#         pip install pytest pytest-azurepipelines
-#       displayName: 'Install Dependencies'
+- stage: Unit Test
+  displayName: Unit Test Custom Validation Rules
+  jobs:
+  - job: Test
+    displayName: Unit Test
+    steps:
+    # - script: |
+    #     python -m pip install --upgrade pip
+    #     pip install -r requirements.txt
+    #     pip install pytest pytest-azurepipelines
+    #   displayName: 'Install Dependencies'
      
-#     - script: |
-#         pytest test_unit.py
-#       workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
-#       displayName: 'pytest'
+    # - script: |
+    #     pytest test_unit.py
+    #   workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
+    #   displayName: 'pytest'
+    - script: |
+        npm ci
+        npm test
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/src/node/coverage/lcov.info'
+        reportDirectory: '$(System.DefaultWorkingDirectory)/src/node/coverage'
+      displayName: 'Publish Code Coverage'
 
 - stage: BuildAndPush
   displayName: Build and push stage
