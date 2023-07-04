@@ -38,9 +38,13 @@ stages:
     #   displayName: 'pytest'
     - script: |
         cd src/node
+        pwd
         npm install
-        npm run test
       displayName: 'Change working directory and install dependencies'
+    - script: |
+        pwd
+        npm run test
+      displayName: 'Run Jest'
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: 'Cobertura'
