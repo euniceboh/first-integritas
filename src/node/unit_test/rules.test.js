@@ -4,7 +4,8 @@ const fs = require('fs');
 const fileContent = fs.readFileSync('./unit_test/uris.txt', 'utf8');
 let paths = fileContent.split('\r\n');
 
-for (let path of paths) {
+for (let i = 0; i < paths.length; i++) {
+    let path = paths[i]
     test(`checkPathCharacters -- ${path}`, () => {
         expect(rules.checkPathCharacters(path)).toBe(true)
     })
@@ -30,6 +31,8 @@ for (let path of paths) {
         expect(rules.checkVerb(path)).toBe(true);
     });
 }
+
+
 
 
 
