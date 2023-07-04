@@ -1,7 +1,7 @@
 module.exports = {
     collectCoverage: true,
     coverageReporters: ["lcov"],
-    watchAll: false,
+    // watchAll: false,
     coverageThreshold: {
       global: {
         branches: 80,
