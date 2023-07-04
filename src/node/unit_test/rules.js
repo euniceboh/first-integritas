@@ -228,7 +228,7 @@ let paths = fileContent.split('\n')
 
 
 module.exports = {
-  fileContent,
+  paths,
   checkPathCharacters,
   checkPathLength,
   checkAPIProduct,
