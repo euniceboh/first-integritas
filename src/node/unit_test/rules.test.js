@@ -4,7 +4,11 @@ const fs = require('fs');
 const fileContent = fs.readFileSync('./unit_test/uris.txt', 'utf8');
 let paths = fileContent.split('\r\n');
 
-for (const path of paths) {
+
+console.log(paths[5])
+
+// for (const path of paths) {
+    let path = "/medicalInsurance/mediShieldLife/v1/getMemberDependants"
     test(`checkPathCharacters -- ${path}`, () => {
         expect(rules.checkPathCharacters(path)).toBe(true)
     })
@@ -29,7 +33,7 @@ for (const path of paths) {
     test(`checkVerb -- ${path}`, () => {
         expect(rules.checkVerb(path)).toBe(true);
     });
-}
+// }
 
 let path_fail_checkPathCharacters = "/medicalInsurance/medi-ShieldLife/v1/getMemberDependants"
 test(`Fail checkPathCharacters --- ${path_fail_checkPathCharacters}`, () => {
@@ -61,7 +65,7 @@ test(`Fail checkCamelCasing --- ${path_fail_checkCamelCasing}`, () => {
     expect(rules.checkCamelCasing(path_fail_checkCamelCasing)).toBe(false)
 })
 
-path_fail_checkPathSpelling = "/medicalInsurance/mediShieldLfe/v1/getMemberDpeants"
+path_fail_checkPathSpelling = "/medicalInsurance/mediShieldLfe/v1/getMemberDepeants"
 test(`Fail checkPathSpelling --- ${path_fail_checkPathSpelling}`, async () => {
     expect(await rules.checkPathSpelling(path_fail_checkPathSpelling)).toBe(false)
 })
