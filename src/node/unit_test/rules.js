@@ -8,6 +8,9 @@ const _ = require("lodash");
 
 const SpellChecker = require('spellchecker');
 
+var Typo = require("typo-js");
+var dictionary = new Typo("en_US");
+
 const WordsNinjaPack = require('wordsninja');
 const WordsNinja = new WordsNinjaPack();
 
@@ -148,7 +151,9 @@ function checkCamelCasing(path) {
       for (let segment of pathSegments) {
         let words = _.words(segment)
         console.log(words)
-        console.log(SpellChecker.isMisspelled("aceptable"))
+        // console.log(SpellChecker.isMisspelled("aceptable"))
+        console.log(dictionary.check("Member"))
+        console.log(dictionary.check("memberdependants"))
         for (let word of words) {
           if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
             pathSegmentsNotCamelCase.push(segment)
