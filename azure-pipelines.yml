@@ -9,22 +9,20 @@ resources:
 - repo: self
 
 variables:
-  # Container registry service connection established during pipeline creation
   applicationName: 'cpfdevportal'
   dockerRegistryServiceConnection: 'a3b968c1-9a21-4d22-b80e-d4b6241e3bb4'
   containerRegistry: 'cpfdevportal.azurecr.io'
   dockercomposefilePath: '$(Build.SourcesDirectory)/docker-compose.yml'
   tag: '$(Build.BuildId)'
 
-  # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
 - stage: UnitTest
-  displayName: Unit Test Custom Validation Rules
+  displayName: Unit Tests
   jobs:
   - job: Test
-    displayName: Unit Test
+    displayName: Unit Test Custom Validation Rules
     steps:
     # - script: |
     #     python -m pip install --upgrade pip
@@ -39,13 +37,13 @@ stages:
     - task: NodeTool@0
       inputs:
         versionSpec: '16.x'
-      displayName: 'Install Node.js'
+      displayName: 'Update Node.js'
     - script: |
         npm -g install npm@latest
         cd src/node
         npm install
         npm run test
-      displayName: 'Change working directory, install dependencies and run Jest'
+      displayName: 'Change working directory, install dependencies and run unit tests'
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: 'Cobertura'
@@ -53,10 +51,10 @@ stages:
       displayName: 'Publish Code Coverage'
 
 - stage: BuildAndPush
-  displayName: Build and push stage
+  displayName: Build and Push into Container Registry
   jobs:
   - job: BuildAndPush
-    displayName: BuildAndPush
+    displayName: Build and Push Containers
     pool:
       vmImage: $(vmImageName)
     steps:
@@ -86,6 +84,7 @@ stages:
         Dockerfile: 'src/node/Dockerfile'
         tags: |
           latest
+      displayName: 'Build and Push Node Server'
     - task: Docker@2
       inputs:
         containerRegistry: 'cpfdevportal'
@@ -94,31 +93,34 @@ stages:
         Dockerfile: 'src/Dockerfile'
         tags: |
           latest
+      displayName: 'Build and Push Flask Server'
 
 
 - stage: Deploy
-  displayName: Deploy Web App
+  displayName: Deploy Web Apps
   jobs:
   - job: Deploy
-    displayName: Deploy
+    displayName: Deployment
     steps:
     - task: AzureWebAppContainer@1
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: 'cpfdevportal-node'
         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest'
+      displayName: 'Deploy Node container to cpfdevportal-node.azurewebsites.net'
     - task: AzureWebAppContainer@1
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: 'cpfdevportal'
         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest'
+      displayName: 'Deploy Flask container to cpfdevportal.azurewebsites.net'
 
 # Integration Test
-# - stage: Integration_Test
-#   displayName: Integration Test Backend
+# - stage: IntegrationAndE2ETest
+#   displayName: Integration And E2E Tests
 #   jobs:
 #   - job: Test
-#     displayName: Integration Test
+#     displayName: E2E Test
 #     steps:
 #     - script: |
 #         python -m pip install --upgrade pip
@@ -129,5 +131,5 @@ stages:
      
 #     - script: |
 #         pytest src/tests/test_integration.py
-#       workingDirectory: '$(System.DefaultWorkingDirectory)/'
+#       workingDirectory: '$(System.DefaultWorkingDirectory)'
 #       displayName: 'pytest'

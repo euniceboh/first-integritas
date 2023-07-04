@@ -12,8 +12,6 @@ const dictionary = new Typo("en_US");
 const WordsNinjaPack = require('wordsninja');
 const WordsNinja = new WordsNinjaPack();
 
-const natural = require('natural');
-
 //======================================================================================================
 //                                             Utils
 //======================================================================================================
@@ -223,8 +221,8 @@ function checkVerb(path) {
 //================================================================
 
 const fileContent = fs.readFileSync('./unit_test/uris.txt', 'utf8');
-// let paths = fileContent.split('\r\n');
-let paths = fileContent.split('\n')
+// let paths = fileContent.split('\r\n'); // when running in windows machines
+let paths = fileContent.split('\n') // when running in linux machines
 
 
 module.exports = {

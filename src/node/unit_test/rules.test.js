@@ -1,7 +1,8 @@
+// JEST White-Box Unit Testing
+
 const rules = require('./rules');
 
 const paths = rules.paths
-console.log(paths)
 
 for (const path of paths) {
     let path = "/medicalInsurance/mediShieldLife/v1/getMemberDependants"
@@ -36,37 +37,37 @@ test(`Fail checkPathCharacters --- ${path_fail_checkPathCharacters}`, () => {
     expect(rules.checkPathCharacters(path_fail_checkPathCharacters)).toBe(false)
 })
 
-path_fail_checkPathLength = "/medicalInsurance/mediShieldLife/subtier2/subtier3/v1/getMemberDependants"
+let path_fail_checkPathLength = "/medicalInsurance/mediShieldLife/subtier2/subtier3/v1/getMemberDependants"
 test(`Fail checkPathLength --- ${path_fail_checkPathLength}`, () => {
     expect(rules.checkPathLength(path_fail_checkPathLength)).toBe(false)
 })
 
-path_fail_checkAPIProduct = "/productNotExist/mediShieldLife/v1/getMemberDependants"
+let path_fail_checkAPIProduct = "/productNotExist/mediShieldLife/v1/getMemberDependants"
 test(`Fail checkAPIProduct --- ${path_fail_checkAPIProduct}`, () => {
     expect(rules.checkAPIProduct(path_fail_checkAPIProduct)).toBe(false)
 })
 
-path_fail_checkPathVersion = "/medicalInsurance/mediShieldLife/b2/getMemberDependants"
+let path_fail_checkPathVersion = "/medicalInsurance/mediShieldLife/b2/getMemberDependants"
 test(`Fail checkPathVersion --- ${path_fail_checkPathVersion}`, () => {
     expect(rules.checkPathVersion(path_fail_checkPathVersion)).toBe(false)
 })
 
-path_fail_checkMatchingVersion = "/medicalInsurance/mediShieldLife/v2/getMemberDependants"
+let path_fail_checkMatchingVersion = "/medicalInsurance/mediShieldLife/v2/getMemberDependants"
 test(`Fail checkMatchingVersion --- ${path_fail_checkMatchingVersion}`, () => {
     expect(rules.checkMatchingVersion(path_fail_checkMatchingVersion)).toBe(false)
 })
 
-path_fail_checkCamelCasing = "/medicalInsurance/mediShieldlife/v1/getMemberdepenants"
+let path_fail_checkCamelCasing = "/medicalInsurance/mediShieldlife/v1/getMemberdepenants"
 test(`Fail checkCamelCasing --- ${path_fail_checkCamelCasing}`, () => {
     expect(rules.checkCamelCasing(path_fail_checkCamelCasing)).toBe(false)
 })
 
-path_fail_checkPathSpelling = "/medicalInsurance/mediShieldLfe/v1/getMemberDepeants"
+let path_fail_checkPathSpelling = "/medicalInsurance/mediShieldLfe/v1/getMemberDepeants"
 test(`Fail checkPathSpelling --- ${path_fail_checkPathSpelling}`, async () => {
     expect(await rules.checkPathSpelling(path_fail_checkPathSpelling)).toBe(false)
 })
 
-path_fail_checkPathVerb = "/medicalInsurance/mediShieldLife/v1/parisMemberDependants"
+let path_fail_checkPathVerb = "/medicalInsurance/mediShieldLife/v1/parisMemberDependants"
 test(`Fail checkPathVerb --- ${path_fail_checkPathVerb}`, () => {
     expect(rules.checkVerb(path_fail_checkPathVerb)).toBe(false)
 })
