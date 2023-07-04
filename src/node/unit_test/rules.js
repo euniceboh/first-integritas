@@ -148,7 +148,7 @@ function checkCamelCasing(path) {
       for (let segment of pathSegments) {
         let words = _.words(segment)
         console.log(words)
-        console.log(SpellChecker.isMisspelled("Memberdepenants"))
+        console.log(SpellChecker.isMisspelled("aceptable"))
         for (let word of words) {
           if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
             pathSegmentsNotCamelCase.push(segment)
