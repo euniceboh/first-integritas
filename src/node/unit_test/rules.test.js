@@ -57,12 +57,12 @@ test(`Fail checkMatchingVersion --- ${path_fail_checkMatchingVersion}`, () => {
     expect(rules.checkMatchingVersion(path_fail_checkMatchingVersion)).toBe(false)
 })
 
-path_fail_checkCamelCasing = "/medicalInsurance/mediShieldlife/v1/getMemberDependants"
+path_fail_checkCamelCasing = "/medicalInsurance/mediShieldlife/v1/getMemberDepenants"
 test(`Fail checkCamelCasing --- ${path_fail_checkCamelCasing }`, () => {
     expect(rules.checkCamelCasing(path_fail_checkCamelCasing )).toBe(false)
 })
 
-path_fail_checkPathSpelling = "/medicalInsurance/mediShieldLfe/v1/getMemberDependants"
+path_fail_checkPathSpelling = "/medicalInsurance/mediShieldLfe/v1/getMemberDepeants"
 test(`Fail checkPathSpelling --- ${path_fail_checkPathSpelling}`, async () => {
     expect(await rules.checkPathSpelling(path_fail_checkPathSpelling)).toBe(false)
 })
