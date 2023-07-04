@@ -1,10 +1,9 @@
 const rules = require('./rules');
 
-const paths = rules.paths
-
+const paths = rules.fileContent
 console.log(paths)
 
-// for (const path of paths) {
+for (const path of paths) {
     let path = "/medicalInsurance/mediShieldLife/v1/getMemberDependants"
     test(`checkPathCharacters -- ${path}`, () => {
         expect(rules.checkPathCharacters(path)).toBe(true)
@@ -30,7 +29,7 @@ console.log(paths)
     test(`checkVerb -- ${path}`, () => {
         expect(rules.checkVerb(path)).toBe(true);
     });
-// }
+}
 
 let path_fail_checkPathCharacters = "/medicalInsurance/medi-ShieldLife/v1/getMemberDependants"
 test(`Fail checkPathCharacters --- ${path_fail_checkPathCharacters}`, () => {
