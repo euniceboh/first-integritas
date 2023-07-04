@@ -38,14 +38,13 @@ stages:
     #   displayName: 'pytest'
     - script: |
         cd src/node
-        npm ci
-        npm test
+        npm install
+        npm run test
       displayName: 'Change working directory and install dependencies'
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: 'Cobertura'
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/src/node/coverage/lcov.info'
-        reportDirectory: '$(System.DefaultWorkingDirectory)/src/node/coverage'
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/src/node/coverage/cobertura-coverage.xml'
       displayName: 'Publish Code Coverage'
 
 - stage: BuildAndPush

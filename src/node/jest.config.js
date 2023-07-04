@@ -1,6 +1,6 @@
 module.exports = {
     collectCoverage: true,
-    coverageReporters: ["lcov"],
+    coverageReporters: ["cobertura"],
     watchAll: false,
     coverageThreshold: {
       global: {
