@@ -1,9 +1,6 @@
 const rules = require('./rules');
-const fs = require('fs');
 
-const fileContent = fs.readFileSync('./unit_test/uris.txt', 'utf8');
-let paths = fileContent.split('\r\n');
-
+const paths = rules.paths
 
 console.log(paths[5])
 

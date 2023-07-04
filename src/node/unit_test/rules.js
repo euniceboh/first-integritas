@@ -2,6 +2,8 @@
 //                                             Dependencies
 //=======================================================================================================
 
+const fs = require('fs');
+
 const _ = require("lodash");
 
 const Typo = require("typo-js");
@@ -220,7 +222,11 @@ function checkVerb(path) {
 
 //================================================================
 
+const fileContent = fs.readFileSync('./unit_test/uris.txt', 'utf8');
+let paths = fileContent.split('\r\n');
+
 module.exports = {
+  paths,
   checkPathCharacters,
   checkPathLength,
   checkAPIProduct,
