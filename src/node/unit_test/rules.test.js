@@ -1,6 +1,6 @@
 const rules = require('./rules');
 
-const paths = rules.fileContent
+const paths = rules.paths
 console.log(paths)
 
 for (const path of paths) {
