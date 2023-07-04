@@ -147,6 +147,7 @@ function checkCamelCasing(path) {
       let pathSegments = getPathSegments(path)
       for (let segment of pathSegments) {
         let words = _.words(segment)
+        console.log(words)
         for (let word of words) {
           if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
             pathSegmentsNotCamelCase.push(segment)
@@ -173,6 +174,7 @@ async function checkPathSpelling(path) {
       const segmentsSpelledWrongly = []
       for (let segment of pathSegments) {
         let words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
+        console.log(words)
         for (let word of words) {
           if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
             console.log(word)
