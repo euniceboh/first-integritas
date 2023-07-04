@@ -36,6 +36,9 @@ stages:
     #     pytest test_unit.py
     #   workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
     #   displayName: 'pytest'
+    - task: NodeTaskRunnerInstaller@0
+      inputs:
+        nodeVersion: '10'
     - script: |
         npm -g install npm@latest
         cd src/node
