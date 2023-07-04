@@ -18,7 +18,6 @@
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "natural": "^6.5.0",
-    "spellchecker": "^3.7.1",
     "typo-js": "^1.2.3",
     "wordsninja": "^1.0.0"
   },

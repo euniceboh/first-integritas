@@ -2,20 +2,15 @@
 //                                             Dependencies
 //=======================================================================================================
 
-const fs = require('fs');
-
 const _ = require("lodash");
 
-const SpellChecker = require('spellchecker');
-
-var Typo = require("typo-js");
-var dictionary = new Typo("en_US");
+const Typo = require("typo-js");
+const dictionary = new Typo("en_US");
 
 const WordsNinjaPack = require('wordsninja');
 const WordsNinja = new WordsNinjaPack();
 
 const natural = require('natural');
-const tokenizer = new natural.WordTokenizer();
 
 //======================================================================================================
 //                                             Utils
@@ -150,12 +145,8 @@ function checkCamelCasing(path) {
       let pathSegments = getPathSegments(path)
       for (let segment of pathSegments) {
         let words = _.words(segment)
-        console.log(words)
-        // console.log(SpellChecker.isMisspelled("aceptable"))
-        console.log(dictionary.check("Member"))
-        console.log(dictionary.check("memberdependants"))
         for (let word of words) {
-          if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
+          if (!wordInCustomDict(word) && !dictionary.check(word)) {
             pathSegmentsNotCamelCase.push(segment)
             break
           }
@@ -180,10 +171,8 @@ async function checkPathSpelling(path) {
       const segmentsSpelledWrongly = []
       for (let segment of pathSegments) {
         let words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
-        console.log(words)
         for (let word of words) {
-          if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
-            console.log(word)
+          if (!wordInCustomDict(word) && !dictionary.check(word)) {
             segmentsSpelledWrongly.push(segment)
             break
           }

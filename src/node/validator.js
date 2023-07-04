@@ -12,7 +12,8 @@ const fs = require("fs");
 
 const _ = require("lodash");
 
-const SpellChecker = require('spellchecker');
+const Typo = require("typo-js");
+const dictionary = new Typo("en_US");
 
 const WordsNinjaPack = require('wordsninja');
 const WordsNinja = new WordsNinjaPack();
@@ -226,7 +227,7 @@ require("ajv-keywords")(ajv) // add all ajv-keywords keywords
  */
 ajv.addKeyword({
     keyword: "path-characters", 
-    validate: function checkPathCharacters(schema, data, parentSchema, dataPath)  {
+    validate: function checkPathCharacters(schema, data, parentSchema, dataPath) {
       if (!schema) {
         return true
       }
@@ -489,7 +490,10 @@ ajv.addKeyword({
       for (let segment of pathSegments) {
         let words = _.words(segment) // splits subtier into words using lodash based on camel casing
         for (let word of words) {
-          if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
+          if (!isNaN(word)) {
+            continue
+          }
+          if (!wordInCustomDict(word) && !dictionary.check(word)) {
             pathSegmentsNotCamelCase.push(segment)
             break
           }
@@ -542,7 +546,10 @@ ajv.addKeyword({
       for (let segment of pathSegments) {
         let words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
         for (let word of words) {
-          if (!wordInCustomDict(word) && SpellChecker.isMisspelled(word)) {
+          if (!isNaN(word)) {
+            continue
+          }
+          if (!wordInCustomDict(word) && !dictionary.check(word)) {
             segmentsSpelledWrongly.push(segment)
             break
           }
@@ -683,13 +690,16 @@ ajv.addKeyword({
       const words = tokenizer.tokenize(data)
       let wordsSpelledWrong = new Set()
       for (let word of words) {
-        if (SpellChecker.isMisspelled(word) && !wordInCustomDict(word)) {
+        if (!isNaN(word)) {
+          continue
+        }
+        if (!wordInCustomDict(word) && !dictionary.check(word)) {
           wordsSpelledWrong.add(word)
         }
       }
       if (wordsSpelledWrong.size != 0) {
         let formattedWordsSpelledWrong = ''
-        wordsSpelledWrong.forEach(word => {formattedWordsSpelledWrong += `- ${word} ==> ${SpellChecker.getCorrectionsForMisspelling(word).join(", ")}<br>`})
+        wordsSpelledWrong.forEach(word => {formattedWordsSpelledWrong += `- ${word} ==> ${dictionary.suggest(word).join(", ")}<br>`})
         let errorMessage = 'The following word(s) are spelled incorrectly in this field:' + '<br>' + formattedWordsSpelledWrong
         checkSpelling.errors = [
           {
