@@ -4,8 +4,7 @@ const fs = require('fs');
 const fileContent = fs.readFileSync('./unit_test/uris.txt', 'utf8');
 let paths = fileContent.split('\r\n');
 
-// for (const path of paths) {
-    let path = "/medicalInsurance/mediShieldLife/v1/getMemberDependants"
+for (const path of paths) {
     test(`checkPathCharacters -- ${path}`, () => {
         expect(rules.checkPathCharacters(path)).toBe(true)
     })
@@ -30,7 +29,7 @@ let paths = fileContent.split('\r\n');
     test(`checkVerb -- ${path}`, () => {
         expect(rules.checkVerb(path)).toBe(true);
     });
-// }
+}
 
 let path_fail_checkPathCharacters = "/medicalInsurance/medi-ShieldLife/v1/getMemberDependants"
 test(`Fail checkPathCharacters --- ${path_fail_checkPathCharacters}`, () => {
