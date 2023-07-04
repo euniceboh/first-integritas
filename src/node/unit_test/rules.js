@@ -222,7 +222,7 @@ function checkVerb(path) {
 
 //================================================================
 
-const fileContent = fs.readFileSync('./unit_test/uris.txt', 'utf8');
+const fileContent = fs.readFileSync('./uris.txt', 'utf8');
 let paths = fileContent.split('\r\n');
 
 module.exports = {
