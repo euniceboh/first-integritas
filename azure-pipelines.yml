@@ -39,9 +39,12 @@ stages:
     - script: |
         npm -g install npm@latest
         cd src/node
-        npm ci
+        npm install
+        cd unit_test
+        less uris.txt
+        cd ..
         npm run test
-      displayName: 'Change working directory and install dependencies'
+      displayName: 'Change working directory, install dependencies and run Jest'
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: 'Cobertura'
