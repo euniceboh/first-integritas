@@ -36,16 +36,14 @@ stages:
     #     pytest test_unit.py
     #   workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
     #   displayName: 'pytest'
-    - task: NodeTaskRunnerInstaller@0
+    - task: NodeTool@0
       inputs:
-        nodeVersion: '10'
+        versionSpec: '16.x'
+      displayName: 'Install Node.js'
     - script: |
         npm -g install npm@latest
         cd src/node
         npm install
-        cd unit_test
-        less uris.txt
-        cd ..
         npm run test
       displayName: 'Change working directory, install dependencies and run Jest'
     - task: PublishCodeCoverageResults@1
