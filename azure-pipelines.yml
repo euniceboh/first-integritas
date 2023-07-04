@@ -20,7 +20,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: Unit Test
+- stage: UnitTest
   displayName: Unit Test Custom Validation Rules
   jobs:
   - job: Test
