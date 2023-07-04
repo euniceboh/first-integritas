@@ -63,8 +63,8 @@ test(`Fail checkCamelCasing --- ${path_fail_checkCamelCasing }`, () => {
 })
 
 path_fail_checkPathSpelling = "/medicalInsurance/mediShieldLfe/v1/getMemberDependants"
-test(`Fail checkPathSpelling --- ${path_fail_checkPathSpelling}`, () => {
-    expect(rules.checkPathSpelling(path_fail_checkPathSpelling)).toBe(false)
+test(`Fail checkPathSpelling --- ${path_fail_checkPathSpelling}`, async () => {
+    expect(await rules.checkPathSpelling(path_fail_checkPathSpelling)).toBe(false)
 })
 
 path_fail_checkPathVerb = "/medicalInsurance/mediShieldLife/v1/parisMemberDependants"
