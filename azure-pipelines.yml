@@ -37,8 +37,9 @@ stages:
     #   workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
     #   displayName: 'pytest'
     - script: |
+        npm -g install npm@latest
         cd src/node
-        npm install
+        npm ci
         npm run test
       displayName: 'Change working directory and install dependencies'
     - task: PublishCodeCoverageResults@1
