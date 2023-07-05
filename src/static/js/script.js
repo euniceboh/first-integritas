@@ -95,7 +95,7 @@ function saveFile() {
  */
 function loadDictionary() {
     let dictionaryTextArea = document.getElementById('customDictionary');
-    const file = "static/dictionary/customDictionary.txt" // HARDCODED
+    const file = "static/dictionary/customDictionary.txt"
     const extension = file.split('.').pop().toLowerCase()
     const allowedExtensions = ['txt', 'csv', 'xlsx']
     if (allowedExtensions.includes(extension)) {

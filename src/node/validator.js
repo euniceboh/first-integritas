@@ -9,11 +9,15 @@ const addFormats = require("ajv-formats");
 const yaml = require("js-yaml");
 
 const fs = require("fs");
+const path = require("path")
 
 const _ = require("lodash");
 
 const Typo = require("typo-js");
-const dictionary = new Typo("en_US");
+const dictionaryUS = new Typo("en_US") // US dictionary
+const dictionaryUK = new Typo("en_GB-ise", false, false, { // British dictionary
+  dictionaryPath: path.join(__dirname, "typojs_dictionaries")
+});
 
 const WordsNinjaPack = require('wordsninja');
 const WordsNinja = new WordsNinjaPack();
@@ -26,7 +30,7 @@ const bodyParser = require("body-parser")
 const cors = require("cors")
 
 //============================================================================================
-//                                    Routes
+//                                    APIs and Routes
 //============================================================================================
 
 const app = express()
@@ -38,7 +42,19 @@ app.use(bodyParser.urlencoded({ extended: true }))
 const port = 80
 
 app.get("/", (req, res) => {
-  res.send("Welcome to the backend server of CPF OAS Validator Tool!")
+  const htmlResponse = `
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>API Exchange Developer Portal Backend</title>
+    </head>
+    <body>
+      <h3>Welcome to the backend server of CPF OAS Validator Tool!</h3>
+    </body>
+  </html>
+  `
+  res.setHeader('Content-Type', 'text/html')
+  res.send(htmlResponse)
 })
 
 app.post("/validate", async (req, res) => {
@@ -61,6 +77,22 @@ app.post("/validate", async (req, res) => {
   }
 })
 
+app.all("*", (req, res) => {
+  const htmlResponse = `
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>404 Not Found</title>
+    </head>
+    <body>
+      <h3>An unexpected error has occurred. If you entered the URL manually, please check your spelling and try again.</h3>
+    </body>
+  </html>
+  `
+  res.setHeader('Content-Type', 'text/html')
+  res.send(htmlResponse)
+})
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
 });
@@ -70,6 +102,18 @@ app.listen(port, '0.0.0.0', () => {
 //============================================================================================
 
 let customDict = []
+
+// TODO: Sync dictionaries from Typo-JS to WordsNinja, particularly for en_GB
+// let USDict = []
+// const typoJSUSDictPath = path.join(__dirname, "node_modules", "typo-js", "dictionaries", "en_US", "en_US.dic")
+// const typoUSDict = fs.readFileSync(typoJSUSDictPath, "utf8")
+// const typoUSDictArray = typoUSDict.split("\n")
+// typoUSDictArray.forEach((line) => {
+//     const word = line.match(/^\w+/)?.[0]
+//     if (word) {
+//         USDict.push(word)
+//     }
+// })
 
 /**
  * Invokes Ajv schema validation with custom validation rules
@@ -81,8 +125,22 @@ let customDict = []
  * @param {Array} dictionaryArray 
  */
 async function validateYAML(docString, dictionaryArray) { 
-  await WordsNinja.loadDictionary(); // forced async load by WordsNinja library
-  customDict = dictionaryArray;
+  // add custom dictionary into dictionary used by WordsNinja
+  customDict = dictionaryArray
+  try {
+    const wordsNinjaDictPath = path.join(__dirname, "node_modules", "wordsninja", "words-en.txt")
+    const wordsNinjaDict = fs.readFileSync(wordsNinjaDictPath, "utf8")
+    const wordsNinjaDictArray = wordsNinjaDict.split("\n")
+    const wordsToAdd = customDict.filter((word) => !wordsNinjaDictArray.includes(word))
+    if (wordsToAdd.length) {
+      const updatedWordsNinjaDict = wordsNinjaDict + "\n" + wordsToAdd.join("\n")
+      fs.writeFileSync(wordsNinjaDictPath, updatedWordsNinjaDict, "utf8")
+    }
+  } catch {
+    return null
+  }
+
+  await WordsNinja.loadDictionary() // load dictionary into WordsNinja instance
 
   let validate = false
   try {
@@ -210,6 +268,14 @@ function wordInCustomDict(word) {
   }
   return false
 }
+
+/**
+ * Adds all the words in custom dictionary into WordsNinja
+ * This functionality included with the WordsNinja library does not work
+ */
+// function addCustomDictWordsNinja() {
+
+// }
 
 //======================================================================================================
 //                     Ajv Custom Validation Rules (CPFB API Standards v1.1.2)
@@ -493,7 +559,7 @@ ajv.addKeyword({
           if (!isNaN(word)) {
             continue
           }
-          if (!wordInCustomDict(word) && !dictionary.check(word)) {
+          if (!wordInCustomDict(word) && !dictionaryUS.check(word) && !dictionaryUK.check(word)) {
             pathSegmentsNotCamelCase.push(segment)
             break
           }
@@ -549,7 +615,7 @@ ajv.addKeyword({
           if (!isNaN(word)) {
             continue
           }
-          if (!wordInCustomDict(word) && !dictionary.check(word)) {
+          if (!wordInCustomDict(word) && !dictionaryUS.check(word) && !dictionaryUK.check(word)) {
             segmentsSpelledWrongly.push(segment)
             break
           }
@@ -693,13 +759,13 @@ ajv.addKeyword({
         if (!isNaN(word)) {
           continue
         }
-        if (!wordInCustomDict(word) && !dictionary.check(word)) {
+        if (!wordInCustomDict(word) && !dictionaryUS.check(word) && !dictionaryUK.check(word)) {
           wordsSpelledWrong.add(word)
         }
       }
       if (wordsSpelledWrong.size != 0) {
         let formattedWordsSpelledWrong = ''
-        wordsSpelledWrong.forEach(word => {formattedWordsSpelledWrong += `- ${word} ==> ${dictionary.suggest(word).join(", ")}<br>`})
+        wordsSpelledWrong.forEach(word => {formattedWordsSpelledWrong += `- ${word} ==> ${dictionaryUK.suggest(word).join(", ")}<br>`})
         let errorMessage = 'The following word(s) are spelled incorrectly in this field:' + '<br>' + formattedWordsSpelledWrong
         checkSpelling.errors = [
           {

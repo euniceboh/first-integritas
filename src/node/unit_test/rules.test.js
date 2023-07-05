@@ -5,7 +5,6 @@ const rules = require('./rules');
 const paths = rules.paths
 
 for (const path of paths) {
-    let path = "/medicalInsurance/mediShieldLife/v1/getMemberDependants"
     test(`checkPathCharacters -- ${path}`, () => {
         expect(rules.checkPathCharacters(path)).toBe(true)
     })

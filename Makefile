@@ -45,7 +45,7 @@ run: node flask
 clean:
 	rm -rf venv; \
 	cd src; rm -rf __pycache__; \
-	cd tests; rm -rf __pycache__; \
+	cd e2e_test; rm -rf __pycache__; \
 	cd ..; cd node; rm -rf node_modules; rm -rf coverage
 
 .PHONY: run clean

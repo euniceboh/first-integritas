@@ -3,11 +3,16 @@
 //=======================================================================================================
 
 const fs = require('fs');
+const path = require('path')
 
 const _ = require("lodash");
 
+const dictionaryPath = path.join(__dirname, "..", "typojs_dictionaries")
 const Typo = require("typo-js");
-const dictionary = new Typo("en_US");
+const dictionaryUS = new Typo("en_US")
+const dictionaryUK = new Typo("en_GB-ise", false, false, {
+  dictionaryPath: dictionaryPath
+});
 
 const WordsNinjaPack = require('wordsninja');
 const WordsNinja = new WordsNinjaPack();
@@ -16,7 +21,15 @@ const WordsNinja = new WordsNinjaPack();
 //                                             Utils
 //======================================================================================================
 
-const customDict = ["medi", "medisave", "dependants", "utilisation"]
+const customDict = ["medi", "medisave", "utilisation"]
+const wordsNinjaDictPath = path.join(__dirname, "..", "node_modules", "wordsninja", "words-en.txt")
+const wordsNinjaDict = fs.readFileSync(wordsNinjaDictPath, "utf8")
+const wordsNinjaDictArray = wordsNinjaDict.split("\n")
+const wordsToAdd = customDict.filter((word) => !wordsNinjaDictArray.includes(word))
+if (wordsToAdd.length) {
+  const updatedWordsNinjaDict = wordsNinjaDict + "\n" + wordsToAdd.join("\n")
+  fs.writeFileSync(wordsNinjaDictPath, updatedWordsNinjaDict, "utf8")
+}
 
 function getPathSegments(path) {
     let pathSegments = path.split("/")
@@ -49,6 +62,8 @@ function getPathSegments(path) {
 //======================================================================================================
 //                     Ajv Custom Validation Rules (CPFB API Standards v1.1.2)
 //======================================================================================================
+
+// TODO: Revise unit tests
 
 function checkPathCharacters(path) {
     try {
@@ -146,7 +161,10 @@ function checkCamelCasing(path) {
       for (let segment of pathSegments) {
         let words = _.words(segment)
         for (let word of words) {
-          if (!wordInCustomDict(word) && !dictionary.check(word)) {
+          if (!wordInCustomDict(word) && !dictionaryUS.check(word) && !dictionaryUK.check(word)) {
+            if (!isNaN(word)) {
+              continue
+            }
             pathSegmentsNotCamelCase.push(segment)
             break
           }
@@ -170,9 +188,13 @@ async function checkPathSpelling(path) {
       let pathSegments = getPathSegments(path)
       const segmentsSpelledWrongly = []
       for (let segment of pathSegments) {
-        let words = WordsNinja.splitSentence(segment) // split words using Wordsninja based on word identification
+        let words = WordsNinja.splitSentence(segment) 
         for (let word of words) {
-          if (!wordInCustomDict(word) && !dictionary.check(word)) {
+          if (!wordInCustomDict(word) && !dictionaryUS.check(word) && !dictionaryUK.check(word)) {
+            console.log(word)
+            if (!isNaN(word)) {
+              continue
+            }
             segmentsSpelledWrongly.push(segment)
             break
           }
@@ -221,9 +243,7 @@ function checkVerb(path) {
 //================================================================
 
 const fileContent = fs.readFileSync('./unit_test/uris.txt', 'utf8');
-// let paths = fileContent.split('\r\n'); // when running in windows machines
-let paths = fileContent.split('\n') // when running in linux machines
-
+let paths = fileContent.split('\n')
 
 module.exports = {
   paths,
