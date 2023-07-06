@@ -10,6 +10,7 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -107,13 +108,17 @@ class TestValidator:
         try: # in pipeline
             with open("src/examples/example1.yaml", "r") as f:
                 self.example1 = f.read()
-            with open("src/examples/example2 .yaml", "r") as f:
+            with open("src/examples/example2.yaml", "r") as f:
                 self.example2 = f.read()
+            with open("src/examples/example3.yaml", "r") as f:
+                self.example3 = f.read()
         except (FileNotFoundError): # local
             with open("../examples/example1.yaml", "r") as f:
                 self.example1 = f.read()
             with open("../examples/example2.yaml", "r") as f:
                 self.example2 = f.read()
+            with open("../examples/example3.yaml", "r") as f:
+                self.example3 = f.read()
         try: # in pipeline
             self.driver = webdriver.Chrome(service=ChromeService(chromeDriverPath), options=options)
         except Exception: # local
@@ -137,72 +142,101 @@ class TestValidator:
             class_attributes = preview_panel.get_attribute("class")
             assert "active" in class_attributes
     
-    # def test_validateYAML_error(self):
-    #     try:
-    #         # WARNING: If screen minimized or screen too small, 
-    #         # ace editor might not appear and thus this test will fail; fixed with fixed window size
-    #         textarea = WebDriverWait(self.driver, 5).until(
-    #             EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
-    #         )
-    #     finally:
-    #         self.driver.execute_script(f"editor.setValue(`{self.template2}`)")
-    #         textareaContent = self.driver.execute_script("editor.getValue()")
-    #         assert (textareaContent != "" or textareaContent != None) == True
-    #     button = self.driver.find_element(By.ID, "checkOASButton").click()
-    #     try:
-    #         modal = WebDriverWait(self.driver, 20).until(
-    #             EC.visibility_of_element_located((By.ID, "oasErrorsBody"))
-    #         )
-    #     finally:
-    #         assert True
+    def test_validateYAML_error(self):
+        try:
+            doc_text_area = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
+            )
+        finally:
+            self.driver.execute_script(f"editor.setValue(`{self.example2}`)")
+            doc = self.driver.execute_script("editor.getValue()")
+            assert (doc != "" or doc != None) == True
+        try:
+            error_panel = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "errorPanel"))
+            )
+        finally:
+            class_attributes = error_panel.get_attribute("class")
+            assert "active" in class_attributes
+            errors = self.driver.find_elements(By.CLASS_NAME, "accordion-button")
+            assert len(errors) == 2
+    
+    def test_validateYAML_lineNumber(self):
+        try:
+            doc_text_area = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
+            )
+        finally:
+            self.driver.execute_script(f"editor.setValue(`{self.example2}`)")
+            doc = self.driver.execute_script("editor.getValue()")
+            assert (doc != "" or doc != None) == True
+        try:
+            error_panel = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "errorPanel"))
+            )
+        finally:
+            errors = self.driver.find_elements(By.CLASS_NAME, "accordion-button")
+            assert len(errors) == 2
+            for error in errors:
+                line_number = error.get_attribute("data-line")
+                assert line_number != -1
+    
+    def test_validateYAML_syntaxerror(self):
+        try:
+            doc_text_area = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
+            )
+        finally:
+            self.driver.execute_script(f"editor.setValue(`{self.example3}`)")
+            doc = self.driver.execute_script("editor.getValue()")
+            assert (doc != "" or doc != None) == True
+        try:
+            syntax_icon = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "ace_icon"))
+            )
+        finally:
+            assert len(self.driver.find_elements(By.CLASS_NAME, "ace_icon")) == 1
+
 
     def teardown_method(self):
             self.driver.close()
 
-
-# class TestNavBarUtils:
-#     def setup_method(self):
-#         try: # in pipeline
-#             self.driver = webdriver.Chrome(service=ChromeService(chromeDriverPath), options=options)
-#         except Exception: # local
-#             self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-#         self.driver.get(frontend404URL)
+class TestNavBarUtils:
+    def setup_method(self):
+        try: # in pipeline
+            self.driver = webdriver.Chrome(service=ChromeService(chromeDriverPath), options=options)
+        except Exception: # local
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+        self.driver.get(frontendURL)
     
-#     def test_frontend_catchall_redirect_button(self):
-#         try:
-#             button = WebDriverWait(self.driver, 10).until(
-#                 EC.visibility_of_element_located((By.CLASS_NAME, "block"))
-#             )
-#         finally:
-#             button = self.driver.find_element(By.CLASS_NAME, "block").click()
-#         try:
-#             title_element = WebDriverWait(self.driver, 10).until(
-#                 EC.presence_of_element_located((By.TAG_NAME, "title"))
-#             )
-#         finally:
-#             title = self.driver.title
-#             assert title == "API Exchange Developer Portal"
+    def test_uploadFile(self)
+        try:
+            file_menu = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "navbarDropdownMenuLink"))
+            )
+        finally:
+            action_chains = ActionChains(self.driver)
+            action_chains.move_to_element(file_menu).perform()
+        try:
+            import_file_button = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "importFile"))
+            )
+        finally:
+            self.driver.find_element(By.ID, "importFile").click()
+            assert True
+            # textareaContent = self.driver.execute_script("editor.getValue()")
+            # assert (textareaContent != "" or textareaContent != None) == True
     
-#     def teardown_method(self):
-#         self.driver.close()
-
-# Manual Testing or external libraries can support
-# class TestFileUploadSave:
-#     def setup_method(self):
-#         # self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-#         self.driver = webdriver.Chrome('/src/tests/chromedriver', options=options)
-#         self.driver.get("https://cpfdevportal.azurewebsites.net/")
-
-#     def test_uploadFile(self):
-#         try:
-#             buttonChooseFile = WebDriverWait(self.driver, 5).until(
-#                 EC.visibility_of_element_located((By.ID, "fileUpload"))
-#             )
-#             buttonChooseFile.send_keys(os.getcwd()+"../template1.yaml")
-#         finally:
-#             self.driver.find_element(By.ID, "fileUploadButton").click()
-#             textareaContent = self.driver.execute_script("editor.getValue()")
-#             assert (textareaContent != "" or textareaContent != None) == True
+    # def test_uploadFile(self):
+    #     try:
+    #         import_file_button = WebDriverWait(self.driver, 10).until(
+    #             EC.visibility_of_element_located((By.ID, "fileUpload"))
+    #         )
+    #         buttonChooseFile.send_keys(os.getcwd()+"../template1.yaml")
+    #     finally:
+    #         self.driver.find_element(By.ID, "fileUploadButton").click()
+    #         textareaContent = self.driver.execute_script("editor.getValue()")
+    #         assert (textareaContent != "" or textareaContent != None) == True
             
     # def test_saveFile(self):
     #     try:
@@ -215,6 +249,14 @@ class TestValidator:
     #         buttonSaveFile = self.driver.find_element(By.ID, "savefile").click()
     #         textareaContent = self.driver.execute_script("editor.getValue()")
     #         assert (textareaContent != "" or textareaContent != None) == True
+    
+    # def test_viewDictionary(self):
 
-    # def teardown_method(self):
-    #     self.driver.close()
+    
+    def teardown_method(self):
+        self.driver.close()
+
+
+
+
+
