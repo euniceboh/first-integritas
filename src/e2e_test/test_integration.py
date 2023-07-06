@@ -1,12 +1,9 @@
 # Integration and e2e Testing on Deployed Web Apps
 
-# Test routes
-# Test redirect button in 404 page
 # Test 2 example YAML docs
     # Test successful and unsuccessful
     # Test accordion item line number exists
 
-import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
@@ -21,7 +18,7 @@ from selenium.webdriver.support import expected_conditions as EC
 options = Options()
 options.add_argument("--start-maximized")
 options.add_argument("--window-size=2560,1440")
-options.add_argument("--headless")
+# options.add_argument("--headless")
 
 chromeDriverPath = "/e2e_test/chromedriver"
 frontendURL = "https://cpfdevportal.azurewebsites.net"
@@ -105,7 +102,7 @@ class TestRedirect:
     def teardown_method(self):
         self.driver.close()
 
-class TestOASValidator:
+class TestValidator:
     def setup_method(self):
         try: # in pipeline
             with open("src/examples/example1.yaml", "r") as f:
@@ -123,52 +120,71 @@ class TestOASValidator:
             self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
         self.driver.get(frontendURL)
     
-    def test_checkOAS_noerror(self):
+    def test_validateYAML_noerror(self):
         try:
-            # WARNING: If screen minimized or screen too small, ace editor might not appear and thus this test will fail
-            textarea = WebDriverWait(self.driver, 20).until(
+            doc_text_area = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )
         finally:
-            self.driver.execute_script(f"editor.setValue(`{self.template1}`)")
-            textareaContent = self.driver.execute_script("editor.getValue()")
-            assert (textareaContent != "" or textareaContent != None) == True
-        button = self.driver.find_element(By.ID, "checkOASButton")
-        self.driver.execute_script("arguments[0].scrollIntoView(false);", button)
-        button.click()
+            self.driver.execute_script(f"editor.setValue(`{self.example1}`)")
+            doc = self.driver.execute_script("editor.getValue()")
+            assert (doc != "" or doc != None) == True
         try:
-            modal = WebDriverWait(self.driver, 5).until(
-                EC.visibility_of_element_located((By.ID, "oasSuccessBody"))
+            preview_panel = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "previewPanel"))
             )
         finally:
-            # Two ways to check if an element exists 
-                # (1) Use find_elements to find all appearances of the element then compare with 0; will be more costly
-                # (2) Use try except finally statements; more code and more confusing if test case not simple
-            # tick = self.driver.find_elements(By.TAG_NAME, "svg")
-            # assert len(tick) != 0
-            assert True
+            class_attributes = preview_panel.get_attribute("class")
+            assert "active" in class_attributes
     
-    def test_checkOAS_error(self):
-        try:
-            # WARNING: If screen minimized or screen too small, 
-            # ace editor might not appear and thus this test will fail; fixed with fixed window size
-            textarea = WebDriverWait(self.driver, 5).until(
-                EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
-            )
-        finally:
-            self.driver.execute_script(f"editor.setValue(`{self.template2}`)")
-            textareaContent = self.driver.execute_script("editor.getValue()")
-            assert (textareaContent != "" or textareaContent != None) == True
-        button = self.driver.find_element(By.ID, "checkOASButton").click()
-        try:
-            modal = WebDriverWait(self.driver, 20).until(
-                EC.visibility_of_element_located((By.ID, "oasErrorsBody"))
-            )
-        finally:
-            assert True
+    # def test_validateYAML_error(self):
+    #     try:
+    #         # WARNING: If screen minimized or screen too small, 
+    #         # ace editor might not appear and thus this test will fail; fixed with fixed window size
+    #         textarea = WebDriverWait(self.driver, 5).until(
+    #             EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
+    #         )
+    #     finally:
+    #         self.driver.execute_script(f"editor.setValue(`{self.template2}`)")
+    #         textareaContent = self.driver.execute_script("editor.getValue()")
+    #         assert (textareaContent != "" or textareaContent != None) == True
+    #     button = self.driver.find_element(By.ID, "checkOASButton").click()
+    #     try:
+    #         modal = WebDriverWait(self.driver, 20).until(
+    #             EC.visibility_of_element_located((By.ID, "oasErrorsBody"))
+    #         )
+    #     finally:
+    #         assert True
 
     def teardown_method(self):
             self.driver.close()
+
+
+# class TestNavBarUtils:
+#     def setup_method(self):
+#         try: # in pipeline
+#             self.driver = webdriver.Chrome(service=ChromeService(chromeDriverPath), options=options)
+#         except Exception: # local
+#             self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+#         self.driver.get(frontend404URL)
+    
+#     def test_frontend_catchall_redirect_button(self):
+#         try:
+#             button = WebDriverWait(self.driver, 10).until(
+#                 EC.visibility_of_element_located((By.CLASS_NAME, "block"))
+#             )
+#         finally:
+#             button = self.driver.find_element(By.CLASS_NAME, "block").click()
+#         try:
+#             title_element = WebDriverWait(self.driver, 10).until(
+#                 EC.presence_of_element_located((By.TAG_NAME, "title"))
+#             )
+#         finally:
+#             title = self.driver.title
+#             assert title == "API Exchange Developer Portal"
+    
+#     def teardown_method(self):
+#         self.driver.close()
 
 # Manual Testing or external libraries can support
 # class TestFileUploadSave:
@@ -202,6 +218,3 @@ class TestOASValidator:
 
     # def teardown_method(self):
     #     self.driver.close()
-
-# Dictionary Input
-

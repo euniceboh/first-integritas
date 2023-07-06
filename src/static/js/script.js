@@ -251,6 +251,9 @@ editor.getSession().on("change", function (e) {
             let highlightRange = new Range(line, 0, line, 300);
             editor.selection.setRange(highlightRange);
             editor.session.addMarker(highlightRange, "error", "text");
+
+            errorPanel.classList.remove('active');
+            previewPanel.classList.remove('active')
             return;
         }
         
@@ -318,7 +321,7 @@ editor.getSession().on("change", function (e) {
                         }
 
                         previewPanel.classList.remove('active');
-                        errorPanel.classList.add('active')
+                        errorPanel.classList.add('active');
                         
                         // Editor border turns red if there are errors
                         editorBorder.style.border = '2px solid #f00';
