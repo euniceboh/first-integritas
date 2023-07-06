@@ -125,7 +125,7 @@ class TestValidator:
             self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
         self.driver.get(frontendURL)
     
-    def test_validateYAML_noerror(self):
+    def test_validateYAML_successful(self):
         try:
             doc_text_area = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
@@ -142,7 +142,7 @@ class TestValidator:
             class_attributes = preview_panel.get_attribute("class")
             assert "active" in class_attributes
     
-    def test_validateYAML_error(self):
+    def test_validateYAML_unsuccessful(self):
         try:
             doc_text_area = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
@@ -204,12 +204,20 @@ class TestValidator:
 class TestNavBarUtils:
     def setup_method(self):
         try: # in pipeline
+            with open("src/examples/example1.yaml", "r") as f:
+                self.example1 = f.read()
+        except (FileNotFoundError): # local
+            with open("../examples/example1.yaml", "r") as f:
+                self.example1 = f.read()
+        try: # in pipeline
             self.driver = webdriver.Chrome(service=ChromeService(chromeDriverPath), options=options)
         except Exception: # local
             self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
         self.driver.get(frontendURL)
     
-    def test_uploadFile(self)
+    # selenium unable to interact with os-level dialogs; tests just clickability of upload file button
+    # fix: include adding a file input element in template before the upload file button is added so that driver.sendKeys() can be used
+    def test_uploadFile(self): 
         try:
             file_menu = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.ID, "navbarDropdownMenuLink"))
@@ -219,42 +227,80 @@ class TestNavBarUtils:
             action_chains.move_to_element(file_menu).perform()
         try:
             import_file_button = WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.ID, "importFile"))
+                EC.visibility_of_element_located((By.ID, "importFileButton"))
             )
         finally:
-            self.driver.find_element(By.ID, "importFile").click()
-            assert True
-            # textareaContent = self.driver.execute_script("editor.getValue()")
-            # assert (textareaContent != "" or textareaContent != None) == True
+            assert import_file_button.is_enabled() == True
     
-    # def test_uploadFile(self):
-    #     try:
-    #         import_file_button = WebDriverWait(self.driver, 10).until(
-    #             EC.visibility_of_element_located((By.ID, "fileUpload"))
-    #         )
-    #         buttonChooseFile.send_keys(os.getcwd()+"../template1.yaml")
-    #     finally:
-    #         self.driver.find_element(By.ID, "fileUploadButton").click()
-    #         textareaContent = self.driver.execute_script("editor.getValue()")
-    #         assert (textareaContent != "" or textareaContent != None) == True
-            
-    # def test_saveFile(self):
-    #     try:
-    #         buttonChooseFile = WebDriverWait(self.driver, 5).until(
-    #             EC.visibility_of_element_located((By.ID, "fileUpload"))
-    #         )
-    #         buttonChooseFile.send_keys("C:/Users/danie/Documents/CPF Validator Tool/CPF-Dev-Portal/src/template1.yaml")
-    #     finally:
-    #         self.driver.find_element(By.ID, "fileUploadButton").click()
-    #         buttonSaveFile = self.driver.find_element(By.ID, "savefile").click()
-    #         textareaContent = self.driver.execute_script("editor.getValue()")
-    #         assert (textareaContent != "" or textareaContent != None) == True
-    
-    # def test_viewDictionary(self):
+    def test_saveFile_successful(self):
+        try:
+            doc_text_area = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
+            )
+        finally:
+            self.driver.execute_script(f"editor.setValue(`{self.example1}`)")
+        try:
+            file_menu = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "navbarDropdownMenuLink"))
+            )
+        finally:
+            action_chains = ActionChains(self.driver)
+            action_chains.move_to_element(file_menu).perform()
+        try:
+            save_file_button = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "saveFileButton"))
+            )
+        finally:
+            save_file_button.click()
+        try:
+            alert = WebDriverWait(self.driver, 10).until(
+                EC.alert_is_present()
+            )
+        finally:
+            alert = self.driver.switch_to.alert
+            assert alert.text == "Save file as"
+            alert.dismiss()
 
-    
+    def test_saveFile_unsuccessful(self):
+        try:
+            file_menu = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "navbarDropdownMenuLink"))
+            )
+        finally:
+            action_chains = ActionChains(self.driver)
+            action_chains.move_to_element(file_menu).perform()
+        try:
+            save_file_button = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "saveFileButton"))
+            )
+        finally:
+            save_file_button.click()
+        try:
+            alert = WebDriverWait(self.driver, 10).until(
+                EC.alert_is_present()
+            )
+        finally:
+            alert = self.driver.switch_to.alert
+            assert alert.text == "Please input an OAS before saving to file!"
+            alert.dismiss()
+
+    def test_viewDictionary(self):
+        try:
+            view_dictionary_button = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_all_elements_located((By.ID, "viewDictionaryButton"))
+            )
+        finally:
+            view_dictionary_button.click()
+        try:
+            dictionary_modal = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_all_elements_located((By.ID, "dictionaryModal"))
+            )
+        finally:
+            dictionary_text_area = self.driver.find_elements(By.ID, "customDictionary")
+            assert len(dictionary_text_area) == 1
     def teardown_method(self):
         self.driver.close()
+
 
 
 
