@@ -115,21 +115,21 @@ stages:
         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest'
       displayName: 'Deploy Flask container to cpfdevportal.azurewebsites.net'
 
-# Integration Test
-# - stage: IntegrationAndE2ETest
-#   displayName: Integration And E2E Tests
-#   jobs:
-#   - job: Test
-#     displayName: E2E Test
-#     steps:
-#     - script: |
-#         python -m pip install --upgrade pip
-#         pip install -r requirements.txt
-#         pip install selenium
-#         pip install pytest pytest-azurepipelines
-#       displayName: 'Install Dependencies'
+
+- stage: IntegrationAndE2ETest
+  displayName: Integration And E2E Tests
+  jobs:
+  - job: Test
+    displayName: E2E Test
+    steps:
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-azurepipelines
+      workingDirectory: '$(System.DefaultWorkingDirectory)/src'
+      displayName: 'Install Dependencies'
      
-#     - script: |
-#         pytest src/tests/test_integration.py
-#       workingDirectory: '$(System.DefaultWorkingDirectory)'
-#       displayName: 'pytest'
+    - script: |
+        pytest test_integration.py
+      workingDirectory: '$(System.DefaultWorkingDirectory)/src/e2e_test'
+      displayName: 'Selenium Pytest'

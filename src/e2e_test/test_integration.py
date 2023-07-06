@@ -1,9 +1,5 @@
 # Integration and e2e Testing on Deployed Web Apps
 
-# Test 2 example YAML docs
-    # Test successful and unsuccessful
-    # Test accordion item line number exists
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
@@ -287,17 +283,18 @@ class TestNavBarUtils:
     def test_viewDictionary(self):
         try:
             view_dictionary_button = WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_all_elements_located((By.ID, "viewDictionaryButton"))
+                EC.visibility_of_element_located((By.ID, "viewDictionaryButton"))
             )
         finally:
             view_dictionary_button.click()
         try:
             dictionary_modal = WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_all_elements_located((By.ID, "dictionaryModal"))
+                EC.visibility_of_element_located((By.ID, "dictionaryModal"))
             )
         finally:
             dictionary_text_area = self.driver.find_elements(By.ID, "customDictionary")
             assert len(dictionary_text_area) == 1
+
     def teardown_method(self):
         self.driver.close()
 
