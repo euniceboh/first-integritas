@@ -2,5 +2,9 @@
     "win32_chromedriver_latest_for_113.0.5672": {
         "timestamp": "16/05/2023",
         "binary_path": "~\\.wdm\\drivers\\chromedriver\\win32\\113.0.5672.63\\chromedriver.exe"
+    },
+    "win32_chromedriver_latest_for_114.0.5735": {
+        "timestamp": "07/07/2023",
+        "binary_path": "~\\.wdm\\drivers\\chromedriver\\win32\\114.0.5735.90\\chromedriver.exe"
     }
 }

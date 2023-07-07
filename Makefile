@@ -1,6 +1,4 @@
-# RUN WITH TAG -j2
-# npm 9.6.7
-# node 18.12.1
+# RUN BOTH SERVERS WITH TAG -j2
 
 .ONESHELL:
 
@@ -28,19 +26,6 @@ flask: venv
 	$(PYTHON) src/app.py
 
 run: node flask
-
-# unit_test:
-# 	. ./venv/Scripts/activate; \
-# 	cd src; \
-# 	cd tests; \
-# 	pytest test_unit.py
-
-# # need to fix webdriverexception bug here
-# integration_test:
-# 	. ./venv/Scripts/activate; \
-# 	cd src; \
-# 	cd tests; \
-# 	pytest test_integration.py
 
 clean:
 	rm -rf venv; \
