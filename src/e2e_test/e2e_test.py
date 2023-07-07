@@ -12,7 +12,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 options = Options()
 options.add_argument("--start-maximized")
 options.add_argument("--window-size=2560,1440")
-# options.add_argument("--headless")
+options.add_argument("--headless")
 
 chromeDriverPath = "src/e2e_test/chromedriver"
 frontendURL = "https://cpfdevportal.azurewebsites.net"

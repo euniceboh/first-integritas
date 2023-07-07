@@ -125,7 +125,6 @@ def getLineNumberFromPathArray(docJson, pathArray):
     '''
     Iterates mapped JSON document based on pathArray
     Returns line number
-    
     '''
     numKeys = len(pathArray)
     if numKeys == 0:
