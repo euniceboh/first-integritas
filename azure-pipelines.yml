@@ -130,6 +130,6 @@ stages:
       displayName: 'Install Dependencies'
      
     - script: |
-        pytest test_integration.py
+        pytest e2e_test.py
       workingDirectory: '$(System.DefaultWorkingDirectory)/src/e2e_test'
       displayName: 'Selenium Pytest'
