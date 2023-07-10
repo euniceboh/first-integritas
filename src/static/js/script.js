@@ -264,8 +264,8 @@ editor.getSession().on("change", function (e) {
 
 
         // Invoke validation logic
-        fetch('http://localhost:3000/validate', { // local
-        // fetch('https://cpfdevportal-node.azurewebsites.net/validate', { // pipeline
+        // fetch('http://localhost:3000/validate', { // local
+        fetch('https://cpfdevportal-node.azurewebsites.net/validate', { // pipeline
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
