@@ -70,13 +70,3 @@ let path_fail_checkPathVerb = "/medicalInsurance/mediShieldLife/v1/parisMemberDe
 test(`Fail checkPathVerb --- ${path_fail_checkPathVerb}`, () => {
     expect(rules.checkVerb(path_fail_checkPathVerb)).toBe(false)
 })
-
-
-
-
-
-
-
-
-
-

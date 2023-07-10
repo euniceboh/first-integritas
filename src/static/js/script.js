@@ -233,9 +233,9 @@ editor.getSession().on("change", function (e) {
     // Using debounce to buffer each post request by DEBOUNCE_BUFFER
     clearTimeout(debounce);
     debounce = setTimeout(function extractOAS () {
-        let docString = editor.getValue();
+        let docString = editor.getValue()
         if (docString.trim() == "" || docString == undefined) { // empty error/preview panel if editor empty
-            errorPanel.classList.remove('active');
+            errorPanel.classList.remove('active')
             previewPanel.classList.remove('active')
             return;
         }
@@ -262,83 +262,81 @@ editor.getSession().on("change", function (e) {
 
         $('#loading').show();
 
-        try {
-            // Invoke validation logic
-            // fetch('http://localhost:3000/validate', {
-            fetch('https://cpfdevportal-node.azurewebsites.net/validate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    doc: docString,
-                    dictionary: dictionaryArray
-                })
+
+        // Invoke validation logic
+        fetch('http://localhost:3000/validate', { // local
+        // fetch('https://cpfdevportal-node.azurewebsites.net/validate', { // pipeline
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                doc: docString,
+                dictionary: dictionaryArray
             })
-                .then(async response => {
-                    if (response.status === 204) { // successful YAML/JSON document
-                        previewOAS(docString);
+        })
+            .then(async response => {
+                if (response.status === 204) { // successful YAML/JSON document
+                    previewOAS(docString);
 
-                        errorPanel.classList.remove('active');
-                        previewPanel.classList.add('active')
+                    errorPanel.classList.remove('active');
+                    previewPanel.classList.add('active')
+                    
+                    // Editor border turns green if no errors
+                    editorBorder.style.border = '2px solid #20c997';
+
+                    $('#loading').hide();
+                } else if (response.status === 200) { // unsuccessful YAML/JSON document
+                    let listErrors = await response.json()
+
+                    refreshAccordion();
+
+                    let formattedErrors = []
+                    for (let i = 0; i < listErrors.length; i++){
+                        let id = i;
+                        let errorLine = listErrors[i]["line_number"];
+                        let errorKeyword = listErrors[i]["keyword"];
+                        let errorMessage = listErrors[i]["error_message"];
                         
-                        // Editor border turns green if no errors
-                        editorBorder.style.border = '2px solid #20c997';
-
-                        $('#loading').hide();
-                    } else if (response.status === 200) { // unsuccessful YAML/JSON document
-                        let listErrors = await response.json()
-
-                        refreshAccordion();
-
-                        let formattedErrors = []
-                        for (let i = 0; i < listErrors.length; i++){
-                            let id = i;
-                            let errorLine = listErrors[i]["line_number"];
-                            let errorKeyword = listErrors[i]["keyword"];
-                            let errorMessage = listErrors[i]["error_message"];
-                            
-                            let errorAdditionalInfo = listErrors[i]["params"]
-                            formattedErrors.push({
-                                id: id,
-                                errorLine: errorLine,
-                                errorKeyword: errorKeyword,
-                                errorMessage: errorMessage,
-                                errorAdditionalInfo: errorAdditionalInfo
-                            })
-                        }
-
-                        formattedErrors.sort((a, b) => a.errorLine - b.errorLine);
-
-                        for (let error of formattedErrors) {
-                            let id = error["id"]
-                            let errorLine = error["errorLine"];
-                            let errorKeyword = error["errorKeyword"];
-                            let errorMessage = error["errorMessage"];
-                            let errorAdditionalInfo = Object.entries(error["errorAdditionalInfo"]);
-                            errorAdditionalInfo = [errorAdditionalInfo[0][0], errorAdditionalInfo[0][1]]
-                            addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
-                        }
-
-                        previewPanel.classList.remove('active');
-                        errorPanel.classList.add('active');
-                        
-                        // Editor border turns red if there are errors
-                        editorBorder.style.border = '2px solid #f00';
-
-                        $('#loading').hide();
-                    } else if (response.status === 500) { // unexpected error with logic
-                        throw new Error(response.json().msg)
-                    } else {
-                        throw new Error("Unexpected status code: " + response.status)
+                        let errorAdditionalInfo = listErrors[i]["params"]
+                        formattedErrors.push({
+                            id: id,
+                            errorLine: errorLine,
+                            errorKeyword: errorKeyword,
+                            errorMessage: errorMessage,
+                            errorAdditionalInfo: errorAdditionalInfo
+                        })
                     }
-                })
-                .catch(error => {
-                    console.error("Error:" + error)
-                })
-        } catch { // cannot call server
-            alert("An error has occurred communicating with the server")
-        }
+
+                    formattedErrors.sort((a, b) => a.errorLine - b.errorLine);
+
+                    for (let error of formattedErrors) {
+                        let id = error["id"]
+                        let errorLine = error["errorLine"];
+                        let errorKeyword = error["errorKeyword"];
+                        let errorMessage = error["errorMessage"];
+                        let errorAdditionalInfo = Object.entries(error["errorAdditionalInfo"]);
+                        errorAdditionalInfo = [errorAdditionalInfo[0][0], errorAdditionalInfo[0][1]]
+                        addAccordionItem(id, errorLine, errorKeyword, errorMessage, errorAdditionalInfo);
+                    }
+
+                    previewPanel.classList.remove('active');
+                    errorPanel.classList.add('active');
+                    
+                    // Editor border turns red if there are errors
+                    editorBorder.style.border = '2px solid #f00';
+
+                    $('#loading').hide();
+                } else if (response.status === 500) { // unexpected error with logic
+                    throw new Error(response.json().msg)
+                } else {
+                    throw new Error("Unexpected status code: " + response.status)
+                }
+            })
+            .catch(error => { // cannot communicate with backend
+                alert("An unexpected error has occurred reaching the backend server.")
+            })
+
     }, DEBOUNCE_BUFFER);
 });
 

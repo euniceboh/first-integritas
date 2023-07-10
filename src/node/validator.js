@@ -27,7 +27,8 @@ const tokenizer = new natural.WordTokenizer();
 
 const express = require("express")
 const bodyParser = require("body-parser")
-const cors = require("cors")
+const cors = require("cors");
+const { error } = require("console");
 
 //============================================================================================
 //                                    APIs and Routes
@@ -39,7 +40,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 // toggle port 3000 when releasing locally and 80 when releasing to azure
-const port = 80
+const port = 3000
 
 app.get("/", (req, res) => {
   const htmlResponse = `
@@ -94,6 +95,7 @@ app.all("*", (req, res) => {
 })
 
 app.listen(port, '0.0.0.0', () => {
+  syncDictionaries()
   console.log(`Server running on port ${port}`);
 });
 
@@ -103,17 +105,31 @@ app.listen(port, '0.0.0.0', () => {
 
 let customDict = []
 
-// TODO: Sync dictionaries from Typo-JS to WordsNinja, particularly for en_GB
-// let USDict = []
-// const typoJSUSDictPath = path.join(__dirname, "node_modules", "typo-js", "dictionaries", "en_US", "en_US.dic")
-// const typoUSDict = fs.readFileSync(typoJSUSDictPath, "utf8")
-// const typoUSDictArray = typoUSDict.split("\n")
-// typoUSDictArray.forEach((line) => {
-//     const word = line.match(/^\w+/)?.[0]
-//     if (word) {
-//         USDict.push(word)
-//     }
-// })
+function syncDictionaries() {
+  let typoJSAllDict = new Set()
+  const typoJSUSDictPath = path.join(__dirname, "node_modules", "typo-js", "dictionaries", "en_US", "en_US.dic")
+  const typoJSUSDict = fs.readFileSync(typoJSUSDictPath, "utf8")
+  const typoJSUSDictArray = typoJSUSDict.split("\n")
+  typoJSUSDictArray.forEach((line) => {
+      let word = line.match(/^\w+/)?.[0]
+      if (word) {
+          typoJSAllDict.add(word)
+      }
+  })
+  
+  const typoJSUKDictPath = path.join(__dirname, "typojs_dictionaries", "en_GB-ise", "en_GB-ise.dic")
+  const typoJSUKDict = fs.readFileSync(typoJSUKDictPath, "utf8")
+  const typoJSUKDictArray = typoJSUKDict.split("\n")
+  typoJSUKDictArray.forEach((line) => {
+      let word = line.match(/^\w+/)?.[0]
+    if (word) {
+      typoJSAllDict.add(word)
+    }
+  })
+
+  addWordsWordsNinja([...typoJSAllDict])
+}
+
 
 /**
  * Invokes Ajv schema validation with custom validation rules
@@ -127,20 +143,9 @@ let customDict = []
 async function validateYAML(docString, dictionaryArray) { 
   // add custom dictionary into dictionary used by WordsNinja
   customDict = dictionaryArray
-  try {
-    const wordsNinjaDictPath = path.join(__dirname, "node_modules", "wordsninja", "words-en.txt")
-    const wordsNinjaDict = fs.readFileSync(wordsNinjaDictPath, "utf8")
-    const wordsNinjaDictArray = wordsNinjaDict.split("\n")
-    const wordsToAdd = customDict.filter((word) => !wordsNinjaDictArray.includes(word))
-    if (wordsToAdd.length) {
-      const updatedWordsNinjaDict = wordsNinjaDict + "\n" + wordsToAdd.join("\n")
-      fs.writeFileSync(wordsNinjaDictPath, updatedWordsNinjaDict, "utf8")
-    }
-  } catch {
-    return null
-  }
+  addWordsWordsNinja(customDict)
 
-  await WordsNinja.loadDictionary() // load dictionary into WordsNinja instance
+  await WordsNinja.loadDictionary() // load dictionary into WordsNinja instance; designed with editable custom dictionary in mind
 
   let validate = false
   try {
@@ -205,8 +210,8 @@ async function validateYAML(docString, dictionaryArray) {
  */
 async function fetchLineNumber(docString, pathArray) {
   try {
-    // const response = await fetch("http://flask/getLineNumber", {
-    const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", {
+    const response = await fetch("http://flask/getLineNumber", { // local
+    // const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", { // pipeline
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -225,6 +230,26 @@ async function fetchLineNumber(docString, pathArray) {
   } catch (error) {
     console.error('Error:', error);
     throw error;
+  }
+}
+
+/**
+ * Adds all the words in an array into WordsNinja
+ * This functionality included with the WordsNinja library does not work...
+ */
+function addWordsWordsNinja(wordsArray) {
+  try {
+    const wordsNinjaDictPath = path.join(__dirname, "node_modules", "wordsninja", "words-en.txt")
+    const wordsNinjaDict = fs.readFileSync(wordsNinjaDictPath, "utf8")
+    const wordsNinjaDictSet = new Set(wordsNinjaDict.split("\n"))
+    const wordsToAdd = wordsArray.filter((word) => !wordsNinjaDictSet.has(word))
+    if (wordsToAdd.length) {
+      const wordsToAddString = "\n" + wordsToAdd.join("\n")
+      fs.appendFileSync(wordsNinjaDictPath, wordsToAddString, "utf8")
+    }
+  } catch (error) {
+    console.log(error)
+    throw error
   }
 }
 
@@ -268,14 +293,6 @@ function wordInCustomDict(word) {
   }
   return false
 }
-
-/**
- * Adds all the words in custom dictionary into WordsNinja
- * This functionality included with the WordsNinja library does not work
- */
-// function addCustomDictWordsNinja() {
-
-// }
 
 //======================================================================================================
 //                     Ajv Custom Validation Rules (CPFB API Standards v1.1.2)

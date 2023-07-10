@@ -2,7 +2,7 @@
   "type": "commonjs",
   "scripts": {
     "build": "node validator.js",
-    "test": "jest --config jest.config.js"
+    "test": "jest --config  unit_test/jest.config.js"
   },
   "dependencies": {
     "ajv": "^8.12.0",
