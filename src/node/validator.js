@@ -130,7 +130,6 @@ function syncDictionaries() {
   addWordsWordsNinja([...typoJSAllDict])
 }
 
-
 /**
  * Invokes Ajv schema validation with custom validation rules
  * Calls function to get line number of each error from Flask server

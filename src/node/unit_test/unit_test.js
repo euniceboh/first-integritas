@@ -66,10 +66,13 @@ function getPathSegments(path) {
 // TODO: Revise unit tests
 
 function checkPathCharacters(path) {
-
-    const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>? ]/
-    return !(regex.test(path));
-
+    try {
+        const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>? ]/
+        return !(regex.test(path));
+    } catch (err) {
+        console.log(err)
+        return false
+    }
 }
 
 function checkPathLength(path) {
