@@ -1,4 +1,5 @@
 module.exports = {
+    maxWorkers: 1,
     collectCoverage: true,
     coverageReporters: ["cobertura"],
     watchAll: false,

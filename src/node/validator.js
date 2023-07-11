@@ -28,7 +28,6 @@ const tokenizer = new natural.WordTokenizer();
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors");
-const { error } = require("console");
 
 //============================================================================================
 //                                    APIs and Routes
@@ -398,7 +397,7 @@ ajv.addKeyword({
       const path = dataPath["parentDataProperty"]
       const pathSegments = path.split("/")
       const apiProduct = pathSegments[1]
-      const allowedAPIProducts = [ 
+      const allowedAPIProducts = new Set([ 
                                   "accountClosure", "adjustment", "agencyCommon", "agencyPortal", "ariseCommon", 
                                   "businessProcessAutomation", "careshieldCustomerService", "careshieldEService", "corporateServices", "cpfLife",
                                   "customerEngagement", "dataServices", "digitalServices", "discretionaryWithdrawals", "matrimonialAssetDivision",
@@ -410,8 +409,8 @@ ajv.addKeyword({
                                   "procurement", "receiptAndPayment", "retirementTopUp", "retirement", "selfEmployedContribution",
                                   "selfEmployedEnforcement", "silverSupport", "surplusSupport", "voluntaryContribution", "corporateDesktop",
                                   "wordfare"
-                                ]
-      if (!allowedAPIProducts.includes(apiProduct)) { 
+                                ])
+      if (!allowedAPIProducts.has(apiProduct)) { 
         checkAPIProduct.errors = [
           {
             keyword: "api-product",
@@ -678,12 +677,25 @@ ajv.addKeyword({
       const path = dataPath["parentDataProperty"]
       let pathSegments = path.split("/")
       const pathVerb = pathSegments[pathSegments.length - 1]
+      if (pathVerb == '') {
+        checkVerb.errors = [
+          {
+            keyword: "path-verb",
+            message: `Verb in path is empty`,
+            params: {
+              subtierVerb: false
+            }
+          }
+        ]
+        return false
+      }
+      
       let words = _.words(pathVerb)
       let verb = words[0]
   
-      const allowedVerbs = ["create", "get", "update", "delete", "compute", "transact", "check", "transfer"]
+      const allowedVerbs = new Set(["create", "get", "update", "delete", "compute", "transact", "check", "transfer"])
   
-      if (!allowedVerbs.includes(verb)) {
+      if (!allowedVerbs.has(verb)) {
         checkVerb.errors = [
           {
             keyword: "path-verb",
@@ -808,3 +820,14 @@ ajv.addKeyword({
     }
   }
 })
+
+module.exports = {
+  _,
+  fs,
+  WordsNinja,
+  dictionaryUS,
+  dictionaryUK,
+  addWordsWordsNinja,
+  getPathSegments,
+  wordInCustomDict
+}
