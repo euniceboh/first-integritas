@@ -47,7 +47,7 @@ stages:
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: 'Cobertura'
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/src/node/coverage/cobertura-coverage.xml'
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/src/node/unit_test/coverage/cobertura-coverage.xml'
       displayName: 'Publish Code Coverage'
 
 - stage: BuildAndPush
