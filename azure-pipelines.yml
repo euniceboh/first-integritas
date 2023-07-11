@@ -24,16 +24,6 @@ stages:
   - job: Test
     displayName: Unit Test Custom Validation Rules
     steps:
-    # - script: |
-    #     python -m pip install --upgrade pip
-    #     pip install -r requirements.txt
-    #     pip install pytest pytest-azurepipelines
-    #   displayName: 'Install Dependencies'
-     
-    # - script: |
-    #     pytest test_unit.py
-    #   workingDirectory: '$(System.DefaultWorkingDirectory)/src/tests/'
-    #   displayName: 'pytest'
     - task: NodeTool@0
       inputs:
         versionSpec: '16.x'

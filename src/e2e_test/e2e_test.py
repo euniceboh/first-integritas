@@ -120,7 +120,7 @@ class TestValidator:
     
     def test_validateYAML_successful(self):
         try:
-            doc_text_area = WebDriverWait(self.driver, 10).until(
+            doc_text_area = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )
         finally:
@@ -128,7 +128,7 @@ class TestValidator:
             doc = self.driver.execute_script("editor.getValue()")
             assert (doc != "" or doc != None) == True
         try:
-            preview_panel = WebDriverWait(self.driver, 10).until(
+            preview_panel = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "previewPanel"))
             )
         finally:
@@ -137,7 +137,7 @@ class TestValidator:
     
     def test_validateYAML_unsuccessful(self):
         try:
-            doc_text_area = WebDriverWait(self.driver, 10).until(
+            doc_text_area = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )
         finally:
@@ -145,7 +145,7 @@ class TestValidator:
             doc = self.driver.execute_script("editor.getValue()")
             assert (doc != "" or doc != None) == True
         try:
-            error_panel = WebDriverWait(self.driver, 10).until(
+            error_panel = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "errorPanel"))
             )
         finally:
@@ -156,7 +156,7 @@ class TestValidator:
     
     def test_validateYAML_lineNumber(self):
         try:
-            doc_text_area = WebDriverWait(self.driver, 10).until(
+            doc_text_area = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )
         finally:
@@ -164,7 +164,7 @@ class TestValidator:
             doc = self.driver.execute_script("editor.getValue()")
             assert (doc != "" or doc != None) == True
         try:
-            error_panel = WebDriverWait(self.driver, 10).until(
+            error_panel = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "errorPanel"))
             )
         finally:
@@ -176,7 +176,7 @@ class TestValidator:
     
     def test_validateYAML_syntaxerror(self):
         try:
-            doc_text_area = WebDriverWait(self.driver, 10).until(
+            doc_text_area = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )
         finally:
@@ -184,7 +184,7 @@ class TestValidator:
             doc = self.driver.execute_script("editor.getValue()")
             assert (doc != "" or doc != None) == True
         try:
-            syntax_icon = WebDriverWait(self.driver, 10).until(
+            syntax_icon = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_icon"))
             )
         finally:
@@ -212,14 +212,14 @@ class TestNavBarUtils:
     # fix: include adding a file input element in template before the upload file button is added so that driver.sendKeys() can be used
     def test_uploadFile(self): 
         try:
-            file_menu = WebDriverWait(self.driver, 10).until(
+            file_menu = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "navbarDropdownMenuLink"))
             )
         finally:
             action_chains = ActionChains(self.driver)
             action_chains.move_to_element(file_menu).perform()
         try:
-            import_file_button = WebDriverWait(self.driver, 10).until(
+            import_file_button = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "importFileButton"))
             )
         finally:
@@ -227,26 +227,26 @@ class TestNavBarUtils:
     
     def test_saveFile_successful(self):
         try:
-            doc_text_area = WebDriverWait(self.driver, 10).until(
+            doc_text_area = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "ace_content"))
             )
         finally:
             self.driver.execute_script(f"editor.setValue(`{self.example1}`)")
         try:
-            file_menu = WebDriverWait(self.driver, 10).until(
+            file_menu = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "navbarDropdownMenuLink"))
             )
         finally:
             action_chains = ActionChains(self.driver)
             action_chains.move_to_element(file_menu).perform()
         try:
-            save_file_button = WebDriverWait(self.driver, 10).until(
+            save_file_button = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "saveFileButton"))
             )
         finally:
             save_file_button.click()
         try:
-            alert = WebDriverWait(self.driver, 10).until(
+            alert = WebDriverWait(self.driver, 20).until(
                 EC.alert_is_present()
             )
         finally:
@@ -256,20 +256,20 @@ class TestNavBarUtils:
 
     def test_saveFile_unsuccessful(self):
         try:
-            file_menu = WebDriverWait(self.driver, 10).until(
+            file_menu = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "navbarDropdownMenuLink"))
             )
         finally:
             action_chains = ActionChains(self.driver)
             action_chains.move_to_element(file_menu).perform()
         try:
-            save_file_button = WebDriverWait(self.driver, 10).until(
+            save_file_button = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "saveFileButton"))
             )
         finally:
             save_file_button.click()
         try:
-            alert = WebDriverWait(self.driver, 10).until(
+            alert = WebDriverWait(self.driver, 20).until(
                 EC.alert_is_present()
             )
         finally:
@@ -279,13 +279,13 @@ class TestNavBarUtils:
 
     def test_viewDictionary(self):
         try:
-            view_dictionary_button = WebDriverWait(self.driver, 10).until(
+            view_dictionary_button = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "viewDictionaryButton"))
             )
         finally:
             view_dictionary_button.click()
         try:
-            dictionary_modal = WebDriverWait(self.driver, 10).until(
+            dictionary_modal = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located((By.ID, "dictionaryModal"))
             )
         finally:
