@@ -2,11 +2,9 @@
 #                                               Dependencies
 #========================================================================================================
 
-import re
-import json
 import ruamel.yaml
 from flask_cors import CORS
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify
 
 #========================================================================================================
 #                                               Routes

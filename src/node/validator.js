@@ -38,8 +38,8 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-// toggle port 3000 when releasing locally and 80 when releasing to azure
-const port = 80
+// change to port 3000 when releasing locally and 80 when releasing to azure
+const port = 3000
 
 app.get("/", (req, res) => {
   const htmlResponse = `
@@ -208,8 +208,8 @@ async function validateYAML(docString, dictionaryArray) {
  */
 async function fetchLineNumber(docString, pathArray) {
   try {
-    // const response = await fetch("http://flask/getLineNumber", { // local
-    const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", { // pipeline
+    const response = await fetch("http://flask/getLineNumber", { // local
+    // const response = await fetch("https://cpfdevportal.azurewebsites.net/getLineNumber", { // pipeline
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
