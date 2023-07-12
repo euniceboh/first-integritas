@@ -214,7 +214,7 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 [stars-url]: https://github.com/github_username/repo_name/stargazers
 [issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
 [issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/DanielxDante/Project-First-Integritas.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/danielxdante/Project-First-Integritas.svg?style=for-the-badge
 [license-url]: https://github.com/DanielxDante/Project-First-Integritas/blob/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/danieltaysg/
