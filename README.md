@@ -1,13 +1,13 @@
-`<a name="readme-top"></a>`
+<a name="readme-top"></a>
 
 <!--https://www.markdownguide.org/basic-syntax/#reference-style-links-->
 
-[Contributors][contributors-url]
-[Forks][forks-url]
-[Stargazers][stars-url]
-[Issues][issues-url]
-[MIT License][license-url]
-[LinkedIn][linkedin-url]
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
 <!-- PROJECT LOGO -->
 
@@ -72,13 +72,13 @@ This repository contains a Dockerized application that provides YAML/JSON docume
 
 ### Built With
 
-* [Flask][Flask-url]
-* [Express][Express-url]
-* [Node][Node-url]
-* [Bootstrap][Bootstrap-url]
-* [JQuery][JQuery-url]
-* [Jest][Jest-url]
-* [Selenium][Selenium-url]
+* [![Flask][Flask.com]][Flask-url]
+* [![Express][Express.js]][Express-url]
+* [![Node][Node.js]][Node-url]
+* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
+* [![JQuery][JQuery.com]][JQuery-url]
+* [![Jest][Jest.js]][Jest-url]
+* [![Selenium][Selenium.dev]][Selenium-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
