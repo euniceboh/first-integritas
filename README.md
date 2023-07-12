@@ -70,9 +70,9 @@
 
 ### Built With
 
-* ![[Flask][Flask.com]][Flask-url]
-* ![[Express][Express.js]][Express-url]
-* ![[Node][Node.js]][Node-url]
+* [![Flask][Flask.com]][Flask-url]
+* [![Express][Express.js]][Express-url]
+* [![Node][Node.js]][Node-url]
 * [![Bootstrap][Bootstrap.com]][Bootstrap-url]
 * [![JQuery][JQuery.com]][JQuery-url]
 * [![Jest][Jest.js]][Jest-url]
