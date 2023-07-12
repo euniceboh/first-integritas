@@ -6,12 +6,10 @@ version: '3'
 services:
   node:
     build: ./src/node
-    # image: danielxdante/node:latest
     ports:
       - '3000:3000'
   flask:
     build: ./src
-    # image: danielxdante/flask:latest
     ports:
       - '80:80'
     depends_on:
