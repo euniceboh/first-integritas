@@ -1,21 +1,13 @@
-`<a name="readme-top"></a>`
+<a name="readme-top"></a>
 
-<!-- PROJECT SHIELDS -->
+<!--https://www.markdownguide.org/basic-syntax/#reference-style-links-->
 
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-
-[Contributors][contributors-url]
-[Forks][forks-url]
-[Stargazers][stars-url]
-[Issues][issues-url]
-[MIT License][license-url]
-[LinkedIn][linkedin-url]
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
 <!-- PROJECT LOGO -->
 
@@ -73,10 +65,6 @@
 ## About The Project
 
 ![Product Home Screenshot][home-screenshot]
-
-![Product Successful YAML/JSON Screenshot][success-screenshot]
-
-![Product Unsuccessful YAML/JSON Screenshot][error-screenshot]
 
 <p align="right">(<a href="#readme-top">Back to top</a>)</p>
 
@@ -140,9 +128,40 @@ Follow these steps to run the application using Docker:
 
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+* Input
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+To validate your YAML/JSON document, you can either type into the code editor on the left panel, or you can import your YAML/JSON file using the "Import File" button under "File".
+
+* Validate
+
+If your YAML/JSON document contains syntax errors, the code editor will automatically scroll and highlight the line where the syntax error occurred 
+
+Once all syntax errors are resolved, wait for a few seconds for the result to appear on the right panel.
+
+* Valid YAML/JSON Document
+
+![Product Successful YAML/JSON Screenshot][success-screenshot]
+
+An API preview of your YAML/JSON document will be displayed.
+
+* Invalid YAML/JSON Document
+
+![Product Unsuccessful YAML/JSON Screenshot][error-screenshot]
+
+An accordion of errors will be displayed.
+
+Additional information will be shown when the accordion items are clicked. The code editor will also automatically scroll and highlight the line where the error has occurred.
+
+Specific rules that determine the errors can be found in the src/node/oas3.0_schema.yaml file.
+
+* Save 
+Once you are satisfied after editing your YAML/JSON on the code editor, you can save it using the "Save File" button under "File".
+
+* Custom Dictionary
+This YAML/JSON validator includes a spelling checking feature for titles, descriptions, and paths. To include custom words that you wish to include into the dictionary, add the words into the src/static/dictionary/customDictionary.txt file.
+
+You can look at the words in your custom dictionary using the "View Dictionary" button in the web application.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
