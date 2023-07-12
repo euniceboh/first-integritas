@@ -150,7 +150,7 @@ An accordion of errors will be displayed.
 
 Additional information will be shown when the accordion items are clicked. The code editor will also automatically scroll and highlight the line where the error has occurred.
 
-Specific rules that determine the errors can be found in the src/node/oas3.0_schema.yaml file.
+Specific rules that determine the errors can be found in the `src/node/oas3.0_schema.yaml` file.
 
 * Save
 
@@ -158,7 +158,7 @@ Once you are satisfied after editing your YAML/JSON on the code editor, you can 
 
 * Custom Dictionary
 
-This YAML/JSON validator includes a spelling checking feature for titles, descriptions, and paths. To include custom words that you wish to include into the dictionary, add the words into the src/static/dictionary/customDictionary.txt file.
+This YAML/JSON validator includes a spelling checking feature for titles, descriptions, and paths. To include custom words that you wish to include into the dictionary, add the words into the `src/static/dictionary/customDictionary.txt` file.
 
 You can look at the words in your custom dictionary using the "View Dictionary" button in the web application.
 
