@@ -1,13 +1,13 @@
-<a name="readme-top"></a>
+`<a name="readme-top"></a>`
 
 <!--https://www.markdownguide.org/basic-syntax/#reference-style-links-->
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+[Contributors][contributors-url]
+[Forks][forks-url]
+[Stargazers][stars-url]
+[Issues][issues-url]
+[MIT License][license-url]
+[LinkedIn][linkedin-url]
 
 <!-- PROJECT LOGO -->
 
@@ -72,13 +72,13 @@ This repository contains a Dockerized application that provides YAML/JSON docume
 
 ### Built With
 
-* [![Flask][Flask.com]][Flask-url]
-* [![Express][Express.js]][Express-url]
-* [![Node][Node.js]][Node-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
-* [![Jest][Jest.js]][Jest-url]
-* [![Selenium][Selenium.dev]][Selenium-url]
+* [Flask][Flask-url]
+* [Express][Express-url]
+* [Node][Node-url]
+* [Bootstrap][Bootstrap-url]
+* [JQuery][JQuery-url]
+* [Jest][Jest-url]
+* [Selenium][Selenium-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -90,7 +90,6 @@ Make sure you have the following prerequisites installed on your machine:
 
 * Docker : [Installation Guide](https://docs.docker.com/engine/install/)
 * Docker Compose (needed only if Docker V1 is installed on your machine): [Installation Guide](https://docs.docker.com/compose/install/linux/)
-
 
 ### Getting Started
 
@@ -133,7 +132,7 @@ To validate your YAML/JSON document, you can either type into the code editor on
 
 * Validate
 
-If your YAML/JSON document contains syntax errors, the code editor will automatically scroll and highlight the line where the syntax error occurred 
+If your YAML/JSON document contains syntax errors, the code editor will automatically scroll and highlight the line where the syntax error occurred
 
 Once all syntax errors are resolved, wait for a few seconds for the result to appear on the right panel.
 
@@ -153,7 +152,7 @@ Additional information will be shown when the accordion items are clicked. The c
 
 Specific rules that determine the errors can be found in the src/node/oas3.0_schema.yaml file.
 
-* Save 
+* Save
 
 Once you are satisfied after editing your YAML/JSON on the code editor, you can save it using the "Save File" button under "File".
 
@@ -163,9 +162,21 @@ This YAML/JSON validator includes a spelling checking feature for titles, descri
 
 You can look at the words in your custom dictionary using the "View Dictionary" button in the web application.
 
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- ROADMAP -->
+
+## Roadmap
+
+- [ ] Beautify error accordion items
+- [ ] Refactor error line identification from Python to JavaScript
+- [ ] Multi-language Support
+  - [ ] Chinese
+  - [ ] Spanish
+
+See the [open issues](https://github.com/danielxdante/Project-First-Integritas/issues) for a full list of proposed features (and known issues).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- CONTRIBUTING -->
 
@@ -234,7 +245,6 @@ Be the first!
 [Jest-url]: https://jestjs.io/
 [Selenium.dev]: https://img.shields.io/badge/Selenium-v4.9.1-DD0031?style=for-the-badge&logo=selenium&logoColor=white
 [Selenium-url]: https://www.selenium.dev/
-
 [Flask.com]: https://img.shields.io/badge/Flask-v2.3.2-000000?style=for-the-badge&logo=flask&logoColor=white
 [Flask-url]: https://flask.palletsprojects.com/en/2.3.x/
 [Express.js]: https://img.shields.io/badge/Express.js-v4.18.2-20232A?style=for-the-badge&logo=express&logoColor=61DAFB
