@@ -70,10 +70,10 @@
 
 ### Built With
 
-* [Flask][Flask-url]
-* [Express][Express-url]
-* [Node][Node-url]
-* [Bootstrap][Bootstrap-url]
+* ![[Flask][Flask.com]][Flask-url]
+* ![[Express][Express.js]][Express-url]
+* ![[Node][Node.js]][Node-url]
+* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
 * [![JQuery][JQuery.com]][JQuery-url]
 * [![Jest][Jest.js]][Jest-url]
 * [![Selenium][Selenium.dev]][Selenium-url]
@@ -155,9 +155,11 @@ Additional information will be shown when the accordion items are clicked. The c
 Specific rules that determine the errors can be found in the src/node/oas3.0_schema.yaml file.
 
 * Save 
+
 Once you are satisfied after editing your YAML/JSON on the code editor, you can save it using the "Save File" button under "File".
 
 * Custom Dictionary
+
 This YAML/JSON validator includes a spelling checking feature for titles, descriptions, and paths. To include custom words that you wish to include into the dictionary, add the words into the src/static/dictionary/customDictionary.txt file.
 
 You can look at the words in your custom dictionary using the "View Dictionary" button in the web application.
