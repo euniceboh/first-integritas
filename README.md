@@ -64,6 +64,8 @@
 
 ## About The Project
 
+This repository contains a Dockerized application that provides YAML/JSON document validation according to the OpenAPI v3.0 specification and additional validation rules for CPF's API space.
+
 ![Product Home Screenshot][home-screenshot]
 
 <p align="right">(<a href="#readme-top">Back to top</a>)</p>
@@ -80,11 +82,7 @@
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- GETTING STARTED -->
-
-## Sneak Peek
-
-This repository contains a Dockerized application that provides YAML/JSON document validation according to the OpenAPI v3.0 specification and additional validation rules for CPF's API space.
+<!-- PRERQUISITES -->
 
 ### Prerequisites
 
@@ -92,6 +90,7 @@ Make sure you have the following prerequisites installed on your machine:
 
 * Docker : [Installation Guide](https://docs.docker.com/engine/install/)
 * Docker Compose (needed only if Docker V1 is installed on your machine): [Installation Guide](https://docs.docker.com/compose/install/linux/)
+
 
 ### Getting Started
 
