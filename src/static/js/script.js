@@ -1,3 +1,6 @@
+const express_url = "http://localhost:3000/validate" // local
+// const express_url = "https://cpfdevportal-node.azurewebsites.net/validate" // pipeline
+
 /**
  * Startup
  */
