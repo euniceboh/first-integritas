@@ -1,5 +1,7 @@
 <a name="readme-top"></a>
 
+[![Build Status](https://dev.azure.com/DTAY019/CPF-Dev-Portal/_apis/build/status%2FDanielxDante.Project-First-Integritas?branchName=main)](https://dev.azure.com/DTAY019/CPF-Dev-Portal/_build/latest?definitionId=4&branchName=main)
+
 <!--https://www.markdownguide.org/basic-syntax/#reference-style-links-->
 
 [![Contributors][contributors-shield]][contributors-url]
@@ -81,12 +83,6 @@ This repository contains a Dockerized application that provides YAML/JSON docume
 * [![Selenium][Selenium.dev]][Selenium-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Status
-|   | Build & Test |
-|---|:-----:|
-|![Win](docs/res/win_med.png) **Windows**|[![Build & Test][win-build-badge]][win-build]| 
-|![Linux](docs/res/linux_med.png) **Linux**|[![Build & Test][linux-build-badge]][linux-build]|
 
 <!-- PRERQUISITES -->
 
@@ -262,8 +258,3 @@ Be the first!
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-v5.2.0-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
 [JQuery.com]: https://img.shields.io/badge/jQuery-v3.4.1-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-
-[win-build-badge]: https://dev.azure.com/mseng/PipelineTools/_apis/build/status/azure-pipelines-tasks.ci-windows
-[win-build]: https://dev.azure.com/mseng/PipelineTools/_build/latest?definitionId=7634
-[linux-build-badge]: https://dev.azure.com/mseng/PipelineTools/_apis/build/status/azure-pipelines-tasks.ci-linux
-[linux-build]: https://dev.azure.com/mseng/PipelineTools/_build/latest?definitionId=7636
