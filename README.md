@@ -1,5 +1,8 @@
 <a name="readme-top"></a>
 
+<!-- Blocked by NTU -->
+[![Build Status](https://dev.azure.com/DTAY019/CPF-Dev-Portal/_apis/build/status%2FDanielxDante.Project-First-Integritas?branchName=main)](https://dev.azure.com/DTAY019/CPF-Dev-Portal/_build/latest?definitionId=4&branchName=main) 
+
 <!--https://www.markdownguide.org/basic-syntax/#reference-style-links-->
 
 [![Contributors][contributors-shield]][contributors-url]
