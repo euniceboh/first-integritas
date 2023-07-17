@@ -47,7 +47,10 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           flaskUrlCommand=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
-          echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]$flaskUrlCommand"
+          # echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]$flaskUrlCommand"
+    - bash: echo $(flaskUrlCommand)
+
+
 
     - task: AzureCLI@2
       name: ProduceNodeUrl
