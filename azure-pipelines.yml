@@ -54,7 +54,7 @@ stages:
     variables:
       derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
     steps:
-    - script: echo $derivedFlaskUrl
+    - script: echo $(derivedFlaskUrl)
           
 
 # - stage: UnitTest
