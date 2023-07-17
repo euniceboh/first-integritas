@@ -1,5 +1,5 @@
-# docker-compose up
-# docker-compose down --rmi all
+# Docker Compose does not support Flask and Node as a service combination so only the user facing Flask will be composed properly.
+# Node will be accessed using localhost, not the service name
 
 version: '3'
 services:
