@@ -39,6 +39,14 @@ stages:
   jobs:
   - job: GetAppServiceURLs
     steps: 
+    - task: AzureCLI@2
+      displayName: Azure Login
+      inputs:
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: 'az login'
+
     - bash:
         flaskUrlCommand=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
         echo "##vso[task.setvariable variable=flaskUrl;isOutput=true]$flaskUrlCommand"
