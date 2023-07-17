@@ -38,7 +38,20 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           nodeUrl=$(az webapp show --name cpfdevportal-node --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
-          echo nodeUrl
+          echo $nodeUrl
+
+- stage: Test
+  displayName: Test
+  jobs:
+  - job: Geturl
+    steps:
+    - task: AzureCLI@2
+      inputs:
+          azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            echo $flaskUrl
           
 
 # - stage: UnitTest
