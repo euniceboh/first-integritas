@@ -54,16 +54,16 @@ stages:
           nodeUrl=$(az webapp show --name cpfdevportal-node --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
           echo $nodeUrl
 
-# - stage: Test
-#   dependsOn: 
-#   - ProcessEnvironmentVariables
-#   displayName: Test
-#   jobs:
-#   - job: Geturl
-#     variables:
-#       derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
-#     steps:
-#     - bash: echo $(derivedFlaskUrl)
+- stage: Test
+  dependsOn: 
+  - ProcessEnvironmentVariables
+  displayName: Test
+  jobs:
+  - job: Geturl
+    variables:
+      derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
+    steps:
+    - bash: echo $(derivedFlaskUrl)
           
 
 # - stage: UnitTest
