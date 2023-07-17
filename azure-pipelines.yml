@@ -29,8 +29,15 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          webAppUrl=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
-          echo "App Service URL: $webAppUrl"
+          flaskUrl=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          nodeUrl=$(az webapp show --name cpfdevportal-node --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
+          
 
 # - stage: UnitTest
 #   displayName: Unit Tests
