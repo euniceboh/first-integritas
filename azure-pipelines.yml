@@ -30,7 +30,8 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)"
+          echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]amazing"
+          # $(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
 
     - task: AzureCLI@2
       name: ProduceNodeUrl
