@@ -48,7 +48,7 @@ stages:
           flaskUrlCommand=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
           echo "##vso[task.setvariable variable=flaskUrlIntermediate]$flaskUrlCommand"
     - bash: |
-        echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]$flaskUrlIntermediate" 
+        echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]amazing" 
       name: ProduceFlaskUrl
 
     - task: AzureCLI@2
