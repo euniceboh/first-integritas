@@ -31,7 +31,6 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           flaskUrl=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
-          echo $flaskUrl
           echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]$flaskUrl"
 
 
@@ -54,7 +53,7 @@ stages:
     variables:
       derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
     steps:
-    - script: echo $(derivedFlaskUrl)
+    - bash: echo $(derivedFlaskUrl)
           
 
 # - stage: UnitTest
