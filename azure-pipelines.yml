@@ -24,6 +24,7 @@ stages:
   - job: GetAppServiceURLs
     steps: 
     - task: AzureCLI@2
+      name: ProduceFlaskUrl
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         scriptType: 'bash'
@@ -31,6 +32,7 @@ stages:
         inlineScript: |
           flaskUrl=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
     - task: AzureCLI@2
+      name: ProduceNodeUrl
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         scriptType: 'bash'
@@ -45,7 +47,7 @@ stages:
   jobs:
   - job: Geturl
     variables:
-      derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceVar.flaskUrl']]
+      derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
     steps:
     - script: echo $(derivedFlaskUrl) 
           
