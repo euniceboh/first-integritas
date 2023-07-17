@@ -48,6 +48,7 @@ stages:
         inlineScript: |
           flaskUrlCommand=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
           echo "##vso[task.setvariable variable=flaskUrl]$flaskUrlCommand"
+          echo $(flaskUrl)
 
     - task: AzureCLI@2
       name: ProduceNodeUrl
@@ -68,7 +69,7 @@ stages:
     variables:
       derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
     steps:
-    - bash: echo "$(flaskUrl)"
+    - bash: echo $(flaskUrl)
           
 
 # - stage: UnitTest
