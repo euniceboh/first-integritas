@@ -47,7 +47,7 @@ stages:
   jobs:
   - job: Geturl
     variables:
-      derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
+      derivedFlaskUrl: $[dependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
     steps:
     - script: echo $(derivedFlaskUrl) 
           
