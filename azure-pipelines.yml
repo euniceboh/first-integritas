@@ -18,42 +18,58 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: ProcessEnvironmentVariables
-  displayName: Process Environment Variables
+- stage: A
   jobs:
-  - job: GetAppServiceURLs
-    steps: 
-    - task: AzureCLI@2
-      name: ProduceFlaskUrl
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          flaskUrl=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
-          echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]flaskUrl"
-
-
-    - task: AzureCLI@2
-      name: ProduceNodeUrl
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          nodeUrl=$(az webapp show --name cpfdevportal-node --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
-          echo $nodeUrl
-
-- stage: Test
-  dependsOn: 
-  - ProcessEnvironmentVariables
-  displayName: Test
-  jobs:
-  - job: Geturl
-    variables:
-      derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
+  - job: A1
     steps:
-    - bash: echo $(derivedFlaskUrl)
+     - bash: echo "##vso[task.setvariable variable=myStageVal;isOutput=true]this is a stage output variable"
+       name: MyOutputVar
+- stage: B
+  dependsOn: A
+  jobs:
+  - job: B1
+    variables:
+      myStageAVar: $[stageDependencies.A.A1.outputs['MyOutputVar.myStageVal']]
+    steps:
+      - bash: echo $(myStageAVar)
+
+# stages:
+# - stage: ProcessEnvironmentVariables
+#   displayName: Process Environment Variables
+#   jobs:
+#   - job: GetAppServiceURLs
+#     steps: 
+#     - task: AzureCLI@2
+#       name: ProduceFlaskUrl
+#       inputs:
+#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+#         scriptType: 'bash'
+#         scriptLocation: 'inlineScript'
+#         inlineScript: |
+#           flaskUrl=$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
+#           echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]flaskUrl"
+
+
+#     - task: AzureCLI@2
+#       name: ProduceNodeUrl
+#       inputs:
+#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+#         scriptType: 'bash'
+#         scriptLocation: 'inlineScript'
+#         inlineScript: |
+#           nodeUrl=$(az webapp show --name cpfdevportal-node --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)
+#           echo $nodeUrl
+
+# - stage: Test
+#   dependsOn: 
+#   - ProcessEnvironmentVariables
+#   displayName: Test
+#   jobs:
+#   - job: Geturl
+#     variables:
+#       derivedFlaskUrl: $[stageDependencies.ProcessEnvironmentVariables.GetAppServiceURLs.outputs['ProduceFlaskUrl.flaskUrl']]
+#     steps:
+#     - bash: echo $(derivedFlaskUrl)
           
 
 # - stage: UnitTest
