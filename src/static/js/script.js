@@ -1,6 +1,10 @@
 // Can add a config.js file at root for convenient config changes related to azure release but since we want to split into 2 sites, we modularise them
-// const express_url = "http://localhost:3000/validate" // local
-const express_url = "https://cpfdevportal-node.azurewebsites.net/validate" // pipeline
+
+/**
+ * Please add/remove comment depending on your environment
+ */
+const express_url = "http://localhost:3000/validate" // local
+// const express_url = "https://cpfdevportal-node.azurewebsites.net/validate" // pipeline
 
 /**
  * Startup
