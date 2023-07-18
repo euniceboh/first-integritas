@@ -36,8 +36,7 @@ const cors = require("cors");
 const env = process.env.NODE_ENV || 'development'
 
 // const flask_url = "http://flask/getLineNumber" // local
-const flask_url = process.env.flaskUrl // pipeline
-// const flask_url = "https://cpfdevportal.azurewebsites.net/getLineNumber" // pipeline
+const flask_url = "https://cpfdevportal.azurewebsites.net/getLineNumber" // pipeline
 
 const app = express()
 app.use(cors())
