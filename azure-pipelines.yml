@@ -19,11 +19,11 @@ stages:
 - stage: ResourceCreation
   displayName: Resource Creation
   jobs:
-  - job: ResourceGroup
-    displayName: Create resource group
+  - job: Resources
+    displayName: Create resources
     steps:
     - task: AzureCLI@2
-      name: ProduceNodeUrl
+      name: CreateResourceGroup
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         scriptType: 'bash'
@@ -37,115 +37,150 @@ stages:
           else
             az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
           fi
-
-- stage: UnitTest
-  displayName: Unit Tests
-  jobs:
-  - job: Test
-    displayName: Unit Test Custom Validation Rules
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '16.x'
-      displayName: 'Update Node.js'
-    - script: |
-        npm -g install npm@latest
-        cd src/node
-        npm install
-        npm run test
-      displayName: 'Change working directory, install dependencies and run unit tests'
-    - task: PublishCodeCoverageResults@1
-      inputs:
-        codeCoverageTool: 'Cobertura'
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/src/node/unit_test/coverage/cobertura-coverage.xml'
-      displayName: 'Publish Code Coverage'
-
-- stage: BuildAndPush
-  displayName: Build and Push into Container Registry
-  jobs:
-  - job: BuildAndPush
-    displayName: Build and Push Containers
-    pool:
-      vmImage: $(vmImageName)
-    steps:
+    
     - task: AzureCLI@2
-      name: ProduceFlaskUrl
+      name: CreateContainerRegistry
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)"
-    
-    - bash: echo $(flaskUrl)
-      name: CheckFlaskUrl
+          ACR_NAME="cpfdevportal"
+          LOCATION="Southeast Asia"
 
+          if az acr show --name $ACR_NAME &>/dev/null; then
+            echo "Container registry already exists."
+          else
+            az acr create --resource-group cpfdevportal-rg --name $ACR_NAME --location $LOCATION --sku Standard
+          fi
+    
     - task: AzureCLI@2
-      name: ProduceNodeUrl
+      name: CreateAppServicePlan
       inputs:
         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          echo "##vso[task.setvariable variable=nodeUrl; isOutput=true]$(az webapp show --name cpfdevportal-node --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)"
+          PLAN_NAME="ASP-cpfdevportalrg-b00d"
+          RESOURCE_GROUP_NAME="cpfdevportal-rg"
+          LOCATION="Southeast Asia"
+
+          # Check if the App Service Plan already exists
+          if az appservice plan show --name $PLAN_NAME --resource-group $RESOURCE_GROUP_NAME &>/dev/null; then
+            echo "App Service Plan already exists."
+          else
+            # Create the App Service Plan
+            az appservice plan create --name $PLAN_NAME --resource-group $RESOURCE_GROUP_NAME --sku F1 --location $LOCATION
+          fi
+
+# - stage: UnitTest
+#   displayName: Unit Tests
+#   jobs:
+#   - job: Test
+#     displayName: Unit Test Custom Validation Rules
+#     steps:
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: '16.x'
+#       displayName: 'Update Node.js'
+#     - script: |
+#         npm -g install npm@latest
+#         cd src/node
+#         npm install
+#         npm run test
+#       displayName: 'Change working directory, install dependencies and run unit tests'
+#     - task: PublishCodeCoverageResults@1
+#       inputs:
+#         codeCoverageTool: 'Cobertura'
+#         summaryFileLocation: '$(System.DefaultWorkingDirectory)/src/node/unit_test/coverage/cobertura-coverage.xml'
+#       displayName: 'Publish Code Coverage'
+
+# - stage: BuildAndPush
+#   displayName: Build and Push into Container Registry
+#   jobs:
+#   - job: BuildAndPush
+#     displayName: Build and Push Containers
+#     pool:
+#       vmImage: $(vmImageName)
+#     steps:
+#     - task: AzureCLI@2
+#       name: ProduceFlaskUrl
+#       inputs:
+#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+#         scriptType: 'bash'
+#         scriptLocation: 'inlineScript'
+#         inlineScript: |
+#           echo "##vso[task.setvariable variable=flaskUrl; isOutput=true]$(az webapp show --name cpfdevportal --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)"
     
-    - bash: echo $(nodeUrl)
-      name: CheckNodeUrl
+#     - bash: echo $(flaskUrl)
+#       name: CheckFlaskUrl
 
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'cpfdevportal'
-        repository: 'danielxdantecpfdevportal_node'
-        command: 'buildAndPush'
-        Dockerfile: 'src/node/Dockerfile'
-        tags: |
-          latest
-      displayName: 'Build and Push Node Server'
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'cpfdevportal'
-        repository: 'danielxdantecpfdevportal_flask'
-        command: 'buildAndPush'
-        Dockerfile: 'src/Dockerfile'
-        tags: |
-          latest
-      displayName: 'Build and Push Flask Server'
+#     - task: AzureCLI@2
+#       name: ProduceNodeUrl
+#       inputs:
+#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+#         scriptType: 'bash'
+#         scriptLocation: 'inlineScript'
+#         inlineScript: |
+#           echo "##vso[task.setvariable variable=nodeUrl; isOutput=true]$(az webapp show --name cpfdevportal-node --resource-group cpfdevportal-rg --query 'defaultHostName' -o tsv)"
+    
+#     - bash: echo $(nodeUrl)
+#       name: CheckNodeUrl
 
-
-- stage: Deploy
-  displayName: Deploy Web Apps
-  jobs:
-  - job: Deploy
-    displayName: Deployment
-    steps:
-    - task: AzureWebAppContainer@1
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        appName: 'cpfdevportal-node'
-        containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest'
-      displayName: 'Deploy Node container to cpfdevportal-node.azurewebsites.net'
-    - task: AzureWebAppContainer@1
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        appName: 'cpfdevportal'
-        containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest'
-      displayName: 'Deploy Flask container to cpfdevportal.azurewebsites.net'
+#     - task: Docker@2
+#       inputs:
+#         containerRegistry: 'cpfdevportal'
+#         repository: 'danielxdantecpfdevportal_node'
+#         command: 'buildAndPush'
+#         Dockerfile: 'src/node/Dockerfile'
+#         tags: |
+#           latest
+#       displayName: 'Build and Push Node Server'
+#     - task: Docker@2
+#       inputs:
+#         containerRegistry: 'cpfdevportal'
+#         repository: 'danielxdantecpfdevportal_flask'
+#         command: 'buildAndPush'
+#         Dockerfile: 'src/Dockerfile'
+#         tags: |
+#           latest
+#       displayName: 'Build and Push Flask Server'
 
 
-- stage: IntegrationAndE2ETest
-  displayName: Integration And E2E Tests
-  jobs:
-  - job: Test
-    displayName: E2E Test
-    steps:
-    - script: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-azurepipelines
-      workingDirectory: '$(System.DefaultWorkingDirectory)/src'
-      displayName: 'Install Dependencies'
+# - stage: Deploy
+#   displayName: Deploy Web Apps
+#   jobs:
+#   - job: Deploy
+#     displayName: Deployment
+#     steps:
+#     - task: AzureWebAppContainer@1
+#       inputs:
+#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+#         appName: 'cpfdevportal-node'
+#         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest'
+#       displayName: 'Deploy Node container to cpfdevportal-node.azurewebsites.net'
+#     - task: AzureWebAppContainer@1
+#       inputs:
+#         azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+#         appName: 'cpfdevportal'
+#         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest'
+#       displayName: 'Deploy Flask container to cpfdevportal.azurewebsites.net'
+
+
+# - stage: IntegrationAndE2ETest
+#   displayName: Integration And E2E Tests
+#   jobs:
+#   - job: Test
+#     displayName: E2E Test
+#     steps:
+#     - script: |
+#         python -m pip install --upgrade pip
+#         pip install -r requirements.txt
+#         pip install pytest pytest-azurepipelines
+#       workingDirectory: '$(System.DefaultWorkingDirectory)/src'
+#       displayName: 'Install Dependencies'
      
-    - script: |
-        pytest e2e_test.py
-      workingDirectory: '$(System.DefaultWorkingDirectory)/src/e2e_test'
-      displayName: 'Selenium Pytest'
+#     - script: |
+#         pytest e2e_test.py
+#       workingDirectory: '$(System.DefaultWorkingDirectory)/src/e2e_test'
+#       displayName: 'Selenium Pytest'
