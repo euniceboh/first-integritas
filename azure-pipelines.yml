@@ -212,6 +212,8 @@ stages:
             az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME -deployment-container-image-name $CONTAINER_IMAGE_NAME
           fi
 
+          az webapp restart --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME
+
     # - task: AzureWebAppContainer@1
     #   inputs:
     #     azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
@@ -237,6 +239,7 @@ stages:
             az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME -deployment-container-image-name $CONTAINER_IMAGE_NAME
           fi
 
+          az webapp restart --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME
 
 - stage: IntegrationAndE2ETest
   displayName: Integration And E2E Tests
