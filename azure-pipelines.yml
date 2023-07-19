@@ -82,7 +82,7 @@ stages:
         inlineScript: |
           WEB_APP_NAME="cpfdevportal"
           RESOURCE_GROUP_NAME="cpfdevportal-rg"
-          PLAN_NAME="ASP-cpfdevportalrg-b00d"
+          PLAN_NAME="ASP-cpfdevportalrg-b00d (F1: 1)"
 
           if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME &>/dev/null; then
             echo "Web App already exists."
