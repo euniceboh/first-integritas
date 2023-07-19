@@ -205,8 +205,6 @@ stages:
           RESOURCE_GROUP_NAME="cpfdevportal-rg"
           PLAN_NAME="ASP-cpfdevportalrg-b00d"
           CONTAINER_IMAGE_NAME="cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest"
-          
-          az devops login
 
           if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME &>/dev/null; then
             az webapp config container set --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_IMAGE_NAME --docker-registry-server-url https://cpfdevportal.azurecr.io
