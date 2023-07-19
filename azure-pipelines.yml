@@ -203,7 +203,7 @@ stages:
           WEB_APP_NAME="cpfdevportal"
           RESOURCE_GROUP_NAME="cpfdevportal-rg"
           PLAN_NAME="ASP-cpfdevportalrg-b00d"
-          CONTAINER_IMAGE_NAME="my-container-registry.azurecr.io/my-container-image:latest"
+          CONTAINER_IMAGE_NAME="cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest"
 
           if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME &>/dev/null; then
             echo "Web App already exists."
