@@ -206,7 +206,7 @@ stages:
           CONTAINER_IMAGE_NAME="cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest"
 
           if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME &>/dev/null; then
-            echo "Web App already exists."
+            az webapp config container set --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_IMAGE_NAME
           else
             az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME -i $CONTAINER_IMAGE_NAME
           fi
@@ -231,7 +231,7 @@ stages:
           CONTAINER_IMAGE_NAME="cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest"
 
           if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME &>/dev/null; then
-            echo "Web App already exists."
+            az webapp config container set --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_IMAGE_NAME
           else
             az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME -i $CONTAINER_IMAGE_NAME
           fi
