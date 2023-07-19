@@ -9,12 +9,35 @@ resources:
 variables:
   applicationName: 'cpfdevportal'
   containerRegistry: 'cpfdevportal.azurecr.io'
+  dockerRegistryServiceConnection: 'a3b968c1-9a21-4d22-b80e-d4b6241e3bb4'
   dockercomposefilePath: '$(Build.SourcesDirectory)/docker-compose.yml'
   tag: '$(Build.BuildId)'
 
   vmImageName: 'ubuntu-latest'
 
 stages:
+- stage: ResourceCreation
+  displayName: Resource Creation
+  jobs:
+  - job: ResourceGroup
+    displayName: Create resource group
+    steps:
+    - task: AzureCLI@2
+      name: ProduceNodeUrl
+      inputs:
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          RESOURCE_GROUP_NAME="cpfdevportal-rg"
+          LOCATION="Southeast Asia"
+
+          if az group exists --name $RESOURCE_GROUP_NAME; then
+            echo "Resource group already exists."
+          else
+            az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
+          fi
+
 - stage: UnitTest
   displayName: Unit Tests
   jobs:
@@ -48,7 +71,7 @@ stages:
     - task: AzureCLI@2
       name: ProduceFlaskUrl
       inputs:
-        azureSubscription: $(AZURESUBSCRIPTION)
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
@@ -60,7 +83,7 @@ stages:
     - task: AzureCLI@2
       name: ProduceNodeUrl
       inputs:
-        azureSubscription: '$(AZURESUBSCRIPTION)'
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
@@ -97,13 +120,13 @@ stages:
     steps:
     - task: AzureWebAppContainer@1
       inputs:
-        azureSubscription: '$(AZURESUBSCRIPTION)'
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: 'cpfdevportal-node'
         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest'
       displayName: 'Deploy Node container to cpfdevportal-node.azurewebsites.net'
     - task: AzureWebAppContainer@1
       inputs:
-        azureSubscription: '$(AZURESUBSCRIPTION)'
+        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
         appName: 'cpfdevportal'
         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest'
       displayName: 'Deploy Flask container to cpfdevportal.azurewebsites.net'
