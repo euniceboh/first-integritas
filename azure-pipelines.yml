@@ -73,39 +73,39 @@ stages:
             az appservice plan create --name $PLAN_NAME --resource-group $RESOURCE_GROUP_NAME --sku F1 --location $LOCATION
           fi
       
-    - task: AzureCLI@2
-      name: CreateFlaskAppService
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          WEB_APP_NAME="cpfdevportal"
-          RESOURCE_GROUP_NAME="cpfdevportal-rg"
-          PLAN_NAME="ASP-cpfdevportalrg-b00d"
+    # - task: AzureCLI@2
+    #   name: CreateFlaskAppService
+    #   inputs:
+    #     azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+    #     scriptType: 'bash'
+    #     scriptLocation: 'inlineScript'
+    #     inlineScript: |
+    #       WEB_APP_NAME="cpfdevportal"
+    #       RESOURCE_GROUP_NAME="cpfdevportal-rg"
+    #       PLAN_NAME="ASP-cpfdevportalrg-b00d"
 
-          if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME &>/dev/null; then
-            echo "Web App already exists."
-          else
-            az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME
-          fi
+    #       if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME &>/dev/null; then
+    #         echo "Web App already exists."
+    #       else
+    #         az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME
+    #       fi
     
-    - task: AzureCLI@2
-      name: CreateNodeAppService
-      inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          WEB_APP_NAME="cpfdevportal-node"
-          RESOURCE_GROUP_NAME="cpfdevportal-rg"
-          PLAN_NAME="ASP-cpfdevportalrg-b00d"
+    # - task: AzureCLI@2
+    #   name: CreateNodeAppService
+    #   inputs:
+    #     azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+    #     scriptType: 'bash'
+    #     scriptLocation: 'inlineScript'
+    #     inlineScript: |
+    #       WEB_APP_NAME="cpfdevportal-node"
+    #       RESOURCE_GROUP_NAME="cpfdevportal-rg"
+    #       PLAN_NAME="ASP-cpfdevportalrg-b00d"
 
-          if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME &>/dev/null; then
-            echo "Web App already exists."
-          else
-            az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME"
-          fi
+    #       if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME &>/dev/null; then
+    #         echo "Web App already exists."
+    #       else
+    #         az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME"
+    #       fi
 
 - stage: UnitTest
   displayName: Unit Tests
