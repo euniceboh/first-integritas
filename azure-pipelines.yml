@@ -1,3 +1,5 @@
+# Create variables for
+
 trigger:
 - main
 
@@ -6,7 +8,6 @@ resources:
 
 variables:
   applicationName: 'cpfdevportal'
-  dockerRegistryServiceConnection: '$(DOCKERREGISTRYSERVICECONNECTION)'
   containerRegistry: 'cpfdevportal.azurecr.io'
   dockercomposefilePath: '$(Build.SourcesDirectory)/docker-compose.yml'
   tag: '$(Build.BuildId)'
@@ -47,7 +48,7 @@ stages:
     - task: AzureCLI@2
       name: ProduceFlaskUrl
       inputs:
-        azureSubscription: '$(AZURESUBSCRIPTION)'
+        azureSubscription: $(AZURESUBSCRIPTION)
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
