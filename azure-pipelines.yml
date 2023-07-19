@@ -33,7 +33,8 @@ stages:
           LOCATION="Southeast Asia"
           WEB_APP_NAME="cpfdevportal"
           
-          az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME &>/dev/null
+          if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME &>/dev/null; then
+            echo "lmao ez"
 
           if az group exists --name $RESOURCE_GROUP_NAME; then
             echo "Resource group already exists."
