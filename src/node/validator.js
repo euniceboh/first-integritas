@@ -38,16 +38,16 @@ const env = process.env.NODE_ENV || 'development'
 /**
  * Please add/remove comment depending on your environment
  */
-const flask_url = "http://flask/getLineNumber" // local
-// const flask_url = "https://cpfdevportal.azurewebsites.net/getLineNumber" // pipeline
+// const flask_url = "http://flask/getLineNumber" // local
+const flask_url = "https://cpfdevportal.azurewebsites.net/getLineNumber" // pipeline
 
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-const port = 3000 // local
-// const port = 80 // pipeline
+// const port = 3000 // local
+const port = 80 // pipeline
 
 app.get("/", (req, res) => {
   const htmlResponse = `
