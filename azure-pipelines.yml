@@ -35,6 +35,7 @@ stages:
           
           if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME &>/dev/null; then
             echo "lmao ez"
+          fi
 
           if az group exists --name $RESOURCE_GROUP_NAME; then
             echo "Resource group already exists."
