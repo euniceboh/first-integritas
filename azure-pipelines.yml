@@ -31,11 +31,6 @@ stages:
         inlineScript: |
           RESOURCE_GROUP_NAME="cpfdevportal-rg"
           LOCATION="Southeast Asia"
-          WEB_APP_NAME="cpfdevportal"
-          
-          if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME &>/dev/null; then
-            echo "lmao ez"
-          fi
 
           if az group exists --name $RESOURCE_GROUP_NAME; then
             echo "Resource group already exists."
@@ -211,9 +206,9 @@ stages:
           CONTAINER_IMAGE_NAME="cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest"
 
           if az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME &>/dev/null; then
-            az webapp config container set --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_IMAGE_NAME
+            az webapp config container set --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_IMAGE_NAME --docker-registry-server-url https://cpfdevportal.azurecr.io
           else
-            az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME -i $CONTAINER_IMAGE_NAME
+            az webapp create --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME --plan $PLAN_NAME -deployment-container-image-name $CONTAINER_IMAGE_NAME
           fi
 
     # - task: AzureWebAppContainer@1
