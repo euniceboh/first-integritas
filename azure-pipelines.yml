@@ -31,6 +31,7 @@ stages:
         inlineScript: |
           RESOURCE_GROUP_NAME="cpfdevportal-rg"
           LOCATION="Southeast Asia"
+          WEB_APP_NAME="cpfdevportal"
           
           az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME &>/dev/null
 
