@@ -6,7 +6,7 @@ resources:
 
 variables:
   applicationName: 'cpfdevportal'
-  dockerRegistryServiceConnection: 'a3b968c1-9a21-4d22-b80e-d4b6241e3bb4'
+  dockerRegistryServiceConnection: '$(DOCKERREGISTRYSERVICECONNECTION)'
   containerRegistry: 'cpfdevportal.azurecr.io'
   dockercomposefilePath: '$(Build.SourcesDirectory)/docker-compose.yml'
   tag: '$(Build.BuildId)'
@@ -47,7 +47,7 @@ stages:
     - task: AzureCLI@2
       name: ProduceFlaskUrl
       inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        azureSubscription: '$(AZURESUBSCRIPTION)'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
@@ -59,7 +59,7 @@ stages:
     - task: AzureCLI@2
       name: ProduceNodeUrl
       inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        azureSubscription: '$(AZURESUBSCRIPTION)'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
@@ -96,13 +96,13 @@ stages:
     steps:
     - task: AzureWebAppContainer@1
       inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        azureSubscription: '$(AZURESUBSCRIPTION)'
         appName: 'cpfdevportal-node'
         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_node:latest'
       displayName: 'Deploy Node container to cpfdevportal-node.azurewebsites.net'
     - task: AzureWebAppContainer@1
       inputs:
-        azureSubscription: 'Azure for Students (dcdbed32-b8b2-4d69-8521-ba8b9056add8)'
+        azureSubscription: '$(AZURESUBSCRIPTION)'
         appName: 'cpfdevportal'
         containers: 'cpfdevportal.azurecr.io/danielxdantecpfdevportal_flask:latest'
       displayName: 'Deploy Flask container to cpfdevportal.azurewebsites.net'
