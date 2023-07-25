@@ -3,9 +3,10 @@
 .ONESHELL:
 
 .DEFAULT_GOAL := run
-
+ 
 PYTHON = ./venv/Scripts/python
 PIP = ./venv/Scripts/pip
+
 
 venv/Scripts/activate: src/requirements.txt
 	python -m venv venv; \
